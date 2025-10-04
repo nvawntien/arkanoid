@@ -1,65 +1,70 @@
 package com.game.arkanoid.models;
-
+import com.game.arkanoid.utils.Constants;
+import javafx.scene.shape.Rectangle;
 public class Paddle {
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private int speed;
 
-    public Paddle(int x, int y, int width, int height, int speed) {
+    private final Rectangle node;
+
+    private double x;
+    private double y;
+    private double width;
+    private double height;
+    private double speed;
+
+    public Paddle(double x, double y) {
         this.x = x;
         this.y = y;
-        this.width = width;
-        this.height = height;
-        this.speed = speed;
+        this.width = Constants.PADDLE_WIDTH ;
+        this.height = Constants.PADDLE_HEIGHT;
+        this.speed = Constants.PADDLE_SPEED;
+        this.node = new Rectangle(x, y, width, height);
+        //this.node.getStyleClass().add("paddle"); 
     }
 
-    public int getX() {
+    public Rectangle getNode() {
+        return node;
+    }
+
+    public double getX() {
         return x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
-    public int getWidth() {
+    public double getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public double getHeight() {
         return height;
     }
 
-    public void moveLeft() {
-        x -= speed;
+    public double getSpeed() {
+        return speed;
     }
 
-    public void moveRight() {
-        x += speed;
-    }
-
-    public void setX(int x) {
+    public void setX(double x) {
         this.x = x;
+        this.node.setX(x);
     }
 
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
+        this.node.setY(y);
     }
 
-    public void setWidth(int width) {
+    public void setWidth(double width) {
         this.width = width;
+        this.node.setWidth(width);
     }
 
-    public void setHeight(int height) {
+    public void setHeight(double height) {
         this.height = height;
     }
 
-    public void setSpeed(int speed) {
+    public void setSpeed(double speed) {
         this.speed = speed;
-    }
-
-    public int getSpeed() {
-        return speed;
     }
 }

@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Rectangle?>
 
-<?import javafx.geometry.Insets?>
-<VBox xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.game.arkanoid.controller.HelloController"
-      alignment="CENTER" spacing="10">
-
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
-
-    <Label text="Enter your name:"/>
-    <TextField fx:id="nameField"/>
-    <Button text="OK" onAction="#handleOk"/>
-    <Label fx:id="welcomeLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
-</VBox>
+<Pane id="GameScreen" focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="D:\Arknoid\arkanoid\src\main\java\com\game\arkanoid\controller">
+   <children>
+      <Rectangle id="paddleRect" arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="20.0" layoutX="262.0" layoutY="350.0" stroke="BLACK" strokeType="INSIDE" width="80.0" />
+   </children>
+</Pane>

@@ -20,5 +20,6 @@ public class HelloController {
         String name = nameField.getText();
         String message = helloService.buildWelcomeMessage(name);
         welcomeLabel.setText(message);
+        
     }
 }
