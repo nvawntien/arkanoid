@@ -10,6 +10,7 @@ module com.game.arkanoid {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires javafx.graphics;
 
     exports com.game.arkanoid.app;
     opens com.game.arkanoid.app to javafx.fxml;

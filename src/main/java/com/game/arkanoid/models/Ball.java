@@ -20,6 +20,8 @@ public class Ball {
         this.dx = 3;
         this.dy = -3;
         this.isMoving = false;
+        this.node = new Circle(this.x, this.y, this.radius);
+        this.node.getStyleClass().add("ball");
     }
 
     public Circle getNode() {
@@ -76,5 +78,12 @@ public class Ball {
 
     public void setMoving(boolean moving) {
         isMoving = moving;
+    }
+
+    public void setCenter(double x, double y) {
+        this.x = x;
+        this.y = y;
+        node.setCenterX(x);
+        node.setCenterY(y);
     }
 }

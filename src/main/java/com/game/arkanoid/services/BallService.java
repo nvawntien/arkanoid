@@ -1,12 +1,17 @@
 package com.game.arkanoid.services;
 
 import com.game.arkanoid.models.Ball;
+import com.game.arkanoid.models.Paddle;
 
 public class BallService {
     private final Ball ball;
 
     public BallService(Ball ball) {
         this.ball = ball;
+    }
+
+    public Ball getBall() {
+        return ball;
     }
 
     public void update(double paneWidth, double paneHeight) {
@@ -50,4 +55,9 @@ public class BallService {
         ball.setMoving(false);
     }
 
+    public void dockTo(Paddle paddle) {
+        double cx = paddle.getX() + paddle.getWidth() / 2.0;
+        double cy = paddle.getY() - this.ball.getRadius();
+        this.ball.setCenter(cx, cy);
+    }
 }
