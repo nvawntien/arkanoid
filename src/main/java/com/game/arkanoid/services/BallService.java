@@ -23,7 +23,7 @@ public class BallService {
         if (b.isMoving()) {
             return;
         }
-        
+
         double t = Math.toRadians(Constants.BALL_LAUNCH_ANGLE);
         b.setVelocity(Constants.BALL_SPEED * Math.cos(t), -Constants.BALL_SPEED * Math.sin(t));
         b.setMoving(true);
@@ -95,5 +95,21 @@ public class BallService {
      */
     public void bounceOff(Ball b, GameObject other) {
         b.bounceOff(other);
+    }
+
+
+    /**
+     * Check if ball is docked to paddle
+     * @param b ball
+     * @param p paddle
+     */
+    public void dockToPaddle(Ball b, Paddle p) {
+            b.setMoving(false);
+            b.setVelocity(0, 0);
+            b.setCenter(
+                        p.getX() + p.getWidth() / 2.0,
+                        p.getY() - b.getRadius() - Constants.BALL_SPAWN_OFFSET
+            );
+
     }
 }

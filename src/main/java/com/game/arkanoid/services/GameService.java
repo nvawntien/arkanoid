@@ -34,9 +34,20 @@ public final class GameService {
         final double scaledDt = dt * s.timeScale;
 
         // 1) Input -> paddle
-        if (in.left)  paddleSvc.moveLeft(s.paddle,  scaledDt, worldW);
-        if (in.right) paddleSvc.moveRight(s.paddle, scaledDt, worldW);
-        if (in.launch && !s.ball.isMoving()) ballSvc.launch(s.ball);
+        if (in.left) {
+            paddleSvc.moveLeft(s.paddle,  scaledDt, worldW);
+        }
+        if (in.right) {
+            paddleSvc.moveRight(s.paddle, scaledDt, worldW);
+        }
+        // 1.5) KEEP BALL DOCKED TO PADDLE WHEN NOT MOVING  ⬇⬇⬇
+        if (!s.ball.isMoving()) {
+            ballSvc.dockToPaddle(s.ball, s.paddle);
+        }
+        // (do this BEFORE launch/physics so it rides the paddle cleanly)
+        if (in.launch && !s.ball.isMoving()) {
+            ballSvc.launch(s.ball);
+        }
 
         // 2) Ball physics
         ballSvc.step(s.ball, scaledDt);
@@ -59,9 +70,11 @@ public final class GameService {
                 s.running = false; // game over
             }
         }
-
         //   TODO: ball–brick collisions --> update s.score, remove bricks
         //    (use a CollisionService that iterates s.bricks)
+
     }
 
 }
+
+

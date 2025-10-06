@@ -11,7 +11,7 @@ public class Constants {
     public static final double GAME_HEIGHT = 600.0;
 
     // Ball constants
-    public static final double BALL_RADIUS = 8.0;
+    public static final double BALL_RADIUS = 9.1;
     public static final double BALL_SPEED  = 300.0;      // px/s launch & nominal speed
     public static final double MIN_BALL_ANGLE = 25.0;    // degrees (right-most)
     public static final double MAX_BALL_ANGLE = 155.0;   // degrees (left-most)
@@ -20,13 +20,13 @@ public class Constants {
     public static final double BALL_LAUNCH_ANGLE = 90.0; // degrees (straight up)
 
     // Paddle constants
-    public static final double PADDLE_WIDTH  = 200.0;
-    public static final double PADDLE_HEIGHT = 16.0;
-    public static final double PADDLE_SPEED  = 100.0;     // px per (dt unit); tune as needed
+    public static final double PADDLE_WIDTH  = 150.0;
+    public static final double PADDLE_HEIGHT = 14.0;
+    public static final double PADDLE_SPEED  = 350.0;     // px per (dt unit); tune as needed
     public static final double MIN_PADDLE_WIDTH = 80.0;
     public static final double MAX_PADDLE_WIDTH = 180.0;
     public static final double PADDLE_MARGIN_BOTTOM = 10.0;
-    public static final double BALL_SPAWN_OFFSET = 1.0;  // gap above paddle when docking
+    public static final double BALL_SPAWN_OFFSET = 0.5;  // gap above paddle when docking
 
     // Brick constants
     public static final double BRICK_WIDTH   = 80.0;
