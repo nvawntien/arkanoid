@@ -7,6 +7,6 @@
 
     <!-- The play area; your GameController adds paddle + ball here -->
     <children>
-        <Pane fx:id="playfield" prefHeight="600" prefWidth="800" styleClass="playfield" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+        <Pane fx:id="gamePane" prefHeight="600" prefWidth="800" styleClass="gamePane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
     </children>
 </AnchorPane>

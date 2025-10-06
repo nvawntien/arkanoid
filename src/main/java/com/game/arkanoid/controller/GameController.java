@@ -1,96 +1,99 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.models.Ball;
-import com.game.arkanoid.models.Paddle;
+import com.game.arkanoid.container.Container;
+import com.game.arkanoid.models.*;
+import com.game.arkanoid.services.GameService;
+import com.game.arkanoid.view.*;
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 
-import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * Game-controller class.
- * Responsibilities:
- *      (i)   own game objects.
- *      (ii)  add them to the FXML Pane and position them.
- *      (iii) handle user input.
- *      (iv)  keep correct layouts when resizing window.
- */
-public class GameController implements Initializable {
+public final class GameController {
 
-    @FXML private Pane playfield;   // <Pane fx:id="playfield"> 
+    @FXML private Pane gamePane;
 
-    private Paddle paddle;
-    private Ball ball;
-    private boolean ballDocked = true; // prelaunch state: ball on paddle
+    // Input
+    private final Set<KeyCode> activeKeys = new HashSet<>();
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        paddle = new Paddle(0, 0);     
-        ball   = new Ball(0, 0);
+    // DI / game core
+    private Container container;
+    private GameService game;
+    private GameState state;
 
-        // Add nodes to the scene graph
-        playfield.getChildren().addAll(paddle.getNode(), ball.getNode());
+    // Renderers (own JavaFX nodes)
+    private BallRenderer ballRenderer;
+    private PaddleRenderer paddleRenderer;
 
-        // Layout once the Pane has real size
-        Platform.runLater(() -> {
-            layoutInitial();
-            playfield.requestFocus(); // keyboard input (optional)
-        });
-
-        // Keep layout on resize
-        playfield.widthProperty().addListener((o, ov, nv) -> layoutOnResize());
-        playfield.heightProperty().addListener((o, ov, nv) -> layoutOnResize());
-
-        // Optional: simple left/right controls to see things move
-        playfield.setFocusTraversable(true);
-        playfield.setOnKeyPressed(this::handleKeyPressed);
+    // Game loop
+    private AnimationTimer loop;
+    public GameController(Container container) {
+        this.container = container;
+        this.game = container.getGameService();
+        this.state = container.getGameState();
     }
 
-    private void layoutInitial() {
-        double w = playfield.getWidth()  > 0 ? playfield.getWidth()  : playfield.getPrefWidth();
-        double h = playfield.getHeight() > 0 ? playfield.getHeight() : playfield.getPrefHeight();
+    @FXML
+    public void initialize() {
+        // 1) Build composition root (you can inject via setContainer(...) instead if you prefer)
+        container = new Container();
+        game      = container.getGameService();
+        state     = container.getGameState();
 
-        // Paddle bottom-center with 20px bottom margin
-        double px = (w - paddle.getWidth()) / 2.0;
-        double py = h - paddle.getHeight() - 20;
-        paddle.setPosition(px, py);
+        // 2) Create renderers once (Pane is ready here)
+        paddleRenderer = new PaddleRenderer(gamePane, state.paddle);
+        ballRenderer   = new BallRenderer(gamePane, state.ball);
 
-        dockBallToPaddle();
+        // 3) Input wiring
+        gamePane.setOnKeyPressed(e -> activeKeys.add(e.getCode()));
+        gamePane.setOnKeyReleased(e -> activeKeys.remove(e.getCode()));
+        gamePane.setFocusTraversable(true);
+        Platform.runLater(gamePane::requestFocus); // ensure pane receives key events
+
+        // 4) Start the loop on the FX thread
+        loop = new AnimationTimer() {
+            long last = -1;
+            @Override public void handle(long now) {
+                if (last < 0) { last = now; return; }
+                double dt = (now - last) / 1_000_000_000.0;
+                last = now;
+
+                // Build per-frame input snapshot
+                InputState in = readInput();
+
+                // Advance game logic (no JavaFX types inside)
+                game.update(state, in, dt, gamePane.getWidth(), gamePane.getHeight());
+
+                // Render: sync model -> nodes
+                paddleRenderer.render(state.paddle);
+                ballRenderer.render(state.ball);
+            }
+        };
+        loop.start();
     }
 
-    private void layoutOnResize() {
-        double py = playfield.getHeight() - paddle.getHeight() - 20;
-        paddle.setY(py);
-
-        
-        if (ballDocked) dockBallToPaddle();
+    private InputState readInput() {
+        InputState in = new InputState();
+        in.left   = activeKeys.contains(KeyCode.LEFT)  || activeKeys.contains(KeyCode.A);
+        in.right  = activeKeys.contains(KeyCode.RIGHT) || activeKeys.contains(KeyCode.D);
+        in.launch = activeKeys.contains(KeyCode.SPACE);
+        // If you add pause in GameService: in.pause = activeKeys.contains(KeyCode.P);
+        return in;
     }
 
-    private void dockBallToPaddle() {
-        double cx = paddle.getX() + paddle.getWidth() / 2.0;
-        double cy = paddle.getY() - ball.getRadius();
-        ball.setCenter(cx, cy);
+    /** Optional: stop the loop when changing scenes/windows. */
+    public void stop() {
+        if (loop != null) loop.stop();
     }
 
-    
-    private void handleKeyPressed(KeyEvent e) {
-        switch (e.getCode()) {
-            case LEFT  -> movePaddle(-12);
-            case RIGHT -> movePaddle(12);
-            case SPACE -> ballDocked = false;           
-            case R     -> { ballDocked = true; dockBallToPaddle(); } 
-        }
-    }
-
-    private void movePaddle(double dx) {
-        double minX = 0;
-        double maxX = playfield.getWidth() - paddle.getWidth();
-        double newX = Math.max(minX, Math.min(paddle.getX() + dx, maxX));
-        paddle.setX(newX);
-        if (ballDocked) dockBallToPaddle();
+    /** Optional alternative: inject a prebuilt Container from Main instead of new Container() in initialize(). */
+    public void setContainer(Container container) {
+        this.container = container;
+        this.game = container.getGameService();
+        this.state = container.getGameState();
     }
 }

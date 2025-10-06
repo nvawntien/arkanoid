@@ -1,58 +1,126 @@
 package com.game.arkanoid.models;
 
-import javafx.scene.shape.Circle;
+import com.game.arkanoid.utils.Constants;
 
-/**
- * Ball class.
- * 
- * @author bmngxn
- */
-public class Ball {
-    private static final double DEFAULT_RADIUS = com.game.arkanoid.utils.Constants.BALL_RADIUS;
-    private final Circle node;
-    private double currentRadius;
+public class Ball extends MovableObject {
+    private double radius;
+    private boolean isMoving;
 
     /**
      * Ball constructor 1.
-     * 
-     * @param x the X coordinate of the ball's center
-     * @param y the Y coordinate of the ball's center
-     * @param radius the radius of the ball (must be > 0)
-     * @throws IllegalArgumentException if radius <= 0
+     * @param centerX center x axis
+     * @param y center y axis
+     * @param radius ball radius
      */
-    public Ball(double x, double y, double radius) {
-        if (radius <= 0) {
-            throw new IllegalArgumentException("Ball radius must be > 0");
-        }
-
-        this.currentRadius = radius;
-        node = new Circle(x, y, currentRadius);
-        node.getStyleClass().add("ball");
-    }
-
-    /**
-     * Ball constructor 2.
-     * 
-     * @param x x Cartesian coordinate
-     * @param y y Cartesian coordinate 
-     */
-
-    public Ball(double x, double y) {
-        this.currentRadius = DEFAULT_RADIUS;
-        node = new Circle(x, y, currentRadius);
-        node.getStyleClass().add("ball");
+    public Ball(double centerX, double centerY, double radius) {
+        super(centerX, centerY, radius * 2, radius * 2);            // MovableObject width = height = 2r
+        if (radius <= 0) throw new IllegalArgumentException("radius must be > 0");
+        this.radius = radius;
+        this.isMoving = false;
     }
 
     //getters and setters
-    public Circle getNode() { return node; }
 
-    public double getRadius() { return node.getRadius(); }
+    public double getCenterX() {
+        return x;
+    }
 
-    public double getCenterX() { return node.getCenterX(); }
-    public double getCenterY() { return node.getCenterY(); }
+    public double getCenterY() {
+        return y;
+    }
 
-    public void setCenter(double x, double y) {
-        node.setCenterX(x);
-        node.setCenterY(y);
+    public void setCenter(double cx, double cy) {
+        this.x = cx;
+        this.y = cy;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+
+    public boolean isMoving() {
+        return isMoving;
+    }
+
+    public void setMoving(boolean moving) {
+        isMoving = moving;
+    }
+
+    @Override
+    public void update(double dt) {
+        if (isMoving) move(dt);
+    }
+
+
+    //Collision handling
+
+    // --- Hình hộp bao (AABB) để kiểm va chạm đơn giản ---
+
+    public double left()   { 
+        return x - radius; 
+    }
+    public double right()  { 
+        return x + radius; 
+    }
+    public double top()    { 
+        return y - radius; 
+    }
+    public double bottom() { 
+        return y + radius; 
+    }
+
+    /** Ball vs AABB (Paddle/Brick) – test va chạm hình tròn với hộp. */
+
+    public boolean checkCollision(GameObject other) {
+        double oL = other.getX();
+        double oT = other.getY();
+        double oR = oL + other.getWidth();
+        double oB = oT + other.getHeight();
+
+        double cx = getCenterX(), cy = getCenterY();
+        double nearestX = Math.max(oL, Math.min(cx, oR));
+        double nearestY = Math.max(oT, Math.min(cy, oB));
+        double ddx = cx - nearestX, ddy = cy - nearestY;
+        return ddx*ddx + ddy*ddy <= radius * radius;
+    }
+
+    /** Nảy khỏi AABB theo trục có độ xuyên nhỏ nhất (đơn giản, ổn định). */
+
+    public void bounceOff(GameObject other) {
+        double oL = other.getX();
+        double oT = other.getY();
+        double oR = oL + other.getWidth();
+        double oB = oT + other.getHeight();
+
+        double penLeft   = Math.abs(right() - oL);
+        double penRight  = Math.abs(oR - left());
+        double penTop    = Math.abs(bottom() - oT);
+        double penBottom = Math.abs(oB - top());
+
+        double minPen = Math.min(Math.min(penLeft, penRight), Math.min(penTop, penBottom));
+
+        if (minPen == penLeft) {
+            setCenter(oL - radius - Constants.BALL_NUDGE, y);
+            setVelocity(-Math.abs(dx) * Constants.BALL_RESTITUTION, dy);
+        } else if (minPen == penRight) {
+            setCenter(oR + radius + Constants.BALL_NUDGE, y);
+            setVelocity(Math.abs(dx) * Constants.BALL_RESTITUTION, dy);
+        } else if (minPen == penTop) {
+            setCenter(x, oT - radius - Constants.BALL_NUDGE);
+            setVelocity(dx, -Math.abs(dy) * Constants.BALL_RESTITUTION);
+        } else {
+            setCenter(x, oB + radius + Constants.BALL_NUDGE);
+            setVelocity(dx, Math.abs(dy) * Constants.BALL_RESTITUTION);
+        }
+
+        double speed = Math.hypot(dx, dy);
+        if (speed < 1e-3) { // tránh “đứng chết”
+            double t = Math.toRadians(Constants.BALL_LAUNCH_ANGLE);
+            setVelocity(Constants.BALL_SPEED * Math.cos(t), -Constants.BALL_SPEED * Math.sin(t));
+        }
     }
 }

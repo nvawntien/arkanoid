@@ -1,47 +1,48 @@
 package com.game.arkanoid.models;
 
-import javafx.geometry.Bounds;
-import javafx.scene.shape.Rectangle;
+import com.game.arkanoid.utils.Constants;
 
-/**
- * Paddle class.
- * 
- * @author bmngxn
- */
+/** Paddle là AABB: x,y = top-left; width,height = kích thước. */
+public class Paddle extends MovableObject {
+    private double speed;            // px/s
+    private double minWidth;         // để clamp power-up
+    private double maxWidth;
 
-public class Paddle {
-    private static final double DEFAULT_WIDTH = com.game.arkanoid.utils.Constants.PADDLE_WIDTH;
-    private static final double DEFAULT_HEIGHT = com.game.arkanoid.utils.Constants.PADDLE_HEIGHT;
-
-    private Rectangle node;
-    //private double currentWidth (powerups and shi)
-
-    /**
-     * Paddle constructor
-     * 
-     * @param x x axis (Cartesian)
-     * @param y y axis (Cartesian)
-     */
-    public Paddle(double x, double y) {
-        node = new Rectangle(x, y, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-        node.getStyleClass().add("paddle"); 
-        node.setArcWidth(10);
-        node.setArcHeight(10);
+    public Paddle(double x, double y, double width, double height, double speed) {
+        super(x, y, width, height);
+        this.speed = speed;
+        this.minWidth = Constants.MIN_PADDLE_WIDTH;
+        this.maxWidth = Constants.MAX_PADDLE_WIDTH;
+        this.dx = 0; 
+        this.dy = 0;                                // ONLY MOVES HORIZONTALLY --> dy = 0 
     }
 
-    // Getters and Setters
-    public Rectangle getNode() { return node; }
+    @Override
+    public void update(double dt) {
+        move(dt); 
+    }
 
-    public double getWidth()  { return node.getWidth(); }
-    public double getHeight() { return node.getHeight(); }
+    // getters and setters
 
-    public void setX(double x) { node.setX(x); }
-    public void setY(double y) { node.setY(y); }
-    public double getX() { return node.getX(); }
-    public double getY() { return node.getY(); }
+    public double getSpeed() { 
+        return speed; 
+    }
+    public void setSpeed(double speed) { 
+        this.speed = speed; 
+    }
 
-    public void setPosition(double x, double y) { 
-        node.setX(x); 
-        node.setY(y); 
+    public double getMinWidth() { 
+        return minWidth; 
+    }
+    public double getMaxWidth() { 
+        return maxWidth; 
+    }
+    public void setWidthBounds(double minW, double maxW) { 
+        this.minWidth = minW; this.maxWidth = maxW; 
+    }
+
+    /** Thay đổi width có clamp theo min/max. */
+    public void setWidthClamped(double newWidth) {
+        this.width = Math.max(minWidth, Math.min(maxWidth, newWidth));
     }
 }
