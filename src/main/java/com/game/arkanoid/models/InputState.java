@@ -1,6 +1,6 @@
 package com.game.arkanoid.models;
 /**
- * Input state. xới
+ * Input state xới.
  * 
  * @author bmngxn
  */

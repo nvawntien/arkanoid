@@ -2,7 +2,7 @@ package com.game.arkanoid.models;
 
 /**
  * Abstract class representing objects in game, 
- * characterized by x, y, width, height. xơiisiiii
+ * characterized by x, y, width, height xơii.
  * 
  * @author bmngxn
  */

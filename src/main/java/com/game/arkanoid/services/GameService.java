@@ -54,12 +54,10 @@ public final class GameService {
         ballSvc.bounceWorld(s.ball, worldW, worldH);
 
         // 3) Ball–Paddle collision (basic)
-        if (s.ball.checkCollision(s.paddle)) {
-            ballSvc.bounceOff(s.ball, s.paddle);
-            // keep it just above the paddle to avoid sticking
-            s.ball.setCenter(s.ball.getCenterX(),
-                             s.paddle.getY() - s.ball.getRadius() - Constants.BALL_NUDGE);
-        }
+        if (ballSvc.intersectsAABB(s.ball, s.paddle)) {
+            ballSvc.bounceOffAABB(s.ball, s.paddle);
+            s.ball.setCenter(s.ball.getCenterX(), s.paddle.getY() - s.ball.getRadius() - Constants.BALL_NUDGE);
+        }   
 
         // 4) Out of bounds (lose life)
         if (ballSvc.fellBelow(s.ball, worldH)) {

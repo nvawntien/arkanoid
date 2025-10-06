@@ -112,4 +112,45 @@ public class BallService {
             );
 
     }
+
+    public boolean intersectsAABB(Ball b, GameObject other) {
+    double oL = other.getX(), oT = other.getY();
+    double oR = oL + other.getWidth(), oB = oT + other.getHeight();
+    double cx = b.getCenterX(), cy = b.getCenterY();
+    double nearestX = Math.max(oL, Math.min(cx, oR));
+    double nearestY = Math.max(oT, Math.min(cy, oB));
+    double ddx = cx - nearestX, ddy = cy - nearestY;
+    return ddx*ddx + ddy*ddy <= b.getRadius() * b.getRadius();
+}
+
+    public void bounceOffAABB(Ball b, GameObject other) {
+        double oL = other.getX(), oT = other.getY();
+        double oR = oL + other.getWidth(), oB = oT + other.getHeight();
+
+        double penLeft   = Math.abs((b.getCenterX() + b.getRadius()) - oL);
+        double penRight  = Math.abs(oR - (b.getCenterX() - b.getRadius()));
+        double penTop    = Math.abs((b.getCenterY() + b.getRadius()) - oT);
+        double penBottom = Math.abs(oB - (b.getCenterY() - b.getRadius()));
+        double minPen = Math.min(Math.min(penLeft, penRight), Math.min(penTop, penBottom));
+
+        if (minPen == penLeft) {
+            b.setCenter(oL - b.getRadius() - Constants.BALL_NUDGE, b.getCenterY());
+              b.setVelocity(-Math.abs(b.getDx()) * Constants.BALL_RESTITUTION, b.getDy());
+        } else if (minPen == penRight) {
+            b.setCenter(oR + b.getRadius() + Constants.BALL_NUDGE, b.getCenterY());
+            b.setVelocity(Math.abs(b.getDx()) * Constants.BALL_RESTITUTION, b.getDy());
+        } else if (minPen == penTop) {
+            b.setCenter(b.getCenterX(), oT - b.getRadius() - Constants.BALL_NUDGE);
+            b.setVelocity(b.getDx(), -Math.abs(b.getDy()) * Constants.BALL_RESTITUTION);
+        } else {
+            b.setCenter(b.getCenterX(), oB + b.getRadius() + Constants.BALL_NUDGE);
+            b.setVelocity(b.getDx(), Math.abs(b.getDy()) * Constants.BALL_RESTITUTION);
+        }
+
+        double speed = Math.hypot(b.getDx(), b.getDy());
+        if (speed < 1e-3) {
+            double t = Math.toRadians(Constants.BALL_LAUNCH_ANGLE);
+            b.setVelocity(Constants.BALL_SPEED * Math.cos(t), -Constants.BALL_SPEED * Math.sin(t));
+        }
+    }
 }
