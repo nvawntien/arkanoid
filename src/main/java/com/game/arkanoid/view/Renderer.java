@@ -4,8 +4,8 @@ import javafx.scene.Node;
 
 /**
  * Interface for rendering a game model onto the JavaFX scene graph.
- * Classes implementing this interface are responsible for creating and 
- * updating the visual representation ({@link Node}) of a specific model 
+ * Classes implementing this interface are responsible for creating and
+ * updating the visual representation ({@link Node}) of a specific model
  * object in the game.
  *
  * @param <Model> the type of the model this renderer handles
@@ -15,14 +15,14 @@ import javafx.scene.Node;
 public interface Renderer<Model> {
     Node getNode();
 
-    /** 
-     * Sync Node from model. Must be called on the JavaFX thread. 
+    /**
+     * Sync Node from model. Must be called on the JavaFX thread.
      * @param model game template model
      */
     void render(Model model);
 
-    /** 
-     * Optional cleanup hook (remove listeners, animations, etc.). 
+    /**
+     * Optional cleanup hook (remove listeners, animations, etc.).
      */
     default void dispose() {}
 }

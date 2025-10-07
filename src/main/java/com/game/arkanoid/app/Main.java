@@ -19,7 +19,7 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/GameView.fxml"));
         loader.setControllerFactory(cls -> {
         if (cls == GameController.class) {
-            return new GameController(container);   // inject Container
+            return new GameController(container.getGameState(), container.getGameService());   // inject Container
         }
         try { return cls.getDeclaredConstructor().newInstance(); }
         catch (Exception e) { throw new RuntimeException(e); }

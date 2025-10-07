@@ -21,7 +21,7 @@ public final class GameController {
     private final Set<KeyCode> activeKeys = new HashSet<>();
 
     // DI / game core
-    private Container container;
+
     private GameService game;
     private GameState state;
 
@@ -31,19 +31,13 @@ public final class GameController {
 
     // Game loop
     private AnimationTimer loop;
-    public GameController(Container container) {
-        this.container = container;
-        this.game = container.getGameService();
-        this.state = container.getGameState();
+    public GameController(GameState state, GameService game) {
+        this.game = game;
+        this.state = state;
     }
 
     @FXML
     public void initialize() {
-        // 1) Build composition root (you can inject via setContainer(...) instead if you prefer)
-        container = new Container();
-        game      = container.getGameService();
-        state     = container.getGameState();
-
         // 2) Create renderers once (Pane is ready here)
         paddleRenderer = new PaddleRenderer(gamePane, state.paddle);
         ballRenderer   = new BallRenderer(gamePane, state.ball);
@@ -90,10 +84,4 @@ public final class GameController {
         if (loop != null) loop.stop();
     }
 
-    /** Optional alternative: inject a prebuilt Container from Main instead of new Container() in initialize(). */
-    public void setContainer(Container container) {
-        this.container = container;
-        this.game = container.getGameService();
-        this.state = container.getGameState();
-    }
 }

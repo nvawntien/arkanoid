@@ -82,19 +82,9 @@ public class BallService {
         b.setMoving(false);
         b.setVelocity(0, 0);
         b.setCenter(
-            p.getX() + p.getWidth() / 2.0,
-            p.getY() - b.getRadius() - Constants.BALL_SPAWN_OFFSET
+                p.getX() + p.getWidth() / 2.0,
+                p.getY() - b.getRadius() - Constants.BALL_SPAWN_OFFSET
         );
-    }
-
-    /**
-     * Makes the ball bounce off a game object.
-     * 
-     * @param b the ball
-     * @param other the object it collided with
-     */
-    public void bounceOff(Ball b, GameObject other) {
-        b.bounceOff(other);
     }
 
 
@@ -111,6 +101,42 @@ public class BallService {
                         p.getY() - b.getRadius() - Constants.BALL_SPAWN_OFFSET
             );
 
+    }
+
+    /** Nảy khỏi AABB theo trục có độ xuyên nhỏ nhất (đơn giản, ổn định). */
+
+    public void bounceOff(Ball b, GameObject other) {
+        double oL = other.getX();
+        double oT = other.getY();
+        double oR = oL + other.getWidth();
+        double oB = oT + other.getHeight();
+
+        double penLeft   = Math.abs(b.right() - oL);
+        double penRight  = Math.abs(oR - b.left());
+        double penTop    = Math.abs(b.bottom() - oT);
+        double penBottom = Math.abs(oB - b.top());
+
+        double minPen = Math.min(Math.min(penLeft, penRight), Math.min(penTop, penBottom));
+
+        if (minPen == penLeft) {
+            b.setCenter(oL - b.getRadius() - Constants.BALL_NUDGE, b.getY());
+            b.setVelocity(-Math.abs(b.getDx()) * Constants.BALL_RESTITUTION, b.getDy());
+        } else if (minPen == penRight) {
+            b.setCenter(oR + b.getRadius() + Constants.BALL_NUDGE, b.getY());
+            b.setVelocity(Math.abs(b.getDx()) * Constants.BALL_RESTITUTION, b.getDy());
+        } else if (minPen == penTop) {
+            b.setCenter(b.getX(), oT - b.getRadius() - Constants.BALL_NUDGE);
+            b.setVelocity(b.getDx(), -Math.abs(b.getDy()) * Constants.BALL_RESTITUTION);
+        } else {
+            b.setCenter(b.getX(), oB + b.getRadius() + Constants.BALL_NUDGE);
+            b.setVelocity(b.getDx(), Math.abs(b.getDy()) * Constants.BALL_RESTITUTION);
+        }
+
+        double speed = Math.hypot(b.getDx(), b.getDy());
+        if (speed < 1e-3) { // tránh “đứng chết”
+            double t = Math.toRadians(Constants.BALL_LAUNCH_ANGLE);
+            b.setVelocity(Constants.BALL_SPEED * Math.cos(t), -Constants.BALL_SPEED * Math.sin(t));
+        }
     }
 
     public boolean intersectsAABB(Ball b, GameObject other) {
@@ -153,4 +179,21 @@ public class BallService {
             b.setVelocity(Constants.BALL_SPEED * Math.cos(t), -Constants.BALL_SPEED * Math.sin(t));
         }
     }
+
+    /** Ball vs AABB (Paddle/Brick) – test va chạm hình tròn với hộp. */
+
+    public boolean checkCollision(Ball b, GameObject other) {
+        double oL = other.getX();
+        double oT = other.getY();
+        double oR = oL + other.getWidth();
+        double oB = oT + other.getHeight();
+
+        double cx = b.getCenterX(), cy = b.getCenterY();
+        double nearestX = Math.max(oL, Math.min(cx, oR));
+        double nearestY = Math.max(oT, Math.min(cy, oB));
+        double ddx = cx - nearestX, ddy = cy - nearestY;
+        return ddx*ddx + ddy*ddy <= b.getRadius() * b.getRadius();
+    }
+
+
 }
