@@ -53,7 +53,7 @@ public final class GameController {
             long last = -1;
             @Override public void handle(long now) {
                 if (last < 0) { last = now; return; }
-                double dt = (now - last) / 1_000_000_000.0;
+                double dt = (now - last) / 11_000_000.0;
                 last = now;
 
                 // Build per-frame input snapshot
