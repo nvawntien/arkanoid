@@ -21,7 +21,7 @@ public class Constants {
 
     // Paddle constants
     public static final double PADDLE_WIDTH  = 150.0;
-    public static final double PADDLE_HEIGHT = 14.0;
+    public static final double PADDLE_HEIGHT = 12.7;
     public static final double PADDLE_SPEED  = 10.0;     // px per (dt unit); tune as needed
     public static final double MIN_PADDLE_WIDTH = 80.0;
     public static final double MAX_PADDLE_WIDTH = 180.0;
@@ -41,4 +41,8 @@ public class Constants {
     public static final int DEFAULT_SCORE = 0;
     public static final int DEFAULT_LIVES = 3;
     public static final int DEFAULT_LEVEL = 1;
+
+    // Time -related
+
+    public static final double TIME_SCALE = 10_000_000.0;
 }

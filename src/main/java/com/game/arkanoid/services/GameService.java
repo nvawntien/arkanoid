@@ -68,11 +68,11 @@ public final class GameService {
                 s.running = false; // game over
             }
         }
+
         //   TODO: ball–brick collisions --> update s.score, remove bricks
         //    (use a CollisionService that iterates s.bricks)
 
     }
-
 }
 
 

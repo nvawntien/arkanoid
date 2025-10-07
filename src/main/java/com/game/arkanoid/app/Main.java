@@ -18,12 +18,12 @@ public class Main extends Application {
         // 2. Load FXML và inject controller
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/GameView.fxml"));
         loader.setControllerFactory(cls -> {
-        if (cls == GameController.class) {
-            return new GameController(container.getGameState(), container.getGameService());   // inject Container
-        }
-        try { return cls.getDeclaredConstructor().newInstance(); }
-        catch (Exception e) { throw new RuntimeException(e); }
-    });
+            if (cls == GameController.class) {
+                return new GameController(container.getGameState(), container.getGameService());   // inject Container
+            }
+            try { return cls.getDeclaredConstructor().newInstance(); }
+            catch (Exception e) { throw new RuntimeException(e); }
+        });
 
         Parent root = loader.load();
         Scene scene = new Scene(root);
