@@ -12,7 +12,7 @@ public class Constants {
 
     // Ball constants
     public static final double BALL_RADIUS = 9.1;
-    public static final double BALL_SPEED  = 300.0;      // px/s launch & nominal speed
+    public static final double BALL_SPEED  = 30.0;      // px/s launch & nominal speed
     public static final double MIN_BALL_ANGLE = 25.0;    // degrees (right-most)
     public static final double MAX_BALL_ANGLE = 155.0;   // degrees (left-most)
     public static final double BALL_RESTITUTION = 0.98;  // energy kept on bounce (0..1)

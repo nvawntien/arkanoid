@@ -1,5 +1,4 @@
 package com.game.arkanoid.controller;
-
 import com.game.arkanoid.container.Container;
 import com.game.arkanoid.models.*;
 import com.game.arkanoid.services.GameService;
@@ -28,7 +27,7 @@ public final class GameController {
     // Renderers (own JavaFX nodes)
     private BallRenderer ballRenderer;
     private PaddleRenderer paddleRenderer;
-
+    private BricksRenderer bricksRenderer;
     // Game loop
     private AnimationTimer loop;
     public GameController(GameState state, GameService game) {
@@ -41,6 +40,7 @@ public final class GameController {
         // 2) Create renderers once (Pane is ready here)
         paddleRenderer = new PaddleRenderer(gamePane, state.paddle);
         ballRenderer   = new BallRenderer(gamePane, state.ball);
+        bricksRenderer = new BricksRenderer(gamePane, state.bricks);
 
         // 3) Input wiring
         gamePane.setOnKeyPressed(e -> activeKeys.add(e.getCode()));
@@ -65,6 +65,7 @@ public final class GameController {
                 // Render: sync model -> nodes
                 paddleRenderer.render(state.paddle);
                 ballRenderer.render(state.ball);
+                bricksRenderer.render(state.bricks);
             }
         };
         loop.start();

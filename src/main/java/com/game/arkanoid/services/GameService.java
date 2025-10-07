@@ -1,6 +1,8 @@
 // services/GameService.java
 package com.game.arkanoid.services;
 
+import java.util.Iterator;
+
 import com.game.arkanoid.models.*;
 import com.game.arkanoid.utils.Constants;
 
@@ -10,14 +12,15 @@ import com.game.arkanoid.utils.Constants;
  * @author bmngxn
  */
 public final class GameService {
-    private final BallService ballSvc;
+     private final BallService ballSvc;
     private final PaddleService paddleSvc;
+    private final BricksService bricksSvc;
 
-    public GameService(BallService ballSvc, PaddleService paddleSvc) {
+    public GameService(BallService ballSvc, PaddleService paddleSvc, BricksService bricksSvc) {
         this.ballSvc = ballSvc;
         this.paddleSvc = paddleSvc;
+        this.bricksSvc = bricksSvc;
     }
-
     /**
      * Advance one frame of game logic.
      * @param in     input state for this frame
@@ -70,6 +73,17 @@ public final class GameService {
         }
         //   TODO: ball–brick collisions --> update s.score, remove bricks
         //    (use a CollisionService that iterates s.bricks)
+        Iterator<Brick> it = s.bricks.iterator();
+        // 4) Ball–Brick collision
+        for (Brick brick : s.bricks) {
+
+            if (ballSvc.checkCollision(s.ball, brick) && !brick.isDestroyed()) {
+                ballSvc.bounceOffAABB(s.ball, brick);
+                boolean destroyed = bricksSvc.handleBrickHit(brick);
+                if (destroyed) s.score += 100;
+                    break; // chỉ xử lý 1 brick mỗi frame
+            }
+        }
 
     }
 

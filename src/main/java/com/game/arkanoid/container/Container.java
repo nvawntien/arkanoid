@@ -1,5 +1,5 @@
 package com.game.arkanoid.container;
-
+import java.util.List;
 import com.game.arkanoid.models.*;
 import com.game.arkanoid.services.*;
 import com.game.arkanoid.utils.Constants;
@@ -9,7 +9,6 @@ public final class Container {
     private final GameService game;
 
     public Container() {
-        // Models
         Paddle paddle = new Paddle(
             Constants.GAME_WIDTH / 2.0 - Constants.PADDLE_WIDTH / 2.0,
             Constants.GAME_HEIGHT - Constants.PADDLE_HEIGHT - Constants.PADDLE_MARGIN_BOTTOM,
@@ -28,18 +27,24 @@ public final class Container {
         this.state.score = Constants.DEFAULT_SCORE;
         this.state.level = Constants.DEFAULT_LEVEL;
 
-        // Services (stateless)
+        // 👉 Thêm bricks
+        BricksService bricksSvc = new BricksService();
+        int[][] layout = {
+            {1,1,1,1,1,1,1,1,1,1},
+            {1,1,1,1,1,1,1,1,1,1},
+            {2,2,2,2,2,2,2,2,2,2}
+        };
+        List<Brick> bricks = bricksSvc.createBricksFromLayout(layout);
+        this.state.bricks.addAll(bricks);
+
+        // Services
         BallService ballSvc = new BallService();
         PaddleService paddleSvc = new PaddleService();
 
         // Orchestrator
-        this.game = new GameService(ballSvc, paddleSvc);
+        this.game = new GameService(ballSvc, paddleSvc, bricksSvc);
     }
 
-    public GameState getGameState() { 
-        return state; 
-    }
-    public GameService getGameService() { 
-        return game;  
-    }
+    public GameState getGameState() { return state; }
+    public GameService getGameService() { return game; }
 }
