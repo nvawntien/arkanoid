@@ -1,57 +1,87 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.models.Ball;
-import com.game.arkanoid.models.Paddle;
+import com.game.arkanoid.container.Container;
+import com.game.arkanoid.models.*;
 import com.game.arkanoid.services.GameService;
-import com.game.arkanoid.services.PaddleService;
-import com.game.arkanoid.services.BallService;
-import com.game.arkanoid.utils.Constants;
-
+import com.game.arkanoid.view.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 
-import java.net.URL;
 import java.util.HashSet;
-import java.util.ResourceBundle;
 import java.util.Set;
 
-public class GameController implements Initializable {
+public final class GameController {
 
-    @FXML
-    private Pane gamePane;
-    private GameService gameService;
+    @FXML private Pane gamePane;
 
+    // Input
     private final Set<KeyCode> activeKeys = new HashSet<>();
 
+    // DI / game core
 
-    public GameController(GameService gameService) {
-        this.gameService = gameService;
+    private GameService game;
+    private GameState state;
+
+    // Renderers (own JavaFX nodes)
+    private BallRenderer ballRenderer;
+    private PaddleRenderer paddleRenderer;
+
+    // Game loop
+    private AnimationTimer loop;
+    public GameController(GameState state, GameService game) {
+        this.game = game;
+        this.state = state;
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        gamePane.getChildren().addAll(gameService.getPaddleService().getPaddle().getNode(),
-                                      gameService.getBallService().getBall().getNode());
+    @FXML
+    public void initialize() {
+        // 2) Create renderers once (Pane is ready here)
+        paddleRenderer = new PaddleRenderer(gamePane, state.paddle);
+        ballRenderer   = new BallRenderer(gamePane, state.ball);
 
-
+        // 3) Input wiring
+        gamePane.setOnKeyPressed(e -> activeKeys.add(e.getCode()));
+        gamePane.setOnKeyReleased(e -> activeKeys.remove(e.getCode()));
         gamePane.setFocusTraversable(true);
-        gamePane.setOnKeyPressed(event -> activeKeys.add(event.getCode()));
-        gamePane.setOnKeyReleased(event -> activeKeys.remove(event.getCode()));
+        Platform.runLater(gamePane::requestFocus); // ensure pane receives key events
 
-        Platform.runLater(() -> gamePane.requestFocus());
+        // 4) Start the loop on the FX thread
+        loop = new AnimationTimer() {
+            long last = -1;
+            @Override public void handle(long now) {
+                if (last < 0) { last = now; return; }
+                double dt = (now - last) / 11_000_000.0;
+                last = now;
 
-        startGameLoop();
+                // Build per-frame input snapshot
+                InputState in = readInput();
+
+                // Advance game logic (no JavaFX types inside)
+                game.update(state, in, dt, gamePane.getWidth(), gamePane.getHeight());
+
+                // Render: sync model -> nodes
+                paddleRenderer.render(state.paddle);
+                ballRenderer.render(state.ball);
+            }
+        };
+        loop.start();
     }
 
-    private void startGameLoop() {
-        gameService.startGameLoop(gamePane, activeKeys);
+    private InputState readInput() {
+        InputState in = new InputState();
+        in.left   = activeKeys.contains(KeyCode.LEFT)  || activeKeys.contains(KeyCode.A);
+        in.right  = activeKeys.contains(KeyCode.RIGHT) || activeKeys.contains(KeyCode.D);
+        in.launch = activeKeys.contains(KeyCode.SPACE);
+        // If you add pause in GameService: in.pause = activeKeys.contains(KeyCode.P);
+        return in;
     }
-    
-    public void stopGame() {
-        gameService.stop();
+
+    /** Optional: stop the loop when changing scenes/windows. */
+    public void stop() {
+        if (loop != null) loop.stop();
     }
+
 }

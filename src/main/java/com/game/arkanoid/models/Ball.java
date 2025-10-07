@@ -1,51 +1,37 @@
 package com.game.arkanoid.models;
 
-import javafx.scene.shape.Circle;
+import com.game.arkanoid.utils.Constants;
 
-public class Ball {
-    private Circle node;
-    private double x;
-    private double y;
+public class Ball extends MovableObject {
     private double radius;
-    private double dx;
-    private double dy;
     private boolean isMoving;
 
-    public Ball(double x, double y, double radius) {
-        this.x = x;
-        this.y = y;
+    /**
+     * Ball constructor 1.
+     * @param centerX center x axis
+     * @param y center y axis
+     * @param radius ball radius
+     */
+    public Ball(double centerX, double centerY, double radius) {
+        super(centerX, centerY, radius * 2, radius * 2);            // MovableObject width = height = 2r
+        if (radius <= 0) throw new IllegalArgumentException("radius must be > 0");
         this.radius = radius;
-
-        // initial flight direction
-        this.dx = 3;
-        this.dy = -3;
         this.isMoving = false;
-        this.node = new Circle(this.x, this.y, this.radius);
-        this.node.getStyleClass().add("ball");
     }
 
-    public Circle getNode() {
-        return node;
-    }
+    //getters and setters
 
-    public void setNode(Circle node) {
-        this.node = node;
-    }
-
-    public double getX() {
+    public double getCenterX() {
         return x;
     }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
+    public double getCenterY() {
         return y;
     }
 
-    public void setY(double y) {
-        this.y = y;
+    public void setCenter(double cx, double cy) {
+        this.x = cx;
+        this.y = cy;
     }
 
     public double getRadius() {
@@ -56,22 +42,6 @@ public class Ball {
         this.radius = radius;
     }
 
-    public double getDx() {
-        return dx;
-    }
-
-    public void setDx(double dx) {
-        this.dx = dx;
-    }
-
-    public double getDy() {
-        return dy;
-    }
-
-    public void setDy(double dy) {
-        this.dy = dy;
-    }
-
     public boolean isMoving() {
         return isMoving;
     }
@@ -80,10 +50,28 @@ public class Ball {
         isMoving = moving;
     }
 
-    public void setCenter(double x, double y) {
-        this.x = x;
-        this.y = y;
-        node.setCenterX(x);
-        node.setCenterY(y);
+    @Override
+    public void update(double dt) {
+        if (isMoving) move(dt);
     }
+
+
+    //Collision handling
+
+    // --- Hình hộp bao (AABB) để kiểm va chạm đơn giản ---
+
+    public double left()   { 
+        return x - radius; 
+    }
+    public double right()  { 
+        return x + radius; 
+    }
+    public double top()    { 
+        return y - radius; 
+    }
+    public double bottom() { 
+        return y + radius; 
+    }
+
+
 }

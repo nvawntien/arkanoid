@@ -1,70 +1,48 @@
 package com.game.arkanoid.models;
+
 import com.game.arkanoid.utils.Constants;
-import javafx.scene.shape.Rectangle;
-public class Paddle {
 
-    private final Rectangle node;
+/** Paddle là AABB: x,y = top-left; width,height = kích thước. */
+public class Paddle extends MovableObject {
+    private double speed;            // px/s
+    private double minWidth;         // để clamp power-up
+    private double maxWidth;
 
-    private double x;
-    private double y;
-    private double width;
-    private double height;
-    private double speed;
-
-    public Paddle(double x, double y) {
-        this.x = x;
-        this.y = y;
-        this.width = Constants.PADDLE_WIDTH ;
-        this.height = Constants.PADDLE_HEIGHT;
-        this.speed = Constants.PADDLE_SPEED;
-        this.node = new Rectangle(x, y, width, height);
-        this.node.getStyleClass().add("paddle");
-    }
-
-    public Rectangle getNode() {
-        return node;
-    }
-
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public double getWidth() {
-        return width;
-    }
-
-    public double getHeight() {
-        return height;
-    }
-
-    public double getSpeed() {
-        return speed;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-        this.node.setX(x);
-    }
-
-    public void setY(double y) {
-        this.y = y;
-        this.node.setY(y);
-    }
-
-    public void setWidth(double width) {
-        this.width = width;
-        this.node.setWidth(width);
-    }
-
-    public void setHeight(double height) {
-        this.height = height;
-    }
-
-    public void setSpeed(double speed) {
+    public Paddle(double x, double y, double width, double height, double speed) {
+        super(x, y, width, height);
         this.speed = speed;
+        this.minWidth = Constants.MIN_PADDLE_WIDTH;
+        this.maxWidth = Constants.MAX_PADDLE_WIDTH;
+        this.dx = 0; 
+        this.dy = 0;                                // ONLY MOVES HORIZONTALLY --> dy = 0 
+    }
+
+    @Override
+    public void update(double dt) {
+        move(dt); 
+    }
+
+    // getters and setters
+
+    public double getSpeed() { 
+        return speed; 
+    }
+    public void setSpeed(double speed) { 
+        this.speed = speed; 
+    }
+
+    public double getMinWidth() { 
+        return minWidth; 
+    }
+    public double getMaxWidth() { 
+        return maxWidth; 
+    }
+    public void setWidthBounds(double minW, double maxW) { 
+        this.minWidth = minW; this.maxWidth = maxW; 
+    }
+
+    /** Thay đổi width có clamp theo min/max. */
+    public void setWidthClamped(double newWidth) {
+        this.width = Math.max(minWidth, Math.min(maxWidth, newWidth));
     }
 }

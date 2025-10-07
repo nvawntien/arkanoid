@@ -14,22 +14,17 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        // 1. Tạo container
         Container container = new Container();
 
         // 2. Load FXML và inject controller
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/GamePlay.fxml"));
-        loader.setControllerFactory(controllerClass -> {
-            if (controllerClass == GameController.class) {
-                return new GameController(container.getGameService()); // inject GameService
-            } else {
-                try {
-                    return controllerClass.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/GameView.fxml"));
+        loader.setControllerFactory(cls -> {
+        if (cls == GameController.class) {
+            return new GameController(container.getGameState(), container.getGameService());   // inject Container
+        }
+        try { return cls.getDeclaredConstructor().newInstance(); }
+        catch (Exception e) { throw new RuntimeException(e); }
+    });
 
         Parent root = loader.load();
         Scene scene = new Scene(root);

@@ -1,43 +1,81 @@
+// src/main/java/com/game/arkanoid/services/PaddleService.java
 package com.game.arkanoid.services;
+
+import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.utils.Constants;
 
 
+/**
+ * Service class for handling paddle-related logic in the game.
+ * 
+ * @author bmgnxn
+ */
 public class PaddleService {
-     private final Paddle paddle;
 
-     public PaddleService(Paddle paddle) {
-        this.paddle = paddle;
+    public PaddleService() {}
+
+    /**
+     * Moves the paddle to the left for a single frame.
+     * 
+     * @param p paddle
+     * @param dt time delta for this frame (s)
+     * @param worldW world width used to clamp the paddle within bounds
+     */
+    public void moveLeft(Paddle p, double dt, double worldW) {
+        p.setVelocity(-p.getSpeed(), 0);
+        p.update(dt);
+        clampWithin(p, worldW);
+        stop(p); // tránh drift sang frame sau
     }
 
-    public void moveLeft() {
-        double newX = paddle.getX() - paddle.getSpeed();
-        if (newX < 0) {
-            newX = 0;
-        }
-        paddle.setX(newX);
+    /**
+     * Moves the paddle to the right for a single frame.
+     * 
+     * @param p paddle
+     * @param dt time delta for this frame (s)
+     * @param worldW world width used to clamp the paddle within bounds
+     */
+    public void moveRight(Paddle p, double dt, double worldW) {
+        p.setVelocity(p.getSpeed(), 0);
+        p.update(dt);
+        clampWithin(p, worldW);
+        stop(p);
     }
 
-    public void moveRight() {
-        double newX = paddle.getX() + paddle.getSpeed();
-       
-        if (newX + paddle.getWidth() > Constants.GAME_WIDTH) {
-            newX = Constants.GAME_WIDTH - paddle.getWidth();
+    /**
+     * Clamps the paddle's horizontal position so it stays within the playfield.
+     *
+     * @param p      paddle to clamp
+     * @param worldW world width used as the right boundary (left boundary is 0)
+     */
+    public void clampWithin(Paddle p, double worldW) {
+        if (p.getX() < 0) {
+            p.setX(0);
         }
-        paddle.setX(newX);
-    }
-    public void scaleSpeed(double factor) {
-        if (factor > 0) {
-            paddle.setSpeed(paddle.getSpeed() * factor);
+        double maxX = worldW - p.getWidth();
+        if (p.getX() > maxX) {
+            p.setX(maxX);
         }
     }
-    public void reset() {
-        paddle.setX(Constants.GAME_WIDTH/2-Constants.PADDLE_WIDTH/2);
-        paddle.setY(Constants.GAME_HEIGHT - 50);
-        paddle.setWidth(Constants.PADDLE_WIDTH);
-        paddle.setSpeed(Constants.PADDLE_SPEED);
+
+    /**
+     * Stop paddle.
+     * @param p paddle to stop
+     */
+    public void stop(Paddle p) { 
+        p.setVelocity(0, 0); 
     }
-    public Paddle getPaddle() {
-        return paddle;
+
+    /** 
+     * Scale the width (power-ups and shi).
+     * @param p paddle to scale
+     * @param factor scale
+     * @param worldW world width used to clamp the paddle after scaling
+     */
+    public void scaleWidth(Paddle p, double factor, double worldW) {
+        p.setWidthClamped(p.getWidth() * factor);
+        clampWithin(p, worldW);
     }
+
 }
