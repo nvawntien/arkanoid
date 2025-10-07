@@ -1,6 +1,5 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.container.Container;
 import com.game.arkanoid.models.*;
 import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.view.*;
@@ -22,8 +21,8 @@ public final class GameController {
 
     // DI / game core
 
-    private GameService game;
-    private GameState state;
+    private GameService gameService;
+    private GameState gameState;
 
     // Renderers (own JavaFX nodes)
     private BallRenderer ballRenderer;
@@ -31,24 +30,24 @@ public final class GameController {
 
     // Game loop
     private AnimationTimer loop;
-    public GameController(GameState state, GameService game) {
-        this.game = game;
-        this.state = state;
+    public GameController(GameState gameState, GameService gameService) {
+        this.gameState = gameState;
+        this.gameService = gameService;
     }
 
     @FXML
     public void initialize() {
-        // 2) Create renderers once (Pane is ready here)
-        paddleRenderer = new PaddleRenderer(gamePane, state.paddle);
-        ballRenderer   = new BallRenderer(gamePane, state.ball);
+        //  Create renderers once (Pane is ready here)
+        paddleRenderer = new PaddleRenderer(gamePane, gameState.paddle);
+        ballRenderer   = new BallRenderer(gamePane, gameState.ball);
 
-        // 3) Input wiring
+        //  Input wiring
         gamePane.setOnKeyPressed(e -> activeKeys.add(e.getCode()));
         gamePane.setOnKeyReleased(e -> activeKeys.remove(e.getCode()));
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus); // ensure pane receives key events
 
-        // 4) Start the loop on the FX thread
+        //  Start the loop on the FX thread
         loop = new AnimationTimer() {
             long last = -1;
             @Override public void handle(long now) {
@@ -60,13 +59,14 @@ public final class GameController {
                 InputState in = readInput();
 
                 // Advance game logic (no JavaFX types inside)
-                game.update(state, in, dt, gamePane.getWidth(), gamePane.getHeight());
+                gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
 
                 // Render: sync model -> nodes
-                paddleRenderer.render(state.paddle);
-                ballRenderer.render(state.ball);
+                paddleRenderer.render(gameState.paddle);
+                ballRenderer.render(gameState.ball);
             }
         };
+
         loop.start();
     }
 
@@ -83,5 +83,4 @@ public final class GameController {
     public void stop() {
         if (loop != null) loop.stop();
     }
-
 }
