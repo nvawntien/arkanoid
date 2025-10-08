@@ -74,14 +74,14 @@ public final class GameService {
 
         //   TODO: ball–brick collisions --> update s.score, remove bricks
         //    (use a CollisionService that iterates s.bricks)
-        Iterator<Brick> it = s.bricks.iterator();
+        Iterator<Brick> it = gameState.bricks.iterator();
         // 4) Ball–Brick collision
-        for (Brick brick : s.bricks) {
+        for (Brick brick : gameState.bricks) {
 
-            if (ballSvc.checkCollision(s.ball, brick) && !brick.isDestroyed()) {
-                ballSvc.bounceOffAABB(s.ball, brick);
+            if (ballSvc.checkCollision(gameState.ball, brick) && !brick.isDestroyed()) {
+                ballSvc.bounceOffAABB(gameState.ball, brick);
                 boolean destroyed = bricksSvc.handleBrickHit(brick);
-                if (destroyed) s.score += 100;
+                if (destroyed) gameState.score += 100;
                     break; // chỉ xử lý 1 brick mỗi frame
             }
         }

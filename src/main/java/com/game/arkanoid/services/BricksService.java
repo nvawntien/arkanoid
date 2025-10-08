@@ -20,8 +20,8 @@ public List<Brick> createBricksFromLayout(int[][] layout) {
             for (int col = 0 ; col < layout[0].length ; col++ ) {
                 int brickHealth = layout[row][col];
                 if (brickHealth > 0) {
-                    double brickX = col * (Constants.BRICK_WIDTH + 5) + 60;
-                    double brickY = row * (Constants.BRICK_HEIGHT + 5) + 50;
+                    double brickX = col * (Constants.BRICK_WIDTH);
+                    double brickY = row * (Constants.BRICK_HEIGHT) + 50;
                     createdBricks.add(new Brick(brickX, brickY, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, brickHealth));
                 }
             }

@@ -38,9 +38,9 @@ public final class GameController {
     @FXML
     public void initialize() {
         // 2) Create renderers once (Pane is ready here)
-        paddleRenderer = new PaddleRenderer(gamePane, state.paddle);
-        ballRenderer   = new BallRenderer(gamePane, state.ball);
-        bricksRenderer = new BricksRenderer(gamePane, state.bricks);
+        paddleRenderer = new PaddleRenderer(gamePane, gameState.paddle);
+        ballRenderer   = new BallRenderer(gamePane, gameState.ball);
+        bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
 
         //  Input wiring
         gamePane.setOnKeyPressed(e -> activeKeys.add(e.getCode()));
@@ -63,9 +63,9 @@ public final class GameController {
                 gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
 
                 // Render: sync model -> nodes
-                paddleRenderer.render(state.paddle);
-                ballRenderer.render(state.ball);
-                bricksRenderer.render(state.bricks);
+                paddleRenderer.render(gameState.paddle);
+                ballRenderer.render(gameState.ball);
+                bricksRenderer.render(gameState.bricks);
             }
         };
 

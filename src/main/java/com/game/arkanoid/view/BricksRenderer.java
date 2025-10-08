@@ -2,7 +2,6 @@ package com.game.arkanoid.view;
 
 import com.game.arkanoid.models.Brick;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.HashMap;
