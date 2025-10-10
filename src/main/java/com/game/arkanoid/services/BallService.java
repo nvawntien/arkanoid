@@ -48,15 +48,15 @@ public class BallService {
      */
     public void bounceWorld(Ball ball, double worldW, double worldH) {
         double r = ball.getRadius();
-        if (ball.getCenterX() - r < 0) {
-            ball.setCenter(r, ball.getCenterY());
+        if (ball.getCenterX() - r < 22) {
+            ball.setCenter(r + 22, ball.getCenterY());
             ball.setVelocity(Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
-        } else if (ball.getCenterX() + r > worldW) {
-            ball.setCenter(worldW - r, ball.getCenterY());
+        } else if (ball.getCenterX() + r > worldW - 22) {
+            ball.setCenter(worldW - 22 - r, ball.getCenterY());
             ball.setVelocity(-Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
         }
-        if (ball.getCenterY() - r < 0) {
-            ball.setCenter(ball.getCenterX(), r);
+        if (ball.getCenterY() - r < 150 + 22) {
+            ball.setCenter(ball.getCenterX(), r + 150 + 22);
             ball.setVelocity(ball.getDx(), Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION);
         }
     }

@@ -50,10 +50,10 @@ public class PaddleService {
      * @param worldW world width used as the right boundary (left boundary is 0)
      */
     public void clampWithin(Paddle paddle, double worldW) {
-        if (paddle.getX() < 0) {
-            paddle.setX(0);
+        if (paddle.getX() < 22) {
+            paddle.setX(22);
         }
-        double maxX = worldW - paddle.getWidth();
+        double maxX = worldW - paddle.getWidth()-22;
         if (paddle.getX() > maxX) {
             paddle.setX(maxX);
         }
