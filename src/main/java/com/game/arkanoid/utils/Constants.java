@@ -1,5 +1,7 @@
 package com.game.arkanoid.utils;
 
+import javafx.scene.image.Image;
+
 /**
  * Game constants.
  * 
@@ -7,11 +9,11 @@ package com.game.arkanoid.utils;
  */
 public class Constants {
     // Game scene size
-    public static final double GAME_WIDTH  = 800.0;
-    public static final double GAME_HEIGHT = 600.0;
+    public static final double GAME_WIDTH  = 600.0;
+    public static final double GAME_HEIGHT = 800.0;
 
     // Ball constants
-    public static final double BALL_RADIUS = 9.1;
+    public static final double BALL_RADIUS = 5.0;
     public static final double BALL_SPEED  = 7.0;      // px/s launch & nominal speed
     public static final double MIN_BALL_ANGLE = 25.0;    // degrees (right-most)
     public static final double MAX_BALL_ANGLE = 155.0;   // degrees (left-most)
@@ -21,7 +23,7 @@ public class Constants {
 
     // Paddle constants
     public static final double PADDLE_WIDTH  = 150.0;
-    public static final double PADDLE_HEIGHT = 14.0;
+    public static final double PADDLE_HEIGHT = 20.0;
     public static final double PADDLE_SPEED  = 10.0;     // px per (dt unit); tune as needed
     public static final double MIN_PADDLE_WIDTH = 80.0;
     public static final double MAX_PADDLE_WIDTH = 180.0;
@@ -29,12 +31,11 @@ public class Constants {
     public static final double BALL_SPAWN_OFFSET = 0.5;  // gap above paddle when docking
 
     // Brick constants
-    public static final double BRICK_WIDTH   = 20.0;
-    public static final double BRICK_HEIGHT  = 20.0;
+    public static final double BRICK_WIDTH   = 43.0;
+    public static final double BRICK_HEIGHT  = 21.0;
     public static final double BRICK_SPACING = 5.0;
     public static final int BRICK_ROWS = 8;
-    public static final int BRICK_COLS = 10;
-
+    public static final int BRICK_COLS = 13;
 
     // HUD constants
 
