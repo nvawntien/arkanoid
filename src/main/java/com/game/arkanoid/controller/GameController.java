@@ -37,6 +37,7 @@ public final class GameController {
 
     @FXML
     public void initialize() {
+        
         // 2) Create renderers once (Pane is ready here)
         paddleRenderer = new PaddleRenderer(gamePane, gameState.paddle);
         ballRenderer   = new BallRenderer(gamePane, gameState.ball);
