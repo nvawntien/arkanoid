@@ -16,12 +16,12 @@ public class BricksService {
 public List<Brick> createBricksFromLayout(int[][] layout) {
     List<Brick> createdBricks = new ArrayList<>();
     
-        for (int row = 0 ; row < layout.length ; row ++) {
-            for (int col = 0 ; col < layout[0].length ; col++ ) {
+        for (int row = 0 ; row < Constants.BRICK_ROWS ; row ++) {
+            for (int col = 0 ; col < Constants.BRICK_COLS; col++ ) {
                 int brickHealth = layout[row][col];
                 if (brickHealth > 0) {
-                    double brickX = col * (Constants.BRICK_WIDTH);
-                    double brickY = row * (Constants.BRICK_HEIGHT) + 50;
+                    double brickX = col * (Constants.BRICK_WIDTH)+22;
+                    double brickY = row * (Constants.BRICK_HEIGHT) + 172;
                     createdBricks.add(new Brick(brickX, brickY, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, brickHealth));
                 }
             }

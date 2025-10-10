@@ -1,29 +1,10 @@
 .gamePane {
     -fx-background-color: #0b0f1a;
-    -fx-border-color: #2e77ff;
-    -fx-border-width: 3;
+   /* -fx-border-color: rgba(46, 119, 255, 1);
+    -fx-border-width: 3;*/
 }
 
 .paddle { -fx-fill: #e6e6e6; }
 .ball   { -fx-fill: #e6e6e6; }
 
-.brick-style {
-    -fx-stroke: black; 
-    -fx-stroke-width: 1;
-}
-
-.brick-1 {
-    -fx-fill: #a0e8f0; 
-}
-
-.brick-2 {
-    -fx-fill: #3498db; 
-}
-
-.brick-3 {
-    -fx-fill: #f1c40f; 
-}
-
-.brick-4 {
-    -fx-fill: #e74c3c; 
-}
+.brick-style {}
