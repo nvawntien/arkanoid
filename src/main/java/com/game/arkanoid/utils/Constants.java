@@ -42,4 +42,8 @@ public class Constants {
     public static final int DEFAULT_SCORE = 0;
     public static final int DEFAULT_LIVES = 3;
     public static final int DEFAULT_LEVEL = 1;
+
+    // Time -related
+
+    public static final double TIME_SCALE = 10_000_000.0;
 }
