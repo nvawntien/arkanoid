@@ -27,6 +27,6 @@ public class Brick extends GameObject {
     public boolean isDestroyed() {
         return health <= 0;
     }
-    
-   
+
+
 }

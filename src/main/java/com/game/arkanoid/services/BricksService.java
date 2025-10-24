@@ -8,14 +8,14 @@ import com.game.arkanoid.utils.Constants;
 public class BricksService {
 
     public BricksService () {}
-/* 
-*tạo 1 mảng các brick được đọc vào qua mảng 2 chiều layout
-* có thể cho mỗi loại brick 1 màu ...
-* hơi bngu =) @tuan
-*/ 
-public List<Brick> createBricksFromLayout(int[][] layout) {
-    List<Brick> createdBricks = new ArrayList<>();
-    
+    /*
+     *tạo 1 mảng các brick được đọc vào qua mảng 2 chiều layout
+     * có thể cho mỗi loại brick 1 màu ...
+     * hơi bngu =) @tuan
+     */
+    public List<Brick> createBricksFromLayout(int[][] layout) {
+        List<Brick> createdBricks = new ArrayList<>();
+
         for (int row = 0 ; row < Constants.BRICK_ROWS ; row ++) {
             for (int col = 0 ; col < Constants.BRICK_COLS; col++ ) {
                 int brickHealth = layout[row][col];
@@ -27,12 +27,12 @@ public List<Brick> createBricksFromLayout(int[][] layout) {
             }
         }
         return createdBricks ;
-    
-}
-/*
- * hàm phá gạch
- */
-public boolean handleBrickHit(Brick brick) {
+
+    }
+    /*
+     * hàm phá gạch
+     */
+    public boolean handleBrickHit(Brick brick) {
         if (brick.isDestroyed()) {
             return false;
         }
@@ -41,12 +41,12 @@ public boolean handleBrickHit(Brick brick) {
             return true;
         }
         return false;
-}
-/*
- * you win ...
- */
-public boolean AllBricksDestroyed(List<Brick> currentBricks) {
+    }
+    /*
+     * you win ...
+     */
+    public boolean AllBricksDestroyed(List<Brick> currentBricks) {
         return currentBricks.stream().allMatch(Brick::isDestroyed);
-}    
-    
+    }
+
 }
