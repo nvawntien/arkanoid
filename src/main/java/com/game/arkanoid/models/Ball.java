@@ -58,17 +58,17 @@ public class Ball extends MovableObject {
 
     // --- Hình hộp bao (AABB) để kiểm va chạm đơn giản ---
 
-    public double left()   { 
-        return x - radius; 
+    public double left()   {
+        return x - radius;
     }
-    public double right()  { 
-        return x + radius; 
+    public double right()  {
+        return x + radius;
     }
-    public double top()    { 
-        return y - radius; 
+    public double top()    {
+        return y - radius;
     }
-    public double bottom() { 
-        return y + radius; 
+    public double bottom() {
+        return y + radius;
     }
 
 

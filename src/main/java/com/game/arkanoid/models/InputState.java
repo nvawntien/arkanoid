@@ -1,7 +1,7 @@
 package com.game.arkanoid.models;
 /**
  * Input state xới.
- * 
+ *
  * @author bmngxn
  */
 public final class InputState {
