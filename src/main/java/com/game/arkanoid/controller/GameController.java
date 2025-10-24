@@ -1,7 +1,6 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.models.GameState;
-import com.game.arkanoid.models.InputState;
+import com.game.arkanoid.models.*;
 import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.utils.Constants;
 import com.game.arkanoid.view.BallRenderer;
@@ -26,42 +25,34 @@ public final class GameController {
     private final GameService gameService;
     private final GameState gameState;
 
-    // Renderers
+    private GameService gameService;
+    private GameState gameState;
+
+    // Renderers (own JavaFX nodes)
     private BallRenderer ballRenderer;
     private PaddleRenderer paddleRenderer;
-
-    // Loop
+    private BricksRenderer bricksRenderer;
+    // Game loop
     private AnimationTimer loop;
-
     public GameController(GameState gameState, GameService gameService) {
-        this.gameService = gameService;
         this.gameState = gameState;
+        this.gameService = gameService;
     }
 
     @FXML
     public void initialize() {
-        // Create renderers on the pane
+        
+        // 2) Create renderers once (Pane is ready here)
         paddleRenderer = new PaddleRenderer(gamePane, gameState.paddle);
         ballRenderer   = new BallRenderer(gamePane, gameState.ball);
+        bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
 
-        // Initial layout once the pane has real size
-        Platform.runLater(() -> {
-            layoutInitial();
-            gamePane.requestFocus();
-            paddleRenderer.render(gameState.paddle);
-            ballRenderer.render(gameState.ball);
-        });
-
-        // Keep layout correct when window resizes
-        gamePane.widthProperty().addListener((o, ov, nv) -> layoutOnResize());
-        gamePane.heightProperty().addListener((o, ov, nv) -> layoutOnResize());
-
-        // Input wiring (HashSet for smooth polling)
+        //  Input wiring
         gamePane.setOnKeyPressed(e -> activeKeys.add(e.getCode()));
         gamePane.setOnKeyReleased(e -> activeKeys.remove(e.getCode()));
         gamePane.setFocusTraversable(true);
 
-        // Time-based main loop
+        //  Start the loop on the FX thread
         loop = new AnimationTimer() {
             long last = -1;
             @Override public void handle(long now) {
@@ -70,12 +61,17 @@ public final class GameController {
                 last = now;
 
                 InputState in = readInput();
+
+                // Advance game logic (no JavaFX types inside)
                 gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
 
+                // Render: sync model -> nodes
                 paddleRenderer.render(gameState.paddle);
                 ballRenderer.render(gameState.ball);
+                bricksRenderer.render(gameState.bricks);
             }
         };
+
         loop.start();
     }
 

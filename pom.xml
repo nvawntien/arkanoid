@@ -102,7 +102,13 @@
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
-    </dependency>  </dependencies>
+    </dependency>  
+                     <dependency>
+                       <groupId>eu.joaocosta</groupId>
+                       <artifactId>interim_sjs1_3</artifactId>
+                       <version>0.1.0</version>
+                     </dependency>
+                   </dependencies>
 
   <build>
     <plugins>

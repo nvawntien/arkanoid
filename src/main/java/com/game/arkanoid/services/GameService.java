@@ -1,6 +1,8 @@
 // services/GameService.java
 package com.game.arkanoid.services;
 
+import java.util.Iterator;
+
 import com.game.arkanoid.models.*;
 import com.game.arkanoid.utils.Constants;
 
@@ -10,14 +12,15 @@ import com.game.arkanoid.utils.Constants;
  * @author bmngxn
  */
 public final class GameService {
-    private final BallService ballSvc;
+     private final BallService ballSvc;
     private final PaddleService paddleSvc;
+    private final BricksService bricksSvc;
 
-    public GameService(BallService ballSvc, PaddleService paddleSvc) {
+    public GameService(BallService ballSvc, PaddleService paddleSvc, BricksService bricksSvc) {
         this.ballSvc = ballSvc;
         this.paddleSvc = paddleSvc;
+        this.bricksSvc = bricksSvc;
     }
-
     /**
      * Advance one frame of game logic.
      * @param in     input state for this frame
@@ -25,52 +28,63 @@ public final class GameService {
      * @param worldW world width (e.g., pane width)
      * @param worldH world height (e.g., pane height)
      */
-    public void update(GameState s, InputState in, double dt, double worldW, double worldH) {
-        if (!s.running) return;
+    public void update(GameState gameState, InputState in, double dt, double worldW, double worldH) {
+        if (!gameState.running) return;
 
-        if (in.pause) s.paused = !s.paused;
-        if (s.paused) return;
+        if (in.pause) gameState.paused = !gameState.paused;
+        if (gameState.paused) return;
 
-        final double scaledDt = dt * s.timeScale;
+        final double scaledDt = dt * gameState.timeScale;
 
-        // 1) Input -> paddle
+        // Input -> paddle
         if (in.left) {
-            paddleSvc.moveLeft(s.paddle,  scaledDt, worldW);
+            paddleSvc.moveLeft(gameState.paddle,  scaledDt, worldW);
         }
         if (in.right) {
-            paddleSvc.moveRight(s.paddle, scaledDt, worldW);
+            paddleSvc.moveRight(gameState.paddle, scaledDt, worldW);
         }
-        // 1.5) KEEP BALL DOCKED TO PADDLE WHEN NOT MOVING  ⬇⬇⬇
-        if (!s.ball.isMoving()) {
-            ballSvc.dockToPaddle(s.ball, s.paddle);
+        //  KEEP BALL DOCKED TO PADDLE WHEN NOT MOVING  ⬇⬇⬇
+        if (!gameState.ball.isMoving()) {
+            ballSvc.dockToPaddle(gameState.ball, gameState.paddle);
         }
         // (do this BEFORE launch/physics so it rides the paddle cleanly)
-        if (in.launch && !s.ball.isMoving()) {
-            ballSvc.launch(s.ball);
+        if (in.launch && !gameState.ball.isMoving()) {
+            ballSvc.launch(gameState.ball);
         }
 
-        // 2) Ball physics
-        ballSvc.step(s.ball, scaledDt);
-        ballSvc.bounceWorld(s.ball, worldW, worldH);
+        //  Ball physics
+        ballSvc.step(gameState.ball, scaledDt);
+        ballSvc.bounceWorld(gameState.ball, worldW, worldH);
 
-        // 3) Ball–Paddle collision (basic)
-        if (ballSvc.intersectsAABB(s.ball, s.paddle)) {
-            ballSvc.bounceOffAABB(s.ball, s.paddle);
-            s.ball.setCenter(s.ball.getCenterX(), s.paddle.getY() - s.ball.getRadius() - Constants.BALL_NUDGE);
+        // Ball–Paddle collision (basic)
+        if (ballSvc.intersectsAABB(gameState.ball, gameState.paddle)) {
+            ballSvc.bounceOffAABB(gameState.ball, gameState.paddle);
+            gameState.ball.setCenter(gameState.ball.getCenterX(), gameState.paddle.getY() - gameState.ball.getRadius() - Constants.BALL_NUDGE);
         }   
 
-        // 4) Out of bounds (lose life)
-        if (ballSvc.fellBelow(s.ball, worldH)) {
-            s.lives--;
-            s.resetForLife();
-            ballSvc.resetOnPaddle(s.ball, s.paddle);
-            if (s.lives < 0) {
-                s.running = false; // game over
+        //  Out of bounds (lose life)
+        if (ballSvc.fellBelow(gameState.ball, worldH)) {
+            gameState.lives--;
+            gameState.resetForLife();
+            ballSvc.resetOnPaddle(gameState.ball, gameState.paddle);
+            if (gameState.lives < 0) {
+                gameState.running = false; // game over
             }
         }
 
         //   TODO: ball–brick collisions --> update s.score, remove bricks
         //    (use a CollisionService that iterates s.bricks)
+        Iterator<Brick> it = gameState.bricks.iterator();
+        // 4) Ball–Brick collision
+        for (Brick brick : gameState.bricks) {
+
+            if (ballSvc.checkCollision(gameState.ball, brick) && !brick.isDestroyed()) {
+                ballSvc.bounceOffAABB(gameState.ball, brick);
+                boolean destroyed = bricksSvc.handleBrickHit(brick);
+                if (destroyed) gameState.score += 100;
+                    break; // chỉ xử lý 1 brick mỗi frame
+            }
+        }
 
     }
 }

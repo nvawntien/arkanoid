@@ -1,7 +1,5 @@
 package com.game.arkanoid.models;
 
-import com.game.arkanoid.utils.Constants;
-
 public class Ball extends MovableObject {
     private double radius;
     private boolean isMoving;
