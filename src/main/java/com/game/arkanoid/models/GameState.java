@@ -14,7 +14,7 @@ public final class GameState {
     public final Paddle paddle;
 
     // World content (fill out as you add features)
-    // public final List<Brick> bricks = new ArrayList<>(); // define Brick later
+     public final List<Brick> bricks = new ArrayList<>(); // define Brick later
 
     public int score = Constants.DEFAULT_SCORE;
     public int lives = Constants.DEFAULT_LIVES;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 
@@ -7,6 +8,9 @@
 
     <!-- The play area; your GameController adds paddle + ball here -->
     <children>
-        <Pane fx:id="gamePane" prefHeight="600" prefWidth="800" styleClass="gamePane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+        <Pane fx:id="gameMenu" prefHeight="600" prefWidth="800" styleClass="gameMenu" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Button layoutX="119.0" layoutY="488.0" mnemonicParsing="false" text="Button" />
+         </children></Pane>
     </children>
 </AnchorPane>
