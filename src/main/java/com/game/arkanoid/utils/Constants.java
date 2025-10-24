@@ -1,10 +1,8 @@
 package com.game.arkanoid.utils;
 
-import javafx.scene.image.Image;
-
 /**
  * Game constants.
- * 
+ *
  * @author bmngxn
  */
 public class Constants {
@@ -17,7 +15,7 @@ public class Constants {
     public static final double BALL_SPEED  = 7.0;      // px/s launch & nominal speed
     public static final double MIN_BALL_ANGLE = 25.0;    // degrees (right-most)
     public static final double MAX_BALL_ANGLE = 155.0;   // degrees (left-most)
-    public static final double BALL_RESTITUTION = 0.98;  // energy kept on bounce (0..1)
+    public static final double BALL_RESTITUTION = 1;  // energy kept on bounce (0..1)
     public static final double BALL_NUDGE = 0.5;         // px to separate after paddle hit
     public static final double BALL_LAUNCH_ANGLE = 135.0; // degrees (straight up)
 
@@ -37,7 +35,15 @@ public class Constants {
     public static final int BRICK_ROWS = 8;
     public static final int BRICK_COLS = 13;
 
-    // HUD constants
+    // Power-ups
+    public static final double POWER_UP_WIDTH = 32.0;
+    public static final double POWER_UP_HEIGHT = 16.0;
+    public static final double POWER_UP_FALL_SPEED = 8.0;
+    public static final double POWER_UP_DROP_CHANCE = 0.25;
+    public static final double POWER_UP_DURATION = 12.0;
+    public static final double POWER_UP_EXPAND_FACTOR = 1.4;
+    public static final double POWER_UP_SHRINK_FACTOR = 0.7;
+    public static final double POWER_UP_SLOW_MOTION_SCALE = 0.6;
 
     public static final int DEFAULT_SCORE = 0;
     public static final int DEFAULT_LIVES = 3;

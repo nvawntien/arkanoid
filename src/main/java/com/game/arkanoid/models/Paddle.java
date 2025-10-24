@@ -13,32 +13,32 @@ public class Paddle extends MovableObject {
         this.speed = speed;
         this.minWidth = Constants.MIN_PADDLE_WIDTH;
         this.maxWidth = Constants.MAX_PADDLE_WIDTH;
-        this.dx = 0; 
+        this.dx = 0;
         this.dy = 0;                                // ONLY MOVES HORIZONTALLY --> dy = 0 
     }
 
     @Override
     public void update(double dt) {
-        move(dt); 
+        move(dt);
     }
 
     // getters and setters
 
-    public double getSpeed() { 
-        return speed; 
+    public double getSpeed() {
+        return speed;
     }
-    public void setSpeed(double speed) { 
-        this.speed = speed; 
+    public void setSpeed(double speed) {
+        this.speed = speed;
     }
 
-    public double getMinWidth() { 
-        return minWidth; 
+    public double getMinWidth() {
+        return minWidth;
     }
-    public double getMaxWidth() { 
-        return maxWidth; 
+    public double getMaxWidth() {
+        return maxWidth;
     }
-    public void setWidthBounds(double minW, double maxW) { 
-        this.minWidth = minW; this.maxWidth = maxW; 
+    public void setWidthBounds(double minW, double maxW) {
+        this.minWidth = minW; this.maxWidth = maxW;
     }
 
     /** Thay đổi width có clamp theo min/max. */

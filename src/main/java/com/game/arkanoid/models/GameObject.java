@@ -3,7 +3,7 @@ package com.game.arkanoid.models;
 /**
  * Abstract class representing objects in game, 
  * characterized by x, y, width, height xơii.
- * 
+ *
  * @author bmngxn
  */
 public abstract class GameObject {
@@ -18,12 +18,12 @@ public abstract class GameObject {
      * @param h object height
      */
     protected GameObject(double x, double y, double w, double h) {
-        this.x = x; 
-        this.y = y; 
-        this.width = w; 
+        this.x = x;
+        this.y = y;
+        this.width = w;
         this.height = h;
     }
-    
+
     /**
      * Abstract method for update object coordinate.
      * @param dt Time delta
