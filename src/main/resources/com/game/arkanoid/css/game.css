@@ -8,3 +8,46 @@
 .ball   { -fx-fill: #e6e6e6; }
 
 .brick-style {}
+
+.menu-root {
+    -fx-background-color: #0b0f1a;
+    -fx-padding: 40;
+}
+
+.menu-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+}
+
+.menu-subtitle {
+    -fx-text-fill: #b3b3b3;
+    -fx-font-size: 18px;
+}
+
+.menu-button, .menu-toggle {
+    -fx-pref-width: 240px;
+    -fx-font-size: 18px;
+    -fx-background-color: #1c2a4a;
+    -fx-text-fill: #f0f0f0;
+    -fx-background-radius: 6;
+    -fx-padding: 10 20 10 20;
+}
+
+.menu-button:hover, .menu-toggle:hover {
+    -fx-background-color: #2f4f7f;
+}
+
+.power-up {
+    -fx-arc-width: 8;
+    -fx-arc-height: 8;
+    -fx-stroke: rgba(255, 255, 255, 0.55);
+    -fx-stroke-width: 1;
+}
+
+.power-up-expand { -fx-fill: #4caf50; }
+.power-up-shrink { -fx-fill: #f44336; }
+.power-up-multi  { -fx-fill: #ffc107; }
+.power-up-life   { -fx-fill: #03a9f4; }
+.power-up-slow   { -fx-fill: #9c27b0; }
+
