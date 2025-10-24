@@ -1,93 +1,126 @@
-// services/GameService.java
 package com.game.arkanoid.services;
 
+import com.game.arkanoid.models.Ball;
+import com.game.arkanoid.models.Brick;
+import com.game.arkanoid.models.GameState;
+import com.game.arkanoid.models.InputState;
+import com.game.arkanoid.utils.Constants;
+import com.game.arkanoid.models.PowerUp;
 import java.util.Iterator;
 
-import com.game.arkanoid.models.*;
-import com.game.arkanoid.utils.Constants;
-
-/**
- * Game Service.
- * 
- * @author bmngxn
- */
 public final class GameService {
-     private final BallService ballSvc;
+
+    private final BallService ballSvc;
     private final PaddleService paddleSvc;
     private final BricksService bricksSvc;
+    private final PowerUpService powerUpSvc;
 
-    public GameService(BallService ballSvc, PaddleService paddleSvc, BricksService bricksSvc) {
+    public GameService(BallService ballSvc, PaddleService paddleSvc, BricksService bricksSvc, PowerUpService powerUpSvc) {
         this.ballSvc = ballSvc;
         this.paddleSvc = paddleSvc;
         this.bricksSvc = bricksSvc;
+        this.powerUpSvc = powerUpSvc;
     }
-    /**
-     * Advance one frame of game logic.
-     * @param in     input state for this frame
-     * @param dt     delta time in seconds
-     * @param worldW world width (e.g., pane width)
-     * @param worldH world height (e.g., pane height)
-     */
-    public void update(GameState gameState, InputState in, double dt, double worldW, double worldH) {
-        if (!gameState.running) return;
 
-        if (in.pause) gameState.paused = !gameState.paused;
-        if (gameState.paused) return;
+    public void update(GameState state, InputState in, double dt, double worldW, double worldH) {
+        if (!state.running) {
+            return;
+        }
+        if (state.paused) {
+            return;
+        }
 
-        final double scaledDt = dt * gameState.timeScale;
+        final double scaledDt = dt * state.timeScale;
 
-        // Input -> paddle
+        handleInput(state, in, scaledDt, worldW);
+        updatePrimaryBall(state, scaledDt, worldW, worldH);
+        updateSecondaryBalls(state, scaledDt, worldW, worldH);
+        powerUpSvc.update(state, scaledDt, worldW, worldH);
+    }
+
+    private void handleInput(GameState state, InputState in, double dt, double worldW) {
         if (in.left) {
-            paddleSvc.moveLeft(gameState.paddle,  scaledDt, worldW);
+            paddleSvc.moveLeft(state.paddle, dt, worldW);
         }
         if (in.right) {
-            paddleSvc.moveRight(gameState.paddle, scaledDt, worldW);
-        }
-        //  KEEP BALL DOCKED TO PADDLE WHEN NOT MOVING  ⬇⬇⬇
-        if (!gameState.ball.isMoving()) {
-            ballSvc.dockToPaddle(gameState.ball, gameState.paddle);
-        }
-        // (do this BEFORE launch/physics so it rides the paddle cleanly)
-        if (in.launch && !gameState.ball.isMoving()) {
-            ballSvc.launch(gameState.ball);
+            paddleSvc.moveRight(state.paddle, dt, worldW);
         }
 
-        //  Ball physics
-        ballSvc.step(gameState.ball, scaledDt);
-        ballSvc.bounceWorld(gameState.ball, worldW, worldH);
-
-        // Ball–Paddle collision (basic)
-        if (ballSvc.intersectsAABB(gameState.ball, gameState.paddle)) {
-            ballSvc.bounceOffAABB(gameState.ball, gameState.paddle);
-            gameState.ball.setCenter(gameState.ball.getCenterX(), gameState.paddle.getY() - gameState.ball.getRadius() - Constants.BALL_NUDGE);
-        }   
-
-        //  Out of bounds (lose life)
-        if (ballSvc.fellBelow(gameState.ball, worldH)) {
-            gameState.lives--;
-            gameState.resetForLife();
-            ballSvc.resetOnPaddle(gameState.ball, gameState.paddle);
-            if (gameState.lives < 0) {
-                gameState.running = false; // game over
-            }
+        if (!state.ball.isMoving()) {
+            ballSvc.dockToPaddle(state.ball, state.paddle);
         }
-
-        //   TODO: ball–brick collisions --> update s.score, remove bricks
-        //    (use a CollisionService that iterates s.bricks)
-        Iterator<Brick> it = gameState.bricks.iterator();
-        // 4) Ball–Brick collision
-        for (Brick brick : gameState.bricks) {
-
-            if (ballSvc.checkCollision(gameState.ball, brick) && !brick.isDestroyed()) {
-                ballSvc.bounceOffAABB(gameState.ball, brick);
-                boolean destroyed = bricksSvc.handleBrickHit(brick);
-                if (destroyed) gameState.score += 100;
-                    break; // chỉ xử lý 1 brick mỗi frame
-            }
+        if (in.launch && !state.ball.isMoving()) {
+            ballSvc.launch(state.ball);
         }
-
     }
 
+    private void updatePrimaryBall(GameState state, double dt, double worldW, double worldH) {
+        Ball ball = state.ball;
+        ballSvc.step(ball, dt);
+        ballSvc.bounceWorld(ball, worldW, worldH);
+        handlePaddleCollision(ball, state);
+        handleBrickCollisions(state, ball);
+
+        if (ballSvc.fellBelow(ball, worldH)) {
+            if (!state.extraBalls.isEmpty()) {
+                Ball replacement = state.extraBalls.remove(0);
+                copyBallState(replacement, state.ball);
+            } else {
+                state.lives--;
+                state.resetForLife();
+                state.extraBalls.clear();
+                ballSvc.resetOnPaddle(state.ball, state.paddle);
+                if (state.lives < 0) {
+                    state.running = false;
+                }
+            }
+        }
+    }
+
+    private void updateSecondaryBalls(GameState state, double dt, double worldW, double worldH) {
+        Iterator<Ball> iterator = state.extraBalls.iterator();
+        while (iterator.hasNext()) {
+            Ball extra = iterator.next();
+            ballSvc.step(extra, dt);
+            ballSvc.bounceWorld(extra, worldW, worldH);
+            handlePaddleCollision(extra, state);
+            handleBrickCollisions(state, extra);
+            if (ballSvc.fellBelow(extra, worldH)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    private void handlePaddleCollision(Ball ball, GameState state) {
+        if (ballSvc.intersectsAABB(ball, state.paddle)) {
+            ballSvc.bounceOffAABB(ball, state.paddle);
+            ball.setCenter(ball.getCenterX(), state.paddle.getY() - ball.getRadius() - Constants.BALL_NUDGE);
+        }
+    }
+
+    private void handleBrickCollisions(GameState state, Ball ball) {
+        for (Brick brick : state.bricks) {
+            if (brick.isDestroyed()) {
+                continue;
+            }
+            if (ballSvc.checkCollision(ball, brick)) {
+                ballSvc.bounceOffAABB(ball, brick);
+                boolean destroyed = bricksSvc.handleBrickHit(brick);
+                if (destroyed) {
+                    state.score += 100;
+                    PowerUp spawned = powerUpSvc.spawnPowerUpIfAny(brick);
+                    if (spawned != null) {
+                        state.powerUps.add(spawned);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    private void copyBallState(Ball source, Ball target) {
+        target.setCenter(source.getCenterX(), source.getCenterY());
+        target.setVelocity(source.getDx(), source.getDy());
+        target.setMoving(source.isMoving());
+    }
 }
-
-

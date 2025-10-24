@@ -1,17 +1,17 @@
-// Main.java
 package com.game.arkanoid.app;
 
+<<<<<<< HEAD
 import com.game.arkanoid.container.Container;
 import com.game.arkanoid.controller.*;
+=======
+import com.game.arkanoid.view.SceneNavigator;
+>>>>>>> a9eee5a2bca1284950d0d4fcf12faa800d6661e0
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-
     @Override
+<<<<<<< HEAD
     public void start(Stage stage) throws Exception {
 
         Container container = new Container();
@@ -29,6 +29,13 @@ public class Main extends Application {
         Parent root = loader.load();
         Scene scene = new Scene(root);
         stage.setScene(scene);
+=======
+    public void start(Stage stage) {
+        stage.setTitle("Arkanoid");
+        stage.setResizable(false);
+        SceneNavigator navigator = new SceneNavigator(stage);
+        navigator.showMenu();
+>>>>>>> a9eee5a2bca1284950d0d4fcf12faa800d6661e0
         stage.show();
     }
 
