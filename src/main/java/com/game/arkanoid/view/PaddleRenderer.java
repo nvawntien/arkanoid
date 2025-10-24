@@ -7,7 +7,7 @@ import javafx.scene.shape.Rectangle;
 
 /**
  * Paddle renderer.
- *
+ * 
  * @author bmngxn
  */
 public final class PaddleRenderer implements Renderer<Paddle> {
@@ -15,7 +15,7 @@ public final class PaddleRenderer implements Renderer<Paddle> {
 
     public PaddleRenderer(Pane pane, Paddle p) {
         this.node = new Rectangle(p.getWidth(), p.getHeight());
-        this.node.getStyleClass().add("paddle");
+        this.node.getStyleClass().add("paddle");     
         pane.getChildren().add(this.node);
         render(p);                                    // initial sync
     }

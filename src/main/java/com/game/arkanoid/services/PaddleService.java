@@ -8,7 +8,7 @@ import com.game.arkanoid.utils.Constants;
 
 /**
  * Service class for handling paddle-related logic in the game.
- *
+ * 
  * @author bmgnxn
  */
 public class PaddleService {
@@ -17,7 +17,7 @@ public class PaddleService {
 
     /**
      * Moves the paddle to the left for a single frame.
-     *
+     * 
      * @param paddle paddle
      * @param dt time delta for this frame (s)
      * @param worldW world width used to clamp the paddle within bounds
@@ -31,7 +31,7 @@ public class PaddleService {
 
     /**
      * Moves the paddle to the right for a single frame.
-     *
+     * 
      * @param paddle Paddle
      * @param dt time delta for this frame (s)
      * @param worldW world width used to clamp the paddle within bounds.
@@ -67,7 +67,7 @@ public class PaddleService {
         paddle.setVelocity(0, 0);
     }
 
-    /**
+    /** 
      * Scale the width (power-ups and shi).
      * @param paddle paddle to scale
      * @param factor scale
