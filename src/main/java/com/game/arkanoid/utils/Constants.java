@@ -23,7 +23,7 @@ public class Constants {
 
     // Paddle constants
     public static final double PADDLE_WIDTH  = 150.0;
-    public static final double PADDLE_HEIGHT = 14.0;
+    public static final double PADDLE_HEIGHT = 20.0;
     public static final double PADDLE_SPEED  = 10.0;     // px per (dt unit); tune as needed
     public static final double MIN_PADDLE_WIDTH = 80.0;
     public static final double MAX_PADDLE_WIDTH = 180.0;
