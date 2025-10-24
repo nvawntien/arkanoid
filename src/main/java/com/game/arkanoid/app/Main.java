@@ -2,7 +2,7 @@
 package com.game.arkanoid.app;
 
 import com.game.arkanoid.container.Container;
-import com.game.arkanoid.controller.GameController;
+import com.game.arkanoid.controller.*;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,10 +17,10 @@ public class Main extends Application {
         Container container = new Container();
 
         // 2. Load FXML và inject controller
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/GameView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/MenuView.fxml"));
         loader.setControllerFactory(cls -> {
-        if (cls == GameController.class) {
-            return new GameController(container.getGameState(), container.getGameService());   // inject Container
+        if (cls == MenuController.class) {
+            return new MenuController( container.getMenuService());   // inject Container
         }
         try { return cls.getDeclaredConstructor().newInstance(); }
         catch (Exception e) { throw new RuntimeException(e); }

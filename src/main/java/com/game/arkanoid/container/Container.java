@@ -7,6 +7,7 @@ import com.game.arkanoid.utils.Constants;
 public final class Container {
     private final GameState state;
     private final GameService game;
+    private final MenuService menu;
 
     public Container() {
         Paddle paddle = new Paddle(
@@ -50,8 +51,10 @@ public final class Container {
 
         // Orchestrator
         this.game = new GameService(ballSvc, paddleSvc, bricksSvc);
+        this.menu = new MenuService();
     }
 
     public GameState getGameState() { return state; }
     public GameService getGameService() { return game; }
+    public MenuService getMenuService() { return menu; }
 }
