@@ -23,12 +23,8 @@ public final class GameService {
     }
 
     public void update(GameState state, InputState in, double dt, double worldW, double worldH) {
-        if (!state.running) {
-            return;
-        }
-        if (state.paused) {
-            return;
-        }
+        if (!state.running) return;
+        if (state.paused) return;
 
         final double scaledDt = dt * state.timeScale;
 
@@ -47,7 +43,7 @@ public final class GameService {
         }
 
         if (!state.ball.isMoving()) {
-            ballSvc.dockToPaddle(state.ball, state.paddle);
+            ballSvc.resetOnPaddle(state.ball, state.paddle);
         }
         if (in.launch && !state.ball.isMoving()) {
             ballSvc.launch(state.ball);
@@ -93,18 +89,17 @@ public final class GameService {
 
     private void handlePaddleCollision(Ball ball, GameState state) {
         if (ballSvc.intersectsAABB(ball, state.paddle)) {
-            ballSvc.bounceOffAABB(ball, state.paddle);
+            ballSvc.bounceOff(ball, state.paddle);
             ball.setCenter(ball.getCenterX(), state.paddle.getY() - ball.getRadius() - Constants.BALL_NUDGE);
         }
     }
 
     private void handleBrickCollisions(GameState state, Ball ball) {
         for (Brick brick : state.bricks) {
-            if (brick.isDestroyed()) {
-                continue;
-            }
-            if (ballSvc.checkCollision(ball, brick)) {
-                ballSvc.bounceOffAABB(ball, brick);
+            if (brick.isDestroyed()) continue;
+
+            if (ballSvc.intersectsAABB(ball, brick)) {
+                ballSvc.bounceOff(ball, brick);
                 boolean destroyed = bricksSvc.handleBrickHit(brick);
                 if (destroyed) {
                     state.score += 100;

@@ -53,15 +53,10 @@ public class BallService {
         );
     }
 
-    public void dockToPaddle(Ball ball, Paddle paddle) {
-        ball.setMoving(false);
-        ball.setVelocity(0, 0);
-        ball.setCenter(
-                paddle.getX() + paddle.getWidth() / 2.0,
-                paddle.getY() - ball.getRadius() - Constants.BALL_SPAWN_OFFSET
-        );
-    }
-
+    /**
+     * Handles bounce behavior when the ball collides with another object.
+     * Includes paddle motion influence for realistic deflection.
+     */
     public void bounceOff(Ball ball, GameObject other) {
         double oL = other.getX();
         double oT = other.getY();
@@ -82,8 +77,38 @@ public class BallService {
             ball.setCenter(oR + ball.getRadius() + Constants.BALL_NUDGE, ball.getY());
             ball.setVelocity(Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
         } else if (minPen == penTop) {
+            // --- Paddle collision with influence ---
             ball.setCenter(ball.getX(), oT - ball.getRadius() - Constants.BALL_NUDGE);
-            ball.setVelocity(ball.getDx(), -Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION);
+
+            double vx = ball.getDx();
+            double vy = -Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION;
+
+            if (other instanceof Paddle) {
+                Paddle paddle = (Paddle) other;
+                double paddleDx = paddle.getDx();
+
+                // Influence constant — tweak for responsiveness
+                final double influence = 0.35;
+
+                // Add paddle velocity influence
+                vx += paddleDx * influence;
+
+                // Normalize to keep overall speed consistent
+                double speed = Math.sqrt(vx * vx + vy * vy);
+                double scale = Constants.BALL_SPEED / speed;
+                vx *= scale;
+                vy *= scale;
+
+                // Clamp outgoing angle to stay within limits
+                double angle = Math.toDegrees(Math.atan2(-vy, vx));
+                angle = Math.max(Constants.MIN_BALL_ANGLE, Math.min(Constants.MAX_BALL_ANGLE, angle));
+
+                double rad = Math.toRadians(angle);
+                vx = Constants.BALL_SPEED * Math.cos(rad);
+                vy = -Constants.BALL_SPEED * Math.sin(rad);
+            }
+
+            ball.setVelocity(vx, vy);
         } else {
             ball.setCenter(ball.getX(), oB + ball.getRadius() + Constants.BALL_NUDGE);
             ball.setVelocity(ball.getDx(), Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION);
@@ -97,51 +122,6 @@ public class BallService {
         double oT = other.getY();
         double oR = oL + other.getWidth();
         double oB = oT + other.getHeight();
-        double cx = ball.getCenterX();
-        double cy = ball.getCenterY();
-        double nearestX = Math.max(oL, Math.min(cx, oR));
-        double nearestY = Math.max(oT, Math.min(cy, oB));
-        double ddx = cx - nearestX;
-        double ddy = cy - nearestY;
-        return ddx * ddx + ddy * ddy <= ball.getRadius() * ball.getRadius();
-    }
-
-    public void bounceOffAABB(Ball ball, GameObject other) {
-        double oL = other.getX();
-        double oT = other.getY();
-        double oR = oL + other.getWidth();
-        double oB = oT + other.getHeight();
-
-        double penLeft = Math.abs((ball.getCenterX() + ball.getRadius()) - oL);
-        double penRight = Math.abs(oR - (ball.getCenterX() - ball.getRadius()));
-        double penTop = Math.abs((ball.getCenterY() + ball.getRadius()) - oT);
-        double penBottom = Math.abs(oB - (ball.getCenterY() - ball.getRadius()));
-
-        double minPen = Math.min(Math.min(penLeft, penRight), Math.min(penTop, penBottom));
-
-        if (minPen == penLeft) {
-            ball.setCenter(oL - ball.getRadius() - Constants.BALL_NUDGE, ball.getCenterY());
-            ball.setVelocity(-Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
-        } else if (minPen == penRight) {
-            ball.setCenter(oR + ball.getRadius() + Constants.BALL_NUDGE, ball.getCenterY());
-            ball.setVelocity(Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
-        } else if (minPen == penTop) {
-            ball.setCenter(ball.getCenterX(), oT - ball.getRadius() - Constants.BALL_NUDGE);
-            ball.setVelocity(ball.getDx(), -Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION);
-        } else {
-            ball.setCenter(ball.getCenterX(), oB + ball.getRadius() + Constants.BALL_NUDGE);
-            ball.setVelocity(ball.getDx(), Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION);
-        }
-
-        ensureMinimumSpeed(ball);
-    }
-
-    public boolean checkCollision(Ball ball, GameObject other) {
-        double oL = other.getX();
-        double oT = other.getY();
-        double oR = oL + other.getWidth();
-        double oB = oT + other.getHeight();
-
         double cx = ball.getCenterX();
         double cy = ball.getCenterY();
         double nearestX = Math.max(oL, Math.min(cx, oR));

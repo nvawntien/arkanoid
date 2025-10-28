@@ -38,7 +38,7 @@ public final class ExtraBallsRenderer {
     }
 
     private Circle createNode(Ball ball) {
-        Circle circle = new Circle(ball.getRadius());
+        Circle circle   = new Circle(ball.getRadius());
         circle.getStyleClass().add("ball");
         pane.getChildren().add(circle);
         return circle;

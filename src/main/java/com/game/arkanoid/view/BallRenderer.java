@@ -6,7 +6,7 @@ import javafx.scene.shape.Circle;
 
 /**
  * Ball renderer.
- *
+ * 
  * @author bmngxn
  */
 public final class BallRenderer {
@@ -14,18 +14,18 @@ public final class BallRenderer {
 
     public BallRenderer(Pane pane, Ball ball) {
         this.node = new Circle(ball.getRadius());
-        this.node.getStyleClass().add("ball");
+        this.node.getStyleClass().add("ball");      
         pane.getChildren().add(this.node);
-        render(ball);
+        render(ball);   
     }
 
     public void render(Ball ball) {
         node.setCenterX(ball.getX());
         node.setCenterY(ball.getY());
-        //  node.setRadius(ball.getRadius());            If radius can change via power-ups, add this sync
+        node.setRadius(ball.getRadius());            //If radius can change via power-ups, add this sync
     }
 
-    public Circle getNode() {
-        return node;
+    public Circle getNode() { 
+        return node; 
     }
 }
