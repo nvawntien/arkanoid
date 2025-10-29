@@ -2,16 +2,16 @@ package com.game.arkanoid.container;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.models.Ball;
-import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.services.BallService;
 import com.game.arkanoid.services.BricksService;
 import com.game.arkanoid.services.GameService;
+import com.game.arkanoid.services.RoundService;
 import com.game.arkanoid.services.PaddleService;
 import com.game.arkanoid.services.PowerUpService;
 import com.game.arkanoid.utils.Constants;
-import java.util.List;
+
 
 public final class Container {
 
@@ -43,25 +43,16 @@ public final class Container {
         this.state.basePaddleSpeed = paddle.getSpeed();
 
         BricksService bricksSvc = new BricksService();
-        int[][] layout = {
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {1, 3, 2, 4, 1, 2, 3, 4, 1, 2, 4, 3, 1},
-                {4, 1, 3, 2, 4, 1, 2, 3, 4, 1, 2, 4, 3},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-        };
-
-        List<Brick> bricks = bricksSvc.createBricksFromLayout(layout);
-        this.state.bricks.addAll(bricks);
 
         BallService ballSvc = new BallService();
         PaddleService paddleSvc = new PaddleService();
         PowerUpService powerUpSvc = new PowerUpService();
 
-        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc);
+        RoundService levelCtrl = new RoundService(bricksSvc, ballSvc);
+        // Load level 1 from resources directory
+        levelCtrl.loadLevel(this.state, 1);
+
+        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, levelCtrl);
     }
 
     public GameState getGameState() {
