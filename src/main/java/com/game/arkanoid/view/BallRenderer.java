@@ -8,7 +8,7 @@ import javafx.scene.layout.Pane;
 /**
  * author: nvawntien.
  */
-public final class BallRenderer {
+public final class BallRenderer implements Renderer<Ball> {
     private final ImageView node;
 
     public BallRenderer(Pane pane, Ball ball) {
@@ -27,11 +27,13 @@ public final class BallRenderer {
         pane.getChildren().add(node);
     }
 
+    @Override
     public void render(Ball ball) {
         node.setTranslateX(ball.getX() - ball.getRadius());
         node.setTranslateY(ball.getY() - ball.getRadius());
     }
 
+    @Override
     public ImageView getNode() {
         return node;
     }

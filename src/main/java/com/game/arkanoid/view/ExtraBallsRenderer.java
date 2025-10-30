@@ -13,8 +13,7 @@ import javafx.scene.layout.Pane;
 /**
  * Renders secondary balls spawned through the multi-ball power-up.
  */
-public final class ExtraBallsRenderer {
-
+public final class ExtraBallsRenderer implements Renderer<List<Ball>> {
     private final Pane pane;
     private final Map<Ball, ImageView> nodes = new IdentityHashMap<>();
     private final Image ballImage;
@@ -53,5 +52,11 @@ public final class ExtraBallsRenderer {
 
         pane.getChildren().add(view);
         return view;
+    }
+
+    @Override
+    public ImageView getNode() {
+        // Not applicable for list renderer 
+        return null;
     }
 }
