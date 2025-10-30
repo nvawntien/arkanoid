@@ -11,7 +11,7 @@
 <AnchorPane stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.SettingsController">
     <children>
         <VBox alignment="CENTER" spacing="16.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" styleClass="menu-root">
-            <children>
+            <children>   
                 <Label text="Settings" styleClass="menu-title" />
                 <CheckBox fx:id="soundToggle" mnemonicParsing="false" text="Sound" onAction="#onSoundToggled" styleClass="menu-toggle"/>
                 <VBox alignment="CENTER" spacing="6.0">

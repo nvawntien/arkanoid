@@ -46,8 +46,8 @@
 }
 
 .power-up-expand { -fx-fill: #4caf50; }
-.power-up-shrink { -fx-fill: #f44336; }
+.power-up-laser { -fx-fill: #f44336; }
 .power-up-multi  { -fx-fill: #ffc107; }
 .power-up-life   { -fx-fill: #03a9f4; }
 .power-up-slow   { -fx-fill: #9c27b0; }
-
+.power-up-catch { -fx-fill: #5016e4}

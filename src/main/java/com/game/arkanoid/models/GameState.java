@@ -25,7 +25,7 @@ public final class GameState {
 
     public boolean running = true;
     public boolean paused = false;
-    public double timeScale = 1.0;
+    public double timeScale = 1.1;
     public double basePaddleWidth;
     public double basePaddleSpeed;
 
