@@ -1,31 +1,38 @@
 package com.game.arkanoid.view;
 
 import com.game.arkanoid.models.Ball;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
 
 /**
- * Ball renderer.
- *
- * @author bmngxn
+ * author: nvawntien.
  */
 public final class BallRenderer {
-    private final Circle node;
+    private final ImageView node;
 
     public BallRenderer(Pane pane, Ball ball) {
-        this.node = new Circle(ball.getRadius());
-        this.node.getStyleClass().add("ball");
-        pane.getChildren().add(this.node);
-        render(ball);
+        Image image = new Image(getClass().getResourceAsStream("/com/game/arkanoid/images/ball.png"));
+        node = new ImageView(image);
+
+        double diameter = ball.getRadius() * 2;
+        node.setFitWidth(diameter);
+        node.setFitHeight(diameter);
+
+        node.setSmooth(true);
+
+        node.setTranslateX(ball.getX() - ball.getRadius());
+        node.setTranslateY(ball.getY() - ball.getRadius());
+
+        pane.getChildren().add(node);
     }
 
     public void render(Ball ball) {
-        node.setCenterX(ball.getX());
-        node.setCenterY(ball.getY());
-        //  node.setRadius(ball.getRadius());            If radius can change via power-ups, add this sync
+        node.setTranslateX(ball.getX() - ball.getRadius());
+        node.setTranslateY(ball.getY() - ball.getRadius());
     }
 
-    public Circle getNode() {
+    public ImageView getNode() {
         return node;
     }
 }
