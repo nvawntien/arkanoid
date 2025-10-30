@@ -95,7 +95,8 @@ public class BallService {
 
                 // Normalize to keep overall speed consistent
                 double speed = Math.sqrt(vx * vx + vy * vy);
-                double scale = Constants.BALL_SPEED / speed;
+                double base = baseSpeed();
+                double scale = base / speed;
                 vx *= scale;
                 vy *= scale;
 
@@ -104,8 +105,8 @@ public class BallService {
                 angle = Math.max(Constants.MIN_BALL_ANGLE, Math.min(Constants.MAX_BALL_ANGLE, angle));
 
                 double rad = Math.toRadians(angle);
-                vx = Constants.BALL_SPEED * Math.cos(rad);
-                vy = -Constants.BALL_SPEED * Math.sin(rad);
+                vx = base * Math.cos(rad);
+                vy = -base * Math.sin(rad);
             }
 
             ball.setVelocity(vx, vy);
@@ -117,7 +118,7 @@ public class BallService {
         ensureMinimumSpeed(ball);
     }
 
-    public boolean intersectsAABB(Ball ball, GameObject other) {
+    public boolean checkCollision(Ball ball, GameObject other) {
         double oL = other.getX();
         double oT = other.getY();
         double oR = oL + other.getWidth();

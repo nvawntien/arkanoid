@@ -51,3 +51,10 @@
 .power-up-life   { -fx-fill: #03a9f4; }
 .power-up-slow   { -fx-fill: #9c27b0; }
 
+/* HUD */
+.hud-label {
+    -fx-text-fill: #e6e6e6;
+    -fx-font-family: "Consolas", "Monospaced";
+    -fx-font-size: 16px;
+}
+

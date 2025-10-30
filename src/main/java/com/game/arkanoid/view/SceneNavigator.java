@@ -4,6 +4,7 @@ import com.game.arkanoid.container.Container;
 import com.game.arkanoid.controller.GameController;
 import com.game.arkanoid.controller.MenuController;
 import com.game.arkanoid.controller.SettingsController;
+import com.game.arkanoid.controller.GameOverController;
 import com.game.arkanoid.utils.Constants;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
@@ -71,6 +72,20 @@ public final class SceneNavigator {
         });
         Scene scene = new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
         stage.setScene(scene);
+    }
+
+    /** Show the game-over screen. */
+    public void showGameOver() {
+        stopActiveGame();
+        Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == GameOverController.class) {
+                    return new GameOverController(this);
+                }
+                throw buildUnknownController(cls);
+            });
+        });
+        stage.setScene(new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT));
     }
 
     /**
