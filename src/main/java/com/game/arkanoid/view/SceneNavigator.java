@@ -25,7 +25,7 @@ public final class SceneNavigator {
 
     public void showMenu() {
         stopActiveGame();
-        Parent root = load("/com/game/arkanoid/fxml/GameMenu.fxml", loader -> {
+        Parent root = load("/com/game/arkanoid/fxml/MenuView.fxml", loader -> {
             loader.setControllerFactory(cls -> {
                 if (cls == MenuController.class) {
                     return new MenuController(this);
