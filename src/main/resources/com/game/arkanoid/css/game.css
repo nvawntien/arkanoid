@@ -1,11 +1,16 @@
 .gamePane {
     -fx-background-color: #0b0f1a;
-   /* -fx-border-color: rgba(46, 119, 255, 1);
+    /* -fx-border-color: rgba(46, 119, 255, 1);
     -fx-border-width: 3;*/
 }
 
-.paddle { -fx-fill: #e6e6e6; }
-.ball   { -fx-fill: #e6e6e6; }
+.paddle { 
+    -fx-fill: #e6e6e6; 
+}
+
+.ball { 
+    -fx-fill: #e6e6e6; 
+}
 
 .brick-style {}
 
@@ -49,16 +54,20 @@
     -fx-effect: dropshadow(gaussian, rgba(227, 216, 216, 0.6), 20, 0.8, 0, 0);
 }
 
-/* Khi được chọn (ở giữa) */
+/* Khi được chọn (ở giữa) — highlight đẹp, đều, không viền bẩn */
 .menu-button.selected {
     -fx-opacity: 1;
     -fx-scale-x: 1.25;
     -fx-scale-y: 1.25;
-    -fx-effect: dropshadow(gaussian, rgba(0, 255, 255, 0.9), 30, 0.8, 0, 0);
-    -fx-transition: all 0.2s ease-in-out;
+
+    /* Glow mượt kết hợp inner + outer */
+    -fx-effect: innershadow(gaussian, rgba(0,255,255,0.6), 20, 0.3, 0, 0),
+                 dropshadow(three-pass-box, rgba(0,255,255,0.7), 30, 0.3, 0, 0);
+
+    -fx-transition: all 0.25s ease-in-out;
 }
 
-
+/* Ảnh nền nút */
 #startButton {
    -fx-background-image: url("../images/startbutton.png");
 }
@@ -67,7 +76,9 @@
 }
 #exitButton {
     -fx-background-image: url("../images/exitbutton.png");
-} 
+}
+
+/* Power-up styles */
 .powerup {
     -fx-arc-width: 8;
     -fx-arc-height: 8;
@@ -80,4 +91,3 @@
 .power-up-multi  { -fx-fill: #ffc107; }
 .power-up-life   { -fx-fill: #03a9f4; }
 .power-up-slow   { -fx-fill: #9c27b0; }
-
