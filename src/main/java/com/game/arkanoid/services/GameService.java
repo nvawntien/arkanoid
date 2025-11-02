@@ -35,7 +35,7 @@ public final class GameService {
         handleInput(state, in, scaledDt, worldW);
         updatePrimaryBall(state, scaledDt, worldW, worldH);
         updateSecondaryBalls(state, scaledDt, worldW, worldH);
-        powerUpSvc.update(state, scaledDt, worldW, worldH);
+        powerUpSvc.update(ballSvc, state, scaledDt, worldW, worldH);
     }
 
     private void handleInput(GameState state, InputState in, double dt, double worldW) {

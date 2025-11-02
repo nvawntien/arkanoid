@@ -12,7 +12,7 @@ public class Constants {
 
     // Ball constants
     public static final double BALL_RADIUS = 5.0;
-    public static final double BALL_SPEED  = 7.0;      // px/s launch & nominal speed
+    public static final double BALL_SPEED  = 5.0;      // px/s launch & nominal speed
     public static final double MIN_BALL_ANGLE = 25.0;    // degrees (right-most)
     public static final double MAX_BALL_ANGLE = 155.0;   // degrees (left-most)
     public static final double BALL_RESTITUTION = 1;  // energy kept on bounce (0..1)
@@ -20,7 +20,7 @@ public class Constants {
     public static final double BALL_LAUNCH_ANGLE = 135.0; // degrees (straight up)
 
     // Paddle constants
-    public static final double PADDLE_WIDTH  = 150.0;
+    public static final double PADDLE_WIDTH  = 79;
     public static final double PADDLE_HEIGHT = 20.0;
     public static final double PADDLE_SPEED  = 10.0;     // px per (dt unit); tune as needed
     public static final double MIN_PADDLE_WIDTH = 80.0;
@@ -38,12 +38,12 @@ public class Constants {
     // Power-ups
     public static final double POWER_UP_WIDTH = 32.0;
     public static final double POWER_UP_HEIGHT = 16.0;
-    public static final double POWER_UP_FALL_SPEED = 8.0;
-    public static final double POWER_UP_DROP_CHANCE = 0.25;
-    public static final double POWER_UP_DURATION = 12.0;
+    public static final double POWER_UP_FALL_SPEED = 2.0;
+    public static final double POWER_UP_DROP_CHANCE = 1;
+    public static final double POWER_UP_DURATION = 20.0;
     public static final double POWER_UP_EXPAND_FACTOR = 1.4;
-    public static final double POWER_UP_SHRINK_FACTOR = 0.7;
-    public static final double POWER_UP_SLOW_MOTION_SCALE = 0.6;
+    public static final double POWER_UP_LASER_FACTOR = 0.7;
+    public static final double POWER_UP_SLOW_BALL_SCALE = 0.6;
 
     public static final int DEFAULT_SCORE = 0;
     public static final int DEFAULT_LIVES = 3;

@@ -31,7 +31,7 @@ public final class PowerUpService {
         return new PowerUp(type, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
-    public void update(GameState state, double dt, double worldW, double worldH) {
+    public void update(BallService ballSvc, GameState state, double dt, double worldW, double worldH) {
         List<PowerUp> toRemove = new ArrayList<>();
         for (PowerUp powerUp : state.powerUps) {
             powerUp.update(dt);
@@ -40,7 +40,7 @@ public final class PowerUpService {
                 continue;
             }
             if (intersects(powerUp, state.paddle)) {
-                applyPowerUp(state, powerUp.getType(), worldW);
+                applyPowerUp(ballSvc, state, powerUp.getType(), worldW);
                 toRemove.add(powerUp);
             }
         }
@@ -62,23 +62,27 @@ public final class PowerUpService {
         return ox1 < px2 && ox2 > px1 && oy1 < py2 && oy2 > py1;
     }
 
-    private void applyPowerUp(GameState state, PowerUpType type, double worldW) {
+    private void applyPowerUp(BallService ballSvc, GameState state, PowerUpType type, double worldW) {
         switch (type) {
             case EXPAND_PADDLE -> {
-                state.activePowerUps.remove(PowerUpType.SHRINK_PADDLE);
+                state.activePowerUps.remove(PowerUpType.LASER_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_EXPAND_FACTOR);
                 state.activePowerUps.put(PowerUpType.EXPAND_PADDLE, Constants.POWER_UP_DURATION);
             }
-            case SHRINK_PADDLE -> {
+            case LASER_PADDLE -> {
                 state.activePowerUps.remove(PowerUpType.EXPAND_PADDLE);
-                state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_SHRINK_FACTOR);
-                state.activePowerUps.put(PowerUpType.SHRINK_PADDLE, Constants.POWER_UP_DURATION);
+                state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_LASER_FACTOR);
+                state.activePowerUps.put(PowerUpType.LASER_PADDLE, Constants.POWER_UP_DURATION);
+            }
+            case CATCH_BALL -> {
+                ballSvc.dockToPaddle(state.ball, state.paddle);
+                   // Currently no timed effect for catch ball; implement if needed.
             }
             case MULTI_BALL -> spawnAdditionalBalls(state);
             case EXTRA_LIFE -> state.lives++;
-            case SLOW_MOTION -> {
-                state.timeScale = Constants.POWER_UP_SLOW_MOTION_SCALE;
-                state.activePowerUps.put(PowerUpType.SLOW_MOTION, Constants.POWER_UP_DURATION);
+            case SLOW_BALL -> {
+                state.timeScale = Constants.POWER_UP_SLOW_BALL_SCALE;
+                state.activePowerUps.put(PowerUpType.SLOW_BALL, Constants.POWER_UP_DURATION);
             }
         }
         // Ensure paddle stays inside bounds when width changed.
@@ -132,11 +136,11 @@ public final class PowerUpService {
 
     private void onEffectExpired(GameState state, PowerUpType type, double worldW) {
         switch (type) {
-            case EXPAND_PADDLE, SHRINK_PADDLE -> {
+            case EXPAND_PADDLE, LASER_PADDLE -> {
                 state.paddle.setWidthClamped(state.basePaddleWidth);
                 clampPaddle(state.paddle, worldW);
             }
-            case SLOW_MOTION -> state.timeScale = 1.0;
+            case SLOW_BALL -> state.timeScale = 1.0;
             default -> { }
         }
     }

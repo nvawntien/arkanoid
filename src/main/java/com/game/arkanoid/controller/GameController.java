@@ -42,7 +42,7 @@ public final class GameController {
 
     @FXML
     public void initialize() {
-        paddleRenderer = new PaddleRenderer(gamePane, gameState.paddle);
+        paddleRenderer = new PaddleRenderer(gamePane);
         ballRenderer = new BallRenderer(gamePane, gameState.ball);
         bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
         extraBallsRenderer = new ExtraBallsRenderer(gamePane);
@@ -64,7 +64,9 @@ public final class GameController {
         gamePane.setOnKeyReleased(event -> activeKeys.remove(event.getCode()));
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);
-
+        // Play paddle intro animation
+        paddleRenderer.playIntro();
+        
         loop = new AnimationTimer() {
             private long last = -1;
 
@@ -80,7 +82,8 @@ public final class GameController {
 
                 InputState in = readInput();
                 gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
-
+                
+               
                 paddleRenderer.render(gameState.paddle);
                 ballRenderer.render(gameState.ball);
                 extraBallsRenderer.render(gameState.extraBalls);
