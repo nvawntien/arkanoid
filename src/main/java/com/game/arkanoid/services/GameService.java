@@ -6,6 +6,7 @@ import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.utils.Constants;
 import com.game.arkanoid.models.PowerUp;
+import com.game.arkanoid.view.PaddleRenderer;
 import java.util.Iterator;
 
 public final class GameService {
@@ -22,7 +23,7 @@ public final class GameService {
         this.powerUpSvc = powerUpSvc;
     }
 
-    public void update(GameState state, InputState in, double dt, double worldW, double worldH) {
+    public void update(GameState state, PaddleRenderer paddleRenderer, InputState in, double dt, double worldW, double worldH) {
         if (!state.running) {
             return;
         }
@@ -35,7 +36,7 @@ public final class GameService {
         handleInput(state, in, scaledDt, worldW);
         updatePrimaryBall(state, scaledDt, worldW, worldH);
         updateSecondaryBalls(state, scaledDt, worldW, worldH);
-        powerUpSvc.update(ballSvc, state, scaledDt, worldW, worldH);
+        powerUpSvc.update(ballSvc, paddleRenderer, state, scaledDt, worldW, worldH);
     }
 
     private void handleInput(GameState state, InputState in, double dt, double worldW) {

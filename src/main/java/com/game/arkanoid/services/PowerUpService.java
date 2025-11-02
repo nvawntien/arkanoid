@@ -7,6 +7,7 @@ import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;
+import com.game.arkanoid.view.PaddleRenderer;
 import com.game.arkanoid.utils.Constants;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,10 +29,10 @@ public final class PowerUpService {
         PowerUpType type = types[random.nextInt(types.length)];
         double x = brick.getX() + (brick.getWidth() - Constants.POWER_UP_WIDTH) / 2.0;
         double y = brick.getY() + brick.getHeight();
-        return new PowerUp(type, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
+        return new PowerUp(PowerUpType.EXPAND_PADDLE, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
-    public void update(BallService ballSvc, GameState state, double dt, double worldW, double worldH) {
+    public void update(BallService ballSvc, PaddleRenderer paddleRenderer, GameState state, double dt, double worldW, double worldH) {
         List<PowerUp> toRemove = new ArrayList<>();
         for (PowerUp powerUp : state.powerUps) {
             powerUp.update(dt);
@@ -40,12 +41,12 @@ public final class PowerUpService {
                 continue;
             }
             if (intersects(powerUp, state.paddle)) {
-                applyPowerUp(ballSvc, state, powerUp.getType(), worldW);
+                applyPowerUp(ballSvc, paddleRenderer, state, powerUp.getType(), worldW);
                 toRemove.add(powerUp);
             }
-        }
+        }  
         state.powerUps.removeAll(toRemove);
-        tickActiveEffects(state, dt, worldW);
+        tickActiveEffects(state, paddleRenderer, dt, worldW);
     }
 
     private boolean intersects(PowerUp powerUp, Paddle paddle) {
@@ -62,9 +63,10 @@ public final class PowerUpService {
         return ox1 < px2 && ox2 > px1 && oy1 < py2 && oy2 > py1;
     }
 
-    private void applyPowerUp(BallService ballSvc, GameState state, PowerUpType type, double worldW) {
+    private void applyPowerUp(BallService ballSvc, PaddleRenderer paddleRenderer, GameState state, PowerUpType type, double worldW) {
         switch (type) {
             case EXPAND_PADDLE -> {
+                paddleRenderer.playExpand(null);
                 state.activePowerUps.remove(PowerUpType.LASER_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_EXPAND_FACTOR);
                 state.activePowerUps.put(PowerUpType.EXPAND_PADDLE, Constants.POWER_UP_DURATION);
@@ -120,12 +122,13 @@ public final class PowerUpService {
         }
     }
 
-    private void tickActiveEffects(GameState state, double dt, double worldW) {
+    private void tickActiveEffects(GameState state, PaddleRenderer paddleRenderer, double dt, double worldW) {
         Iterator<PowerUpType> iterator = new ArrayList<>(state.activePowerUps.keySet()).iterator();
         while (iterator.hasNext()) {
             PowerUpType type = iterator.next();
             double remaining = state.activePowerUps.get(type) - dt;
             if (remaining <= 0) {
+                paddleRenderer.playShrink(null); // No-op onFinished
                 state.activePowerUps.remove(type);
                 onEffectExpired(state, type, worldW);
             } else {
@@ -136,7 +139,11 @@ public final class PowerUpService {
 
     private void onEffectExpired(GameState state, PowerUpType type, double worldW) {
         switch (type) {
-            case EXPAND_PADDLE, LASER_PADDLE -> {
+            case EXPAND_PADDLE -> {
+                state.paddle.setWidthClamped(state.basePaddleWidth);
+                clampPaddle(state.paddle, worldW);
+            }
+            case LASER_PADDLE -> {
                 state.paddle.setWidthClamped(state.basePaddleWidth);
                 clampPaddle(state.paddle, worldW);
             }

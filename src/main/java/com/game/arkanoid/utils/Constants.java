@@ -40,8 +40,8 @@ public class Constants {
     public static final double POWER_UP_HEIGHT = 16.0;
     public static final double POWER_UP_FALL_SPEED = 2.0;
     public static final double POWER_UP_DROP_CHANCE = 1;
-    public static final double POWER_UP_DURATION = 20.0;
-    public static final double POWER_UP_EXPAND_FACTOR = 1.4;
+    public static final double POWER_UP_DURATION = 450.0;
+    public static final double POWER_UP_EXPAND_FACTOR = 119.0 / 79.0;
     public static final double POWER_UP_LASER_FACTOR = 0.7;
     public static final double POWER_UP_SLOW_BALL_SCALE = 0.6;
 

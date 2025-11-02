@@ -81,7 +81,7 @@ public final class GameController {
                 last = now;
 
                 InputState in = readInput();
-                gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
+                gameService.update(gameState, paddleRenderer, in, dt, gamePane.getWidth(), gamePane.getHeight());
                 
                
                 paddleRenderer.render(gameState.paddle);
