@@ -1,16 +1,21 @@
 .gamePane {
     -fx-background-color: #0b0f1a;
-   /* -fx-border-color: rgba(46, 119, 255, 1);
+    /* -fx-border-color: rgba(46, 119, 255, 1);
     -fx-border-width: 3;*/
 }
 
-.paddle { -fx-fill: #e6e6e6; }
-.ball   { -fx-fill: #e6e6e6; }
+.paddle { 
+    -fx-fill: #e6e6e6; 
+}
+
+.ball { 
+    -fx-fill: #e6e6e6; 
+}
 
 .brick-style {}
 
 .menu-root {
-    -fx-background-color: #0b0f1a;
+    -fx-background-image: url("../images/menu_background.png");
     -fx-padding: 40;
 }
 
@@ -25,20 +30,56 @@
     -fx-font-size: 18px;
 }
 
-.menu-button, .menu-toggle {
-    -fx-pref-width: 240px;
-    -fx-font-size: 18px;
-    -fx-background-color: #1c2a4a;
-    -fx-text-fill: #f0f0f0;
-    -fx-background-radius: 6;
-    -fx-padding: 10 20 10 20;
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+
+    /* Hiệu ứng mặc định */
+    -fx-opacity: 0.6;
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-effect: dropshadow(gaussian, rgba(150, 142, 142, 0.4), 10, 0.5, 0, 2);
+    -fx-transition: all 0.2s ease-in-out;
 }
 
-.menu-button:hover, .menu-toggle:hover {
-    -fx-background-color: #2f4f7f;
+/* Khi hover (rê chuột qua) */
+.menu-button:hover {
+    -fx-opacity: 0.8;
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+    -fx-effect: dropshadow(gaussian, rgba(227, 216, 216, 0.6), 20, 0.8, 0, 0);
 }
 
-.power-up {
+/* Khi được chọn (ở giữa) — highlight đẹp, đều, không viền bẩn */
+.menu-button.selected {
+    -fx-opacity: 1;
+    -fx-scale-x: 1.25;
+    -fx-scale-y: 1.25;
+
+    /* Glow mượt kết hợp inner + outer */
+    -fx-effect: innershadow(gaussian, rgba(0,255,255,0.6), 20, 0.3, 0, 0),
+                 dropshadow(three-pass-box, rgba(0,255,255,0.7), 30, 0.3, 0, 0);
+
+    -fx-transition: all 0.25s ease-in-out;
+}
+
+/* Ảnh nền nút */
+#startButton {
+   -fx-background-image: url("../images/startbutton.png");
+}
+#optionButton {
+    -fx-background-image: url("../images/optionbutton.png");
+}
+#exitButton {
+    -fx-background-image: url("../images/exitbutton.png");
+}
+
+/* Power-up styles */
+.powerup {
     -fx-arc-width: 8;
     -fx-arc-height: 8;
     -fx-stroke: rgba(255, 255, 255, 0.55);
@@ -46,15 +87,8 @@
 }
 
 .power-up-expand { -fx-fill: #4caf50; }
-.power-up-shrink { -fx-fill: #f44336; }
+.power-up-laser { -fx-fill: #f44336; }
 .power-up-multi  { -fx-fill: #ffc107; }
 .power-up-life   { -fx-fill: #03a9f4; }
 .power-up-slow   { -fx-fill: #9c27b0; }
-
-/* HUD */
-.hud-label {
-    -fx-text-fill: #e6e6e6;
-    -fx-font-family: "Consolas", "Monospaced";
-    -fx-font-size: 16px;
-}
-
+.power-up-catch { -fx-fill: #5016e4}

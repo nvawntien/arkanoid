@@ -1,9 +1,7 @@
 // src/main/java/com/game/arkanoid/services/PaddleService.java
 package com.game.arkanoid.services;
 
-import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.Paddle;
-import com.game.arkanoid.utils.Constants;
 
 
 /**

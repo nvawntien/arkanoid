@@ -5,8 +5,9 @@ package com.game.arkanoid.models;
  */
 public enum PowerUpType {
     EXPAND_PADDLE,
-    SHRINK_PADDLE,
+    LASER_PADDLE,
     MULTI_BALL,
     EXTRA_LIFE,
-    SLOW_MOTION
+    CATCH_BALL,
+    SLOW_BALL
 }

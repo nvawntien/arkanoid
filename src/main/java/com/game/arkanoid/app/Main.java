@@ -13,7 +13,7 @@ public class Main extends Application {
         navigator.showMenu();
         stage.show();
     }
-
+    
     public static void main(String[] args) {
         launch(args);
     }

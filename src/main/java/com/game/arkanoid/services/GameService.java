@@ -34,7 +34,8 @@ public final class GameService {
         handleInput(state, in, scaledDt, worldW);
         updatePrimaryBall(state, scaledDt, worldW, worldH);
         updateSecondaryBalls(state, scaledDt, worldW, worldH);
-        powerUpSvc.update(state, scaledDt, worldW, worldH);
+
+        powerUpSvc.update(ballSvc, state, scaledDt, worldW, worldH);
 
         // Level progression
         if (bricksSvc.allBricksCleared(state.bricks)) {
@@ -44,7 +45,7 @@ public final class GameService {
             }
         }
     }
-
+    
     private void handleInput(GameState state, InputState in, double dt, double worldW) {
         if (in.left) {
             paddleSvc.moveLeft(state.paddle, dt, worldW);
