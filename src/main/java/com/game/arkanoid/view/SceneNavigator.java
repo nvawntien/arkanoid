@@ -4,6 +4,7 @@ import com.game.arkanoid.container.Container;
 import com.game.arkanoid.controller.GameController;
 import com.game.arkanoid.controller.MenuController;
 import com.game.arkanoid.controller.SettingsController;
+import com.game.arkanoid.controller.GameOverController;
 import com.game.arkanoid.utils.Constants;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +24,9 @@ public final class SceneNavigator {
         this.stage = stage;
     }
 
+    /**
+     * Show the main menu scene.
+     */
     public void showMenu() {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/MenuView.fxml", loader -> {
@@ -36,6 +40,9 @@ public final class SceneNavigator {
         stage.setScene(new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT));
     }
 
+    /**
+     * Show the settings scene.
+     */
     public void showSettings() {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/SettingsView.fxml", loader -> {
@@ -49,6 +56,9 @@ public final class SceneNavigator {
         stage.setScene(new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT));
     }
 
+    /**
+     * Show the game scene.
+     */
     public void showGame() {
         stopActiveGame();
         Container container = new Container();
@@ -64,10 +74,31 @@ public final class SceneNavigator {
         stage.setScene(scene);
     }
 
+    /** Show the game-over screen. */
+    public void showGameOver() {
+        stopActiveGame();
+        Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == GameOverController.class) {
+                    return new GameOverController(this);
+                }
+                throw buildUnknownController(cls);
+            });
+        });
+        stage.setScene(new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT));
+    }
+
+    /**
+     * Exit the application.
+     */
     public void exit() {
         stage.close();
     }
 
+
+    /**
+     * Stop the active game if any.
+     */
     private void stopActiveGame() {
         if (activeGameController != null) {
             activeGameController.stop();
@@ -75,6 +106,12 @@ public final class SceneNavigator {
         }
     }
 
+    /**
+     * Load FXML resource with custom controller configuration.
+     * @param resource FXML resource path
+     * @param configurer controller configurer
+     * @return loaded Parent node
+     */
     private Parent load(String resource, java.util.function.Consumer<FXMLLoader> configurer) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         configurer.accept(loader);
@@ -90,6 +127,11 @@ public final class SceneNavigator {
         }
     }
 
+    /**
+     * Build exception for unknown controller requests.
+     * @param cls requested controller class
+     * @return  runtime exception
+     */
     private RuntimeException buildUnknownController(Class<?> cls) {
         return new IllegalArgumentException("Unsupported controller request: " + cls.getName());
     }

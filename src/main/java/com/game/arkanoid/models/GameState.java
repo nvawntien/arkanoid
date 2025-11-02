@@ -22,6 +22,8 @@ public final class GameState {
     public int score = Constants.DEFAULT_SCORE;
     public int lives = Constants.DEFAULT_LIVES;
     public int level = Constants.DEFAULT_LEVEL;
+    public boolean gameCompleted = false;
+    public boolean gameOver = false;
 
     public boolean running = true;
     public boolean paused = false;

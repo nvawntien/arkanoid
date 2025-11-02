@@ -6,6 +6,7 @@ import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.utils.Constants;
 import com.game.arkanoid.models.PowerUp;
+
 import java.util.Iterator;
 
 public final class GameService {
@@ -14,30 +15,37 @@ public final class GameService {
     private final PaddleService paddleSvc;
     private final BricksService bricksSvc;
     private final PowerUpService powerUpSvc;
+    private final RoundService roundSvc;
 
-    public GameService(BallService ballSvc, PaddleService paddleSvc, BricksService bricksSvc, PowerUpService powerUpSvc) {
+    public GameService(BallService ballSvc, PaddleService paddleSvc, BricksService bricksSvc, PowerUpService powerUpSvc, RoundService roundSvc) {
         this.ballSvc = ballSvc;
         this.paddleSvc = paddleSvc;
         this.bricksSvc = bricksSvc;
         this.powerUpSvc = powerUpSvc;
+        this.roundSvc = roundSvc;
     }
 
     public void update(GameState state, InputState in, double dt, double worldW, double worldH) {
-        if (!state.running) {
-            return;
-        }
-        if (state.paused) {
-            return;
-        }
+        if (!state.running) return;
+        if (state.paused) return;
 
         final double scaledDt = dt * state.timeScale;
 
         handleInput(state, in, scaledDt, worldW);
         updatePrimaryBall(state, scaledDt, worldW, worldH);
         updateSecondaryBalls(state, scaledDt, worldW, worldH);
-        powerUpSvc.update(ballSvc, state, scaledDt, worldW, worldH);
-    }
 
+        powerUpSvc.update(ballSvc, state, scaledDt, worldW, worldH);
+
+        // Level progression
+        if (bricksSvc.allBricksCleared(state.bricks)) {
+            roundSvc.loadNextLevel(state);
+            if (state.gameCompleted) {
+                state.running = false;
+            }
+        }
+    }
+    
     private void handleInput(GameState state, InputState in, double dt, double worldW) {
         if (in.left) {
             paddleSvc.moveLeft(state.paddle, dt, worldW);
@@ -47,7 +55,7 @@ public final class GameService {
         }
 
         if (!state.ball.isMoving()) {
-            ballSvc.dockToPaddle(state.ball, state.paddle);
+            ballSvc.resetOnPaddle(state.ball, state.paddle);
         }
         if (in.launch && !state.ball.isMoving()) {
             ballSvc.launch(state.ball);
@@ -72,6 +80,7 @@ public final class GameService {
                 ballSvc.resetOnPaddle(state.ball, state.paddle);
                 if (state.lives < 0) {
                     state.running = false;
+                    state.gameOver = true;
                 }
             }
         }
@@ -92,19 +101,18 @@ public final class GameService {
     }
 
     private void handlePaddleCollision(Ball ball, GameState state) {
-        if (ballSvc.intersectsAABB(ball, state.paddle)) {
-            ballSvc.bounceOffAABB(ball, state.paddle);
+        if (ballSvc.checkCollision(ball, state.paddle)) {
+            ballSvc.bounceOff(ball, state.paddle);
             ball.setCenter(ball.getCenterX(), state.paddle.getY() - ball.getRadius() - Constants.BALL_NUDGE);
         }
     }
 
     private void handleBrickCollisions(GameState state, Ball ball) {
         for (Brick brick : state.bricks) {
-            if (brick.isDestroyed()) {
-                continue;
-            }
+            if (brick.isDestroyed()) continue;
+
             if (ballSvc.checkCollision(ball, brick)) {
-                ballSvc.bounceOffAABB(ball, brick);
+                ballSvc.bounceOff(ball, brick);
                 boolean destroyed = bricksSvc.handleBrickHit(brick);
                 if (destroyed) {
                     state.score += 100;

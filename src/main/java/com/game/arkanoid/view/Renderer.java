@@ -22,7 +22,7 @@ public interface Renderer<Model> {
     void render(Model model);
 
     /**
-     * Optional cleanup hook (remove listeners, animations, etc.).
+     * Optional cleanup (remove listeners, animations, etc.).
      */
     default void dispose() {}
 }

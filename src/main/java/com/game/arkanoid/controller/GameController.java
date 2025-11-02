@@ -14,6 +14,7 @@ import java.util.Set;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 
@@ -33,6 +34,10 @@ public final class GameController {
     private ExtraBallsRenderer extraBallsRenderer;
     private PowerUpRenderer powerUpRenderer;
     private AnimationTimer loop;
+
+    @FXML private Label livesLabel;
+    @FXML private Label scoreLabel;
+    @FXML private Label highScoreLabel;
 
     public GameController(GameState gameState, GameService gameService, SceneNavigator navigator) {
         this.gameState = gameState;
@@ -89,6 +94,21 @@ public final class GameController {
                 extraBallsRenderer.render(gameState.extraBalls);
                 powerUpRenderer.render(gameState.powerUps);
                 bricksRenderer.render(gameState.bricks);
+
+                if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
+                if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
+                if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
+
+                if (gameState.gameOver) {
+                    stop();
+                    navigator.showGameOver();
+                    return;
+                }
+
+                if (gameState.gameCompleted) {
+                    stop();
+                    navigator.showMenu();
+                }
             }
         };
 
