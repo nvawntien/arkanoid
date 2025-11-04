@@ -20,10 +20,13 @@ public final class PaddleRenderer implements Renderer<Paddle> {
     private final List<Image> wideFrames = new ArrayList<>();
     private final List<Image> shrinkFrames = new ArrayList<>();
     private final List<Image> widePulsateFrames = new ArrayList<>();
+    private final List<Image> laserFrames = new ArrayList<>();
+    private final List<Image> laserPulsateFrames = new ArrayList<>();
     private Timeline currentAnimation;
-    private AnimationTimer expandTimer, shrinkTimer;
+    private AnimationTimer expandTimer, shrinkTimer, laserTimer;
     private double elapsedExpand = 0;
     private double elapsedShrink = 0;
+    private double elapsedLaser = 0;
     private boolean isTransforming = false; // đang expand hoặc shrink
 
     public PaddleRenderer(Pane pane) {
@@ -45,6 +48,20 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         for (int i = 1; i <= 9; i++) {
             wideFrames.add(new Image(getClass().getResourceAsStream(
                 String.format("/com/game/arkanoid/images/paddle_wide_%d.png", i)
+            )));
+        }
+
+        // Load laser frames
+        for (int i = 1; i <= 16; i++) {
+            laserFrames.add(new Image(getClass().getResourceAsStream(
+                String.format("/com/game/arkanoid/images/paddle_laser_%d.png", i)
+            )));
+        }
+
+        // Load laser pulsate frames
+        for (int i = 1; i <= 4; i++) {
+            laserPulsateFrames.add(new Image(getClass().getResourceAsStream(
+                String.format("/com/game/arkanoid/images/paddle_laser_pulsate_%d.png", i)
             )));
         }
 
@@ -178,10 +195,56 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         shrinkTimer.start();
     }
 
+    public void playLaser(Runnable onFinished) {
+        stopAnimation();
+
+        final int FRAME_COUNT = laserFrames.size();
+        final double FRAME_DURATION = 0.08;
+        final double TOTAL_DURATION = FRAME_COUNT * FRAME_DURATION;
+        elapsedLaser = 0;
+        isTransforming = true;
+
+        laserTimer = new AnimationTimer() {
+            private long lastTime = 0;
+            @Override
+            public void handle(long now) {
+                if (lastTime == 0) {
+                    lastTime = now;
+                    return;
+                }
+
+                double delta = (now - lastTime) / 1e9;
+                lastTime = now;
+                elapsedLaser += delta;
+
+                int currentFrame = Math.min((int)(elapsedLaser / FRAME_DURATION), FRAME_COUNT - 1);
+                Image frame = laserFrames.get(currentFrame);
+                node.setImage(frame);
+                node.setFitWidth(frame.getWidth());
+                node.setFitHeight(frame.getHeight());
+
+                if (elapsedLaser >= TOTAL_DURATION) {
+                    stop();
+                    isTransforming = false;
+                    startLaserPulsate();
+                    if (onFinished != null) onFinished.run();
+                }
+            }
+        };
+        laserTimer.start();
+    }
+
+    public void startLaserPulsate() {
+        if (laserPulsateFrames.isEmpty()) return;
+        isTransforming = false;
+        playFrameSequence(laserPulsateFrames, 100, true, null);
+    }
+
     public void stopAnimation() {
         if (currentAnimation != null) currentAnimation.stop();
         if (expandTimer != null) expandTimer.stop();
         if (shrinkTimer != null) shrinkTimer.stop();
+        if (laserTimer != null) laserTimer.stop();
     }
 
     private void playFrameSequence(List<Image> frames, double frameDurationMs, boolean loop, Runnable onFinished) {

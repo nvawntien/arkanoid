@@ -29,7 +29,7 @@ public final class PowerUpService {
         PowerUpType type = types[random.nextInt(types.length)];
         double x = brick.getX() + (brick.getWidth() - Constants.POWER_UP_WIDTH) / 2.0;
         double y = brick.getY() + brick.getHeight();
-        return new PowerUp(PowerUpType.CATCH_BALL, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
+        return new PowerUp(PowerUpType.LASER_PADDLE, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
     public void update(BallService ballSvc, PaddleRenderer paddleRenderer, GameState state, double dt, double worldW, double worldH) {
@@ -69,12 +69,14 @@ public final class PowerUpService {
                 if (!state.activePowerUps.containsKey(PowerUpType.EXPAND_PADDLE)) {
                     paddleRenderer.playExpand(null);
                 }
-               
                 state.activePowerUps.remove(PowerUpType.LASER_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_EXPAND_FACTOR);
                 state.activePowerUps.put(PowerUpType.EXPAND_PADDLE, Constants.POWER_UP_DURATION);
             }
             case LASER_PADDLE -> {
+                if (!state.activePowerUps.containsKey(PowerUpType.LASER_PADDLE)) {
+                    paddleRenderer.playLaser(null);
+                }
                 state.activePowerUps.remove(PowerUpType.EXPAND_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_LASER_FACTOR);
                 state.activePowerUps.put(PowerUpType.LASER_PADDLE, Constants.POWER_UP_DURATION);

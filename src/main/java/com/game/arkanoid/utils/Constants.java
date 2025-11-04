@@ -42,7 +42,7 @@ public class Constants {
     public static final double POWER_UP_DROP_CHANCE = 1;
     public static final double POWER_UP_DURATION = 450.0;
     public static final double POWER_UP_EXPAND_FACTOR = 119.0 / 79.0;
-    public static final double POWER_UP_LASER_FACTOR = 0.7;
+    public static final double POWER_UP_LASER_FACTOR = 1.0;
     public static final double POWER_UP_SLOW_BALL_SCALE = 0.6;
 
     public static final int DEFAULT_SCORE = 0;
