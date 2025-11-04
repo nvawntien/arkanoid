@@ -59,8 +59,20 @@ public final class GameService {
         }
 
         if (!state.ball.isMoving()) {
-            ballSvc.resetOnPaddle(state.ball, state.paddle);
+            if (state.ball.isStuck()) {
+                // Ball was caught: keep it attached to the paddle using the stored offset
+                double paddleX = state.paddle.getX();
+                double paddleW = state.paddle.getWidth();
+                double desiredX = paddleX + state.ball.getStuckOffsetX();
+                double minX = paddleX + state.ball.getRadius();
+                double maxX = paddleX + paddleW - state.ball.getRadius();
+                desiredX = Math.max(minX, Math.min(desiredX, maxX));
+                state.ball.setCenter(desiredX, state.paddle.getY() - state.ball.getRadius() - Constants.BALL_NUDGE);
+            } else {
+                ballSvc.resetOnPaddle(state.ball, state.paddle);
+            }
         }
+        
         if (in.launch && !state.ball.isMoving()) {
             ballSvc.launch(state.ball);
         }

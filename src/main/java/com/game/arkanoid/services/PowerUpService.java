@@ -29,7 +29,7 @@ public final class PowerUpService {
         PowerUpType type = types[random.nextInt(types.length)];
         double x = brick.getX() + (brick.getWidth() - Constants.POWER_UP_WIDTH) / 2.0;
         double y = brick.getY() + brick.getHeight();
-        return new PowerUp(PowerUpType.EXPAND_PADDLE, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
+        return new PowerUp(PowerUpType.CATCH_BALL, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
     public void update(BallService ballSvc, PaddleRenderer paddleRenderer, GameState state, double dt, double worldW, double worldH) {
@@ -80,8 +80,7 @@ public final class PowerUpService {
                 state.activePowerUps.put(PowerUpType.LASER_PADDLE, Constants.POWER_UP_DURATION);
             }
             case CATCH_BALL -> {
-                ballSvc.resetOnPaddle(state.ball, state.paddle);
-                   // Currently no timed effect for catch ball; implement if needed.
+                state.ball.setStuck(true);
             }
             case MULTI_BALL -> spawnAdditionalBalls(state);
             case EXTRA_LIFE -> state.lives++;
