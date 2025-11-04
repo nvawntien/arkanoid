@@ -13,11 +13,11 @@ public class Constants {
     // Ball constants
     public static final double BALL_RADIUS = 5.0;
     public static final double BALL_SPEED  = 5.0;      // px/s launch & nominal speed
-    public static final double MIN_BALL_ANGLE = 25.0;    // degrees (right-most)
-    public static final double MAX_BALL_ANGLE = 155.0;   // degrees (left-most)
+    public static final double MIN_BALL_ANGLE = 35.0;    // degrees (right-most)
+    public static final double MAX_BALL_ANGLE = 75.0;   // degrees (left-most)
     public static final double BALL_RESTITUTION = 1;  // energy kept on bounce (0..1)
     public static final double BALL_NUDGE = 0.5;         // px to separate after paddle hit
-    public static final double BALL_LAUNCH_ANGLE = 135.0; // degrees (straight up)
+    public static final double BALL_LAUNCH_ANGLE = 95.0; // degrees (straight up)
 
     // Paddle constants
     public static final double PADDLE_WIDTH  = 79;

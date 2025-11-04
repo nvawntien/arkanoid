@@ -77,7 +77,7 @@ public final class PowerUpService {
                 state.activePowerUps.put(PowerUpType.LASER_PADDLE, Constants.POWER_UP_DURATION);
             }
             case CATCH_BALL -> {
-                ballSvc.dockToPaddle(state.ball, state.paddle);
+                ballSvc.resetOnPaddle(state.ball, state.paddle);
                    // Currently no timed effect for catch ball; implement if needed.
             }
             case MULTI_BALL -> spawnAdditionalBalls(state);
