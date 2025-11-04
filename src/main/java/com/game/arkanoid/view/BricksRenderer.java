@@ -13,7 +13,7 @@ import javafx.scene.shape.Rectangle;
 /**
  * Renders bricks and stays in sync when the brick list changes (e.g., on level transitions).
  */
-public final class BricksRenderer {
+public final class BricksRenderer implements Renderer<List<Brick>> {
     private final Pane pane;
     private final Map<Brick, Rectangle> brickNodes = new HashMap<>();
 
@@ -27,6 +27,7 @@ public final class BricksRenderer {
         render(bricks);
     }
 
+    @Override
     public void render(List<Brick> bricks) {
         // Remove nodes for bricks that no longer exist
         Iterator<Map.Entry<Brick, Rectangle>> it = brickNodes.entrySet().iterator();
@@ -64,6 +65,12 @@ public final class BricksRenderer {
         }
     }
 
+    @Override
+    public Rectangle getNode() {
+        // Not applicable for list renderer 
+        return null;
+    }
+       
     private ImagePattern getBrickImagePattern(int health) {
         return switch (health) {
             case 4 -> new ImagePattern(brick4Img);
