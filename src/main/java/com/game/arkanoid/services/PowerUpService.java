@@ -66,7 +66,10 @@ public final class PowerUpService {
     private void applyPowerUp(BallService ballSvc, PaddleRenderer paddleRenderer, GameState state, PowerUpType type, double worldW) {
         switch (type) {
             case EXPAND_PADDLE -> {
-                paddleRenderer.playExpand(null);
+                if (!state.activePowerUps.containsKey(PowerUpType.EXPAND_PADDLE)) {
+                    paddleRenderer.playExpand(null);
+                }
+               
                 state.activePowerUps.remove(PowerUpType.LASER_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_EXPAND_FACTOR);
                 state.activePowerUps.put(PowerUpType.EXPAND_PADDLE, Constants.POWER_UP_DURATION);
