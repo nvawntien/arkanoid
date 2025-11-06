@@ -2,8 +2,8 @@ package com.game.arkanoid.controller;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.config.GameSettings.Difficulty;
-import com.game.arkanoid.controller.infra.SceneNavigator;
-import com.game.arkanoid.view.sound.SoundService;
+import com.game.arkanoid.controller.SceneController;
+import com.game.arkanoid.view.sound.SoundRenderer;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,8 +22,8 @@ public final class SettingsController {
     @FXML
     private ComboBox<Difficulty> difficultyCombo;
 
-    private final SceneNavigator navigator;
-    private final SoundService soundService = SoundService.getInstance();
+    private final SceneController navigator;
+    private final SoundRenderer sound = SoundRenderer.getInstance();
 
     @FXML
     private Slider masterSlider;
@@ -36,7 +36,7 @@ public final class SettingsController {
 
     private double previousMasterVolume = GameSettings.getMasterVolume();
 
-    public SettingsController(SceneNavigator navigator) {
+    public SettingsController(SceneController navigator) {
         this.navigator = navigator;
     }
 
@@ -46,9 +46,9 @@ public final class SettingsController {
         difficultyCombo.getSelectionModel().select(GameSettings.getDifficulty());
         soundToggle.setSelected(GameSettings.isSoundEnabled());
 
-        masterSlider.valueProperty().bindBidirectional(soundService.masterVolumeProperty());
-        musicSlider.valueProperty().bindBidirectional(soundService.musicVolumeProperty());
-        sfxSlider.valueProperty().bindBidirectional(soundService.sfxVolumeProperty());
+        masterSlider.valueProperty().bindBidirectional(sound.masterVolumeProperty());
+        musicSlider.valueProperty().bindBidirectional(sound.musicVolumeProperty());
+        sfxSlider.valueProperty().bindBidirectional(sound.sfxVolumeProperty());
         masterSlider.valueProperty().addListener((obs, oldV, newV) -> {
             if (!masterSlider.isDisabled()) {
                 previousMasterVolume = newV.doubleValue();
@@ -70,10 +70,10 @@ public final class SettingsController {
         GameSettings.setSoundEnabled(enabled);
         if (enabled) {
             double restoreValue = previousMasterVolume > 0 ? previousMasterVolume : 1.0;
-            soundService.masterVolumeProperty().set(restoreValue);
+            sound.masterVolumeProperty().set(restoreValue);
         } else {
-            previousMasterVolume = soundService.masterVolumeProperty().get();
-            soundService.masterVolumeProperty().set(0.0);
+            previousMasterVolume = sound.masterVolumeProperty().get();
+            sound.masterVolumeProperty().set(0.0);
         }
         masterSlider.setDisable(!enabled);
         musicSlider.setDisable(!enabled);

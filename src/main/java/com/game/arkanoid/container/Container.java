@@ -10,7 +10,7 @@ import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.services.RoundService;
 import com.game.arkanoid.services.PaddleService;
 import com.game.arkanoid.services.PowerUpService;
-import com.game.arkanoid.view.sound.SoundService;
+import com.game.arkanoid.view.sound.SoundRenderer;
 import com.game.arkanoid.utils.Constants;
 
 
@@ -44,14 +44,14 @@ public final class Container {
         BricksService bricksSvc = new BricksService();
         BallService ballSvc = new BallService();
         PaddleService paddleSvc = new PaddleService();
-        SoundService soundSvc = SoundService.getInstance();
-        PowerUpService powerUpSvc = new PowerUpService(soundSvc);
+        SoundRenderer sound = SoundRenderer.getInstance();
+        PowerUpService powerUpSvc = new PowerUpService(sound);
 
         RoundService levelCtrl = new RoundService(bricksSvc, ballSvc);
         // Load level 1 from resources directory
         levelCtrl.loadLevel(this.state, 1);
 
-        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, levelCtrl, soundSvc);
+        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, levelCtrl, sound);
         this.game.bindState(this.state);
     }
 

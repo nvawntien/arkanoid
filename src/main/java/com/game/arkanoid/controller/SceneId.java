@@ -1,4 +1,4 @@
-package com.game.arkanoid.controller.infra;
+package com.game.arkanoid.controller;
 
 public enum SceneId {
     MENU,

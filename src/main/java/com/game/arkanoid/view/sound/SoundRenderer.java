@@ -17,7 +17,7 @@ import javafx.util.Duration;
 /**
  * Presentation-layer audio manager used by controllers/services to trigger SFX/BGM directly.
  */
-public final class SoundService {
+public final class SoundRenderer {
 
     private static final String SOUND_ROOT = "/com/game/arkanoid/sounds/";
 
@@ -40,7 +40,7 @@ public final class SoundService {
             Map.entry("level_bgm", "ball_hard_block.wav")
     );
 
-    private static SoundService instance;
+    private static SoundRenderer instance;
 
     private final Map<String, AudioClip> sfxClips = new HashMap<>();
     private final Map<String, MediaPlayer> bgmPlayers = new HashMap<>();
@@ -50,16 +50,16 @@ public final class SoundService {
     private final DoubleProperty musicVolume = new SimpleDoubleProperty(0.7);
     private final DoubleProperty sfxVolume = new SimpleDoubleProperty(0.8);
 
-    private SoundService() {
+    private SoundRenderer() {
         preloadSfx();
         preloadBgm();
         bindSettingDefaults();
         setupVolumePropagation();
     }
 
-    public static synchronized SoundService getInstance() {
+    public static synchronized SoundRenderer getInstance() {
         if (instance == null) {
-            instance = new SoundService();
+            instance = new SoundRenderer();
         }
         return instance;
     }
@@ -193,7 +193,7 @@ public final class SoundService {
     }
 
     private URL getResource(String path) {
-        return SoundService.class.getResource(path);
+        return SoundRenderer.class.getResource(path);
     }
 
     private double clamp(double v) {

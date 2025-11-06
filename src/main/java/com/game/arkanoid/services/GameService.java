@@ -7,7 +7,7 @@ import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.utils.Constants;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
-import com.game.arkanoid.view.sound.SoundService;
+import com.game.arkanoid.view.sound.SoundRenderer;
 import java.util.Iterator;
 
 /**
@@ -20,7 +20,7 @@ public final class GameService {
     private final BricksService bricksSvc;
     private final PowerUpService powerUpSvc;
     private final RoundService roundSvc;
-    private final SoundService soundSvc;
+    private final SoundRenderer soundSvc;
 
     public GameService(
             BallService ballSvc,
@@ -28,7 +28,7 @@ public final class GameService {
             BricksService bricksSvc,
             PowerUpService powerUpSvc,
             RoundService roundSvc,
-            SoundService soundSvc) {
+            SoundRenderer soundSvc) {
         this.ballSvc = ballSvc;
         this.paddleSvc = paddleSvc;
         this.bricksSvc = bricksSvc;

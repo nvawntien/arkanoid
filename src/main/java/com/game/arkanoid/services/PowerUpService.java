@@ -9,7 +9,8 @@ import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.utils.Constants;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
-import com.game.arkanoid.view.sound.SoundService;
+import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.view.sound.SoundRenderer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,10 +21,10 @@ import java.util.Random;
  */
 public final class PowerUpService {
 
-    private final SoundService soundService;
+    private final SoundRenderer soundService;
     private final Random random = new Random();
 
-    public PowerUpService(SoundService soundService) {
+    public PowerUpService(SoundRenderer soundService) {
         this.soundService = soundService;
     }
 

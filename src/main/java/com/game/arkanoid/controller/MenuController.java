@@ -1,8 +1,8 @@
 package com.game.arkanoid.controller;
 
 import com.game.arkanoid.view.animator.MenuAnimator;
-import com.game.arkanoid.view.sound.SoundService;
-import com.game.arkanoid.controller.infra.SceneNavigator;
+import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.controller.SceneController;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,8 +13,8 @@ import javafx.scene.layout.AnchorPane;
 
 public final class MenuController {
 
-    private final SceneNavigator navigator;
-    private final SoundService soundService = SoundService.getInstance();
+    private final SceneController navigator;
+    private final SoundRenderer sound = SoundRenderer.getInstance();
 
     @FXML private AnchorPane root;
     @FXML private Button optionButton;
@@ -23,14 +23,14 @@ public final class MenuController {
 
     private MenuAnimator animator;
 
-    public MenuController(SceneNavigator navigator) {
+    public MenuController(SceneController navigator) {
         this.navigator = navigator;
     }
 
     @FXML
     private void initialize() {
         animator = new MenuAnimator(optionButton, startButton, exitButton);
-        soundService.loopBgm("menu_bgm");
+        sound.loopBgm("menu_bgm");
 
         root.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -54,21 +54,21 @@ public final class MenuController {
 
     @FXML
     private void onStartGame(ActionEvent event) {
-        soundService.playSfx("menu_click");
-        soundService.fade("menu_bgm", 0.0);
+        sound.playSfx("menu_click");
+        sound.fade("menu_bgm", 0.0);
         navigator.showGame();
     }
 
     @FXML
     private void onOpenSettings(ActionEvent event) {
-        soundService.playSfx("menu_click");
+        sound.playSfx("menu_click");
         navigator.showSettings();
     }
 
     @FXML
     private void onExit(ActionEvent event) {
-        soundService.playSfx("menu_click");
-        soundService.stopAll();
+        sound.playSfx("menu_click");
+        sound.stopAll();
         navigator.exit();
     }
 }

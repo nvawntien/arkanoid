@@ -1,7 +1,7 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.controller.infra.SceneId;
-import com.game.arkanoid.controller.infra.SceneNavigator;
+import com.game.arkanoid.controller.SceneId;
+import com.game.arkanoid.controller.SceneController;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.services.GameService;
@@ -10,7 +10,7 @@ import com.game.arkanoid.view.renderer.BricksRenderer;
 import com.game.arkanoid.view.renderer.ExtraBallsRenderer;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
 import com.game.arkanoid.view.renderer.PowerUpRenderer;
-import com.game.arkanoid.view.sound.SoundService;
+import com.game.arkanoid.view.sound.SoundRenderer;
 import com.game.arkanoid.view.transition.TransitionStrategy;
 
 import java.io.IOException;
@@ -52,8 +52,8 @@ public final class GameController {
     private final Set<KeyCode> activeKeys = new HashSet<>();
     private final GameService gameService;
     private final GameState gameState;
-    private final SceneNavigator navigator;
-    private final SoundService soundService = SoundService.getInstance();
+    private final SceneController navigator;
+    private final SoundRenderer soundService = SoundRenderer.getInstance();
 
     private BallRenderer ballRenderer;
     private PaddleRenderer paddleRenderer;
@@ -69,10 +69,9 @@ public final class GameController {
     private int lastLifeCount = Integer.MIN_VALUE;
     private int lastLevelObserved = Integer.MIN_VALUE;
 
-    // Small guards
     private boolean pauseTransitionRunning = false;
 
-    public GameController(GameState gameState, GameService gameService, SceneNavigator navigator) {
+    public GameController(GameState gameState, GameService gameService, SceneController navigator) {
         this.gameState = gameState;
         this.gameService = gameService;
         this.navigator = navigator;
@@ -296,7 +295,7 @@ public final class GameController {
     private void resumeGame() {
         hidePauseMenu();
         gameState.paused = false;
-        activeKeys.clear(); // avoid sticky inputs
+        activeKeys.clear(); 
         soundService.playSfx("pause_off");
         soundService.fade("level_bgm", soundService.effectiveMusicVolume(), Duration.millis(220));
         Platform.runLater(gamePane::requestFocus);

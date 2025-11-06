@@ -1,4 +1,4 @@
-package com.game.arkanoid.controller.infra;
+package com.game.arkanoid.controller;
 
 import com.game.arkanoid.container.Container;
 import com.game.arkanoid.controller.GameController;
@@ -19,13 +19,13 @@ import javafx.stage.Stage;
 /**
  * Central scene navigation helper that also plays animated transitions.
  */
-public final class SceneNavigator {
+public final class SceneController {
 
     private final Stage stage;
     private final TransitionManager transitionManager = new TransitionManager();
     private GameController activeGameController;
 
-    public SceneNavigator(Stage stage) {
+    public SceneController(Stage stage) {
         this.stage = Objects.requireNonNull(stage, "stage");
     }
 
