@@ -27,6 +27,7 @@ public final class GameState {
 
     public boolean running = true;
     public boolean paused = false;
+    public boolean levelTransitionPending = false;
     public double timeScale = 1.1;
     public double basePaddleWidth;
     public double basePaddleSpeed;
@@ -42,10 +43,20 @@ public final class GameState {
 
     public void resetForLevel() {
         score = 0;
-        lives = 3;
-        level = 1;
+        lives = Constants.DEFAULT_LIVES;
+        level = Constants.DEFAULT_LEVEL;
         running = true;
         paused = false;
+        levelTransitionPending = false;
         timeScale = 1.0;
     }
+
+    public void decrementLives() {
+        lives--;
+    }
+
+    public void incrementLives() {
+        lives++;
+    }
+
 }

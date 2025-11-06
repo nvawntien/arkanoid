@@ -92,3 +92,66 @@
 .power-up-life   { -fx-fill: #03a9f4; }
 .power-up-slow   { -fx-fill: #9c27b0; }
 .power-up-catch { -fx-fill: #5016e4}
+
+.pause-overlay {
+    -fx-background-color: rgba(5, 8, 18, 0.65);
+}
+
+.pause-card {
+    -fx-background-color: rgba(24, 30, 48, 0.95);
+    -fx-background-radius: 14;
+    -fx-spacing: 18;
+    -fx-alignment: center;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 35, 0.3, 0, 8);
+}
+
+.pause-title {
+    -fx-text-fill: linear-gradient(#ffffff, #a8d8ff);
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 6 0;
+}
+
+.pause-button {
+    -fx-background-color: rgba(48, 68, 112, 0.85);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 8 18;
+    -fx-cursor: hand;
+}
+
+.pause-button:hover {
+    -fx-background-color: rgba(70, 104, 168, 0.95);
+}
+
+.pause-button.warning {
+    -fx-background-color: rgba(128, 36, 36, 0.85);
+}
+
+.pause-button.warning:hover {
+    -fx-background-color: rgba(160, 52, 52, 0.95);
+}
+
+#lifeBox {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.life-icon {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 12, 0.4, 0, 0);
+}
+
+.level-banner {
+    -fx-background-color: rgba(12, 18, 38, 0.88);
+    -fx-background-radius: 12;
+    -fx-padding: 18 34;
+    -fx-effect: dropshadow(gaussian, rgba(8, 12, 26, 0.75), 28, 0.3, 0, 12);
+}
+
+.level-banner-text {
+    -fx-text-fill: #f0f6ff;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}

@@ -2,8 +2,8 @@ package com.game.arkanoid.services;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.events.GameEventBus;
-import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
-import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
+import com.game.arkanoid.events.PowerUpActivatedEvent;
+import com.game.arkanoid.events.PowerUpExpiredEvent;
 import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.GameState;
@@ -11,30 +11,34 @@ import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.utils.Constants;
+import com.game.arkanoid.view.sound.SoundRenderer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Orchestrates the spawning, updating and application of power-ups.
+ * Handles spawning, updating and applying power-ups. Talks directly to renderers for animations.
  */
 public final class PowerUpService {
 
+    private final SoundRenderer soundService;
     private final Random random = new Random();
     private final GameEventBus eventBus = GameEventBus.getInstance();
 
-    public PowerUp spawnPowerUpIfAny(Brick brick) {
+    public PowerUpService(SoundRenderer soundService) {
+        this.soundService = soundService;
+    }
+
+    public PowerUp spawnPowerUpIfAny( double x, double y, double width) {
         if (random.nextDouble() > Constants.POWER_UP_DROP_CHANCE) {
             return null;
         }
-        PowerUpType[] types = { PowerUpType.EXPAND_PADDLE, PowerUpType.LASER_PADDLE };
+        PowerUpType[] types = {PowerUpType.EXPAND_PADDLE};
         PowerUpType type = types[random.nextInt(types.length)];
-        double x = brick.getX() + (brick.getWidth() - Constants.POWER_UP_WIDTH) / 2.0;
-        double y = brick.getY() + brick.getHeight();
-
-        PowerUp powerUp = new PowerUp(type, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
-        return powerUp;
+        double spawnX = x + (width - Constants.POWER_UP_WIDTH) / 2.0;
+        double spawnY = y + Constants.BRICK_HEIGHT;
+        return new PowerUp(type, spawnX, spawnY, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
     public void update(GameState state, double dt, double worldW, double worldH) {
@@ -48,8 +52,9 @@ public final class PowerUpService {
             if (intersects(powerUp, state.paddle)) {
                 applyPowerUp(state, powerUp.getType(), worldW);
                 toRemove.add(powerUp);
+                soundService.playSfx("powerup_collect");
             }
-        }  
+        }
         state.powerUps.removeAll(toRemove);
         tickActiveEffects(state, dt, worldW);
     }
@@ -90,13 +95,12 @@ public final class PowerUpService {
                 state.ball.setStuck(true);
             }
             case MULTI_BALL -> spawnAdditionalBalls(state);
-            case EXTRA_LIFE -> state.lives++;
+            case EXTRA_LIFE -> state.incrementLives();
             case SLOW_BALL -> {
                 state.timeScale = Constants.POWER_UP_SLOW_BALL_SCALE;
                 state.activePowerUps.put(PowerUpType.SLOW_BALL, Constants.POWER_UP_DURATION);
             }           
         }
-        // Ensure paddle stays inside bounds when width changed.
         clampPaddle(state.paddle, worldW);
     }
 
@@ -137,7 +141,6 @@ public final class PowerUpService {
             PowerUpType type = iterator.next();
             double remaining = state.activePowerUps.get(type) - dt;
             if (remaining <= 0) {
-                //paddleRenderer.playShrink(null); // No-op onFinished
                 state.activePowerUps.remove(type);
                 onEffectExpired(state, type, worldW);
             } else {
@@ -148,11 +151,7 @@ public final class PowerUpService {
 
     private void onEffectExpired(GameState state, PowerUpType type, double worldW) {
         switch (type) {
-            case EXPAND_PADDLE -> {
-                state.paddle.setWidthClamped(state.basePaddleWidth);
-                clampPaddle(state.paddle, worldW);
-            }
-            case LASER_PADDLE -> {
+            case EXPAND_PADDLE, LASER_PADDLE -> {
                 state.paddle.setWidthClamped(state.basePaddleWidth);
                 clampPaddle(state.paddle, worldW);
             }

@@ -1,7 +1,9 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.view.MenuView;
-import com.game.arkanoid.view.SceneNavigator;
+import com.game.arkanoid.view.animator.MenuAnimator;
+import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.controller.SceneController;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -11,22 +13,24 @@ import javafx.scene.layout.AnchorPane;
 
 public final class MenuController {
 
-    private final SceneNavigator navigator;
+    private final SceneController navigator;
+    private final SoundRenderer sound = SoundRenderer.getInstance();
 
     @FXML private AnchorPane root;
     @FXML private Button optionButton;
     @FXML private Button startButton;
     @FXML private Button exitButton;
 
-    private MenuView animator;
+    private MenuAnimator animator;
 
-    public MenuController(SceneNavigator navigator) {
+    public MenuController(SceneController navigator) {
         this.navigator = navigator;
     }
 
     @FXML
     private void initialize() {
-        animator = new MenuView(optionButton, startButton, exitButton);
+        animator = new MenuAnimator(optionButton, startButton, exitButton);
+        sound.loopBgm("menu_bgm");
 
         root.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -50,16 +54,21 @@ public final class MenuController {
 
     @FXML
     private void onStartGame(ActionEvent event) {
+        sound.playSfx("menu_click");
+        sound.fade("menu_bgm", 0.0);
         navigator.showGame();
     }
 
     @FXML
     private void onOpenSettings(ActionEvent event) {
+        sound.playSfx("menu_click");
         navigator.showSettings();
     }
 
     @FXML
     private void onExit(ActionEvent event) {
+        sound.playSfx("menu_click");
+        sound.stopAll();
         navigator.exit();
     }
 }

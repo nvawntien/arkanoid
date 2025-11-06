@@ -1,13 +1,14 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.view.SceneNavigator;
+import com.game.arkanoid.controller.SceneController;
+
 import javafx.event.ActionEvent;
 
 /** Simple controller for the game over screen. */
 public final class GameOverController {
-    private final SceneNavigator navigator;
+    private final SceneController navigator;
 
-    public GameOverController(SceneNavigator navigator) {
+    public GameOverController(SceneController navigator) {
         this.navigator = navigator;
     }
 

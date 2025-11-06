@@ -1,33 +1,56 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.controller;
 
 import com.game.arkanoid.container.Container;
 import com.game.arkanoid.controller.GameController;
+import com.game.arkanoid.controller.GameOverController;
 import com.game.arkanoid.controller.MenuController;
 import com.game.arkanoid.controller.SettingsController;
-import com.game.arkanoid.controller.GameOverController;
+import com.game.arkanoid.view.transition.TransitionManager;
+import com.game.arkanoid.view.transition.TransitionStrategy;
 import com.game.arkanoid.utils.Constants;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.function.Consumer;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Central scene navigation helper to keep {@link javafx.application.Application} lean.
+ * Central scene navigation helper that also plays animated transitions.
  */
-public final class SceneNavigator {
+public final class SceneController {
 
     private final Stage stage;
+    private final TransitionManager transitionManager = new TransitionManager();
     private GameController activeGameController;
 
-    public SceneNavigator(Stage stage) {
-        this.stage = stage;
+    public SceneController(Stage stage) {
+        this.stage = Objects.requireNonNull(stage, "stage");
     }
 
-    /**
-     * Show the main menu scene.
-     */
+    /** Expose transition manager so controllers can request custom strategies. */
+    public TransitionManager transitions() {
+        return transitionManager;
+    }
+
+    /** Navigate to a scene with a custom transition strategy. */
+    public void navigateTo(SceneId sceneId, TransitionStrategy transition) {
+        switch (sceneId) {
+            case MENU -> showMenu(transition);
+            case SETTINGS -> showSettings(transition);
+            case GAME -> showGame(transition);
+            case GAME_OVER -> showGameOver(transition);
+            default -> throw new IllegalArgumentException("Unhandled scene: " + sceneId);
+        }
+    }
+
+    /** Show the main menu with default transition. */
     public void showMenu() {
+        showMenu(transitionManager.menuTransition());
+    }
+
+    private void showMenu(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/MenuView.fxml", loader -> {
             loader.setControllerFactory(cls -> {
@@ -37,13 +60,15 @@ public final class SceneNavigator {
                 throw buildUnknownController(cls);
             });
         });
-        stage.setScene(new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT));
+        setScene(SceneId.MENU, root, transition);
     }
 
-    /**
-     * Show the settings scene.
-     */
+    /** Show the settings scene with default transition. */
     public void showSettings() {
+        showSettings(transitionManager.settingsTransition());
+    }
+
+    private void showSettings(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/SettingsView.fxml", loader -> {
             loader.setControllerFactory(cls -> {
@@ -53,13 +78,15 @@ public final class SceneNavigator {
                 throw buildUnknownController(cls);
             });
         });
-        stage.setScene(new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT));
+        setScene(SceneId.SETTINGS, root, transition);
     }
 
-    /**
-     * Show the game scene.
-     */
+    /** Show the gameplay scene with default transition. */
     public void showGame() {
+        showGame(transitionManager.gameTransition());
+    }
+
+    private void showGame(TransitionStrategy transition) {
         stopActiveGame();
         Container container = new Container();
         Parent root = load("/com/game/arkanoid/fxml/GameView.fxml", loader -> {
@@ -70,12 +97,15 @@ public final class SceneNavigator {
                 throw buildUnknownController(cls);
             });
         });
-        Scene scene = new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
-        stage.setScene(scene);
+        setScene(SceneId.GAME, root, transition);
     }
 
-    /** Show the game-over screen. */
+    /** Show the game over scene with default transition. */
     public void showGameOver() {
+        showGameOver(transitionManager.gameOverTransition());
+    }
+
+    private void showGameOver(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
             loader.setControllerFactory(cls -> {
@@ -85,20 +115,20 @@ public final class SceneNavigator {
                 throw buildUnknownController(cls);
             });
         });
-        stage.setScene(new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT));
+        setScene(SceneId.GAME_OVER, root, transition);
     }
 
-    /**
-     * Exit the application.
-     */
+    /** Exit the application. */
     public void exit() {
         stage.close();
     }
 
+    private void setScene(SceneId sceneId, Parent root, TransitionStrategy transition) {
+        Scene scene = new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
+        stage.setScene(scene);
+        transitionManager.play(scene.getRoot(), transition, null);
+    }
 
-    /**
-     * Stop the active game if any.
-     */
     private void stopActiveGame() {
         if (activeGameController != null) {
             activeGameController.stop();
@@ -106,13 +136,7 @@ public final class SceneNavigator {
         }
     }
 
-    /**
-     * Load FXML resource with custom controller configuration.
-     * @param resource FXML resource path
-     * @param configurer controller configurer
-     * @return loaded Parent node
-     */
-    private Parent load(String resource, java.util.function.Consumer<FXMLLoader> configurer) {
+    private Parent load(String resource, Consumer<FXMLLoader> configurer) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         configurer.accept(loader);
         try {
@@ -127,11 +151,6 @@ public final class SceneNavigator {
         }
     }
 
-    /**
-     * Build exception for unknown controller requests.
-     * @param cls requested controller class
-     * @return  runtime exception
-     */
     private RuntimeException buildUnknownController(Class<?> cls) {
         return new IllegalArgumentException("Unsupported controller request: " + cls.getName());
     }

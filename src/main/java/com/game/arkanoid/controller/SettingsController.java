@@ -2,11 +2,14 @@ package com.game.arkanoid.controller;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.config.GameSettings.Difficulty;
-import com.game.arkanoid.view.SceneNavigator;
+import com.game.arkanoid.controller.SceneController;
+import com.game.arkanoid.view.sound.SoundRenderer;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Slider;
 
 /**
  * Controller that binds the Settings UI to the static configuration store.
@@ -19,9 +22,21 @@ public final class SettingsController {
     @FXML
     private ComboBox<Difficulty> difficultyCombo;
 
-    private final SceneNavigator navigator;
+    private final SceneController navigator;
+    private final SoundRenderer sound = SoundRenderer.getInstance();
 
-    public SettingsController(SceneNavigator navigator) {
+    @FXML
+    private Slider masterSlider;
+
+    @FXML
+    private Slider musicSlider;
+
+    @FXML
+    private Slider sfxSlider;
+
+    private double previousMasterVolume = GameSettings.getMasterVolume();
+
+    public SettingsController(SceneController navigator) {
         this.navigator = navigator;
     }
 
@@ -30,11 +45,39 @@ public final class SettingsController {
         difficultyCombo.getItems().setAll(Difficulty.values());
         difficultyCombo.getSelectionModel().select(GameSettings.getDifficulty());
         soundToggle.setSelected(GameSettings.isSoundEnabled());
+
+        masterSlider.valueProperty().bindBidirectional(sound.masterVolumeProperty());
+        musicSlider.valueProperty().bindBidirectional(sound.musicVolumeProperty());
+        sfxSlider.valueProperty().bindBidirectional(sound.sfxVolumeProperty());
+        masterSlider.valueProperty().addListener((obs, oldV, newV) -> {
+            if (!masterSlider.isDisabled()) {
+                previousMasterVolume = newV.doubleValue();
+            }
+        });
+
+        boolean enabled = GameSettings.isSoundEnabled();
+        masterSlider.setDisable(!enabled);
+        musicSlider.setDisable(!enabled);
+        sfxSlider.setDisable(!enabled);
+        if (enabled) {
+            previousMasterVolume = masterSlider.getValue();
+        }
     }
 
     @FXML
     private void onSoundToggled(ActionEvent event) {
-        GameSettings.setSoundEnabled(soundToggle.isSelected());
+        boolean enabled = soundToggle.isSelected();
+        GameSettings.setSoundEnabled(enabled);
+        if (enabled) {
+            double restoreValue = previousMasterVolume > 0 ? previousMasterVolume : 1.0;
+            sound.masterVolumeProperty().set(restoreValue);
+        } else {
+            previousMasterVolume = sound.masterVolumeProperty().get();
+            sound.masterVolumeProperty().set(0.0);
+        }
+        masterSlider.setDisable(!enabled);
+        musicSlider.setDisable(!enabled);
+        sfxSlider.setDisable(!enabled);
     }
 
     @FXML
