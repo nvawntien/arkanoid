@@ -1,16 +1,16 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.view.animator;
 
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
 
-public final class MenuView {
+public final class MenuAnimator {
     private Button left;
     private Button center;
     private Button right;
 
-    public MenuView(Button left, Button center, Button right) {
+    public MenuAnimator(Button left, Button center, Button right) {
         this.left = left;
         this.center = center;
         this.right = right;

@@ -1,4 +1,4 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.view.renderer;
 
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;

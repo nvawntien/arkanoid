@@ -1,6 +1,7 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.view.SceneNavigator;
+import com.game.arkanoid.controller.infra.SceneNavigator;
+
 import javafx.event.ActionEvent;
 
 /** Simple controller for the game over screen. */

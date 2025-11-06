@@ -1,4 +1,4 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.view.renderer;
 
 import com.game.arkanoid.models.Brick;
 import java.util.HashMap;

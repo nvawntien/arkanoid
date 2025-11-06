@@ -10,6 +10,7 @@ import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.services.RoundService;
 import com.game.arkanoid.services.PaddleService;
 import com.game.arkanoid.services.PowerUpService;
+import com.game.arkanoid.view.sound.SoundService;
 import com.game.arkanoid.utils.Constants;
 
 
@@ -36,23 +37,22 @@ public final class Container {
         );
 
         this.state = new GameState(ball, paddle);
-        this.state.lives = Constants.DEFAULT_LIVES;
-        this.state.score = Constants.DEFAULT_SCORE;
-        this.state.level = Constants.DEFAULT_LEVEL;
+        this.state.resetForLevel();
         this.state.basePaddleWidth = paddle.getWidth();
         this.state.basePaddleSpeed = paddle.getSpeed();
 
         BricksService bricksSvc = new BricksService();
-
         BallService ballSvc = new BallService();
         PaddleService paddleSvc = new PaddleService();
-        PowerUpService powerUpSvc = new PowerUpService();
+        SoundService soundSvc = SoundService.getInstance();
+        PowerUpService powerUpSvc = new PowerUpService(soundSvc);
 
         RoundService levelCtrl = new RoundService(bricksSvc, ballSvc);
         // Load level 1 from resources directory
         levelCtrl.loadLevel(this.state, 1);
 
-        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, levelCtrl);
+        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, levelCtrl, soundSvc);
+        this.game.bindState(this.state);
     }
 
     public GameState getGameState() {

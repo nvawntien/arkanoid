@@ -1,8 +1,6 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.view.renderer;
 
 import com.game.arkanoid.models.Paddle;
-import com.game.arkanoid.models.PowerUp;
-import com.game.arkanoid.utils.Constants;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -12,10 +10,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Collections;
 
 public final class PaddleRenderer implements Renderer<Paddle> {
@@ -26,37 +22,42 @@ public final class PaddleRenderer implements Renderer<Paddle> {
     private final List<Image> shrinkFrames = new ArrayList<>();
     private final List<Image> widePulsateFrames = new ArrayList<>();
     private Timeline currentAnimation;
-    private boolean introPlayed = false;
+    private AnimationTimer expandTimer, shrinkTimer;
     private double elapsedExpand = 0;
     private double elapsedShrink = 0;
+    private boolean isTransforming = false; // đang expand hoặc shrink
 
     public PaddleRenderer(Pane pane) {
         // Load intro frames
         for (int i = 1; i <= 15; i++) {
-            String path = String.format("/com/game/arkanoid/images/paddle_materialize_%d.png", i);
-            introFrames.add(new Image(getClass().getResourceAsStream(path)));
+            introFrames.add(new Image(getClass().getResourceAsStream(
+                String.format("/com/game/arkanoid/images/paddle_materialize_%d.png", i)
+            )));
         }
 
         // Load pulsate frames
         for (int i = 1; i <= 4; i++) {
-            String path = String.format("/com/game/arkanoid/images/paddle_pulsate_%d.png", i);
-            pulsateFrames.add(new Image(getClass().getResourceAsStream(path)));
+            pulsateFrames.add(new Image(getClass().getResourceAsStream(
+                String.format("/com/game/arkanoid/images/paddle_pulsate_%d.png", i)
+            )));
         }
 
         // Load wide frames
         for (int i = 1; i <= 9; i++) {
-            String path = String.format("/com/game/arkanoid/images/paddle_wide_%d.png", i);
-            wideFrames.add(new Image(getClass().getResourceAsStream(path)));
+            wideFrames.add(new Image(getClass().getResourceAsStream(
+                String.format("/com/game/arkanoid/images/paddle_wide_%d.png", i)
+            )));
         }
 
-        // Load shrink frames
+        // shrink là wide đảo ngược
         shrinkFrames.addAll(wideFrames);
         Collections.reverse(shrinkFrames);
 
         // Load wide pulsate frames
         for (int i = 1; i <= 4; i++) {
-            String path = String.format("/com/game/arkanoid/images/paddle_wide_pulsate_%d.png", i);
-            widePulsateFrames.add(new Image(getClass().getResourceAsStream(path)));
+            widePulsateFrames.add(new Image(getClass().getResourceAsStream(
+                String.format("/com/game/arkanoid/images/paddle_wide_pulsate_%d.png", i)
+            )));
         }
 
         node = new ImageView(introFrames.get(0));
@@ -66,10 +67,15 @@ public final class PaddleRenderer implements Renderer<Paddle> {
 
     @Override
     public void render(Paddle paddle) { 
+        // 🟢 Chỉ cập nhật vị trí, KHÔNG ép kích thước trong lúc animation đang chạy
         node.setTranslateX(paddle.getX());
         node.setTranslateY(paddle.getY());
-        node.setFitWidth(paddle.getWidth());
-        node.setFitHeight(paddle.getHeight());
+
+        if (!isTransforming) {
+            // Chỉ update kích thước khi paddle ở trạng thái tĩnh (normal/pulsate)
+            node.setFitWidth(paddle.getWidth());
+            node.setFitHeight(paddle.getHeight());
+        }
     }
     
     @Override
@@ -80,25 +86,26 @@ public final class PaddleRenderer implements Renderer<Paddle> {
     // --- Animation controls ---
     public void playIntro() {
         if (introFrames.isEmpty()) return;
-        playFrameSequence(introFrames, 80, false, () -> startPulsate());
+        playFrameSequence(introFrames, 80, false, this::startPulsate);
     }
 
     public void startPulsate() {
         if (pulsateFrames.isEmpty()) return;
+        isTransforming = false;
         playFrameSequence(pulsateFrames, 100, true, null);
     }
 
     public void playExpand(Runnable onFinished) {
         stopAnimation();
 
-        final int FRAME_COUNT = wideFrames.size();   // số frame mở rộng
-        final double FRAME_DURATION = 0.08;          // thời gian 1 frame (giây)
+        final int FRAME_COUNT = wideFrames.size();
+        final double FRAME_DURATION = 0.02;
         final double TOTAL_DURATION = FRAME_COUNT * FRAME_DURATION;
         elapsedExpand = 0;
+        isTransforming = true;
 
-        AnimationTimer expandTimer = new AnimationTimer() {
+        expandTimer = new AnimationTimer() {
             private long lastTime = 0;
-
             @Override
             public void handle(long now) {
                 if (lastTime == 0) {
@@ -110,42 +117,40 @@ public final class PaddleRenderer implements Renderer<Paddle> {
                 lastTime = now;
                 elapsedExpand += delta;
 
-                // Tính frame hiện tại
                 int currentFrame = Math.min((int)(elapsedExpand / FRAME_DURATION), FRAME_COUNT - 1);
+                Image frame = wideFrames.get(currentFrame);
+                node.setImage(frame);
+                node.setFitWidth(frame.getWidth());
+                node.setFitHeight(frame.getHeight());
 
-                // Cập nhật hình ảnh
-                node.setImage(wideFrames.get(currentFrame));
-
-                // Khi đã tới frame cuối cùng
                 if (elapsedExpand >= TOTAL_DURATION) {
                     stop();
-                    startWidePulsate(); // chuyển sang animation pulsate
+                    isTransforming = false;
+                    startWidePulsate();
                     if (onFinished != null) onFinished.run();
                 }
             }
         };
-
         expandTimer.start();
     }
 
-
-
     public void startWidePulsate() {
         if (widePulsateFrames.isEmpty()) return;
+        isTransforming = false;
         playFrameSequence(widePulsateFrames, 100, true, null);
     }
 
     public void playShrink(Runnable onFinished) {
         stopAnimation();
 
-        final int FRAME_COUNT = shrinkFrames.size();   // số frame thu nhỏ
-        final double FRAME_DURATION = 0.08;          // thời gian 1 frame (giây)
+        final int FRAME_COUNT = shrinkFrames.size();
+        final double FRAME_DURATION = 0.02;
         final double TOTAL_DURATION = FRAME_COUNT * FRAME_DURATION;
         elapsedShrink = 0;
+        isTransforming = true;
 
-        AnimationTimer shrinkTimer = new AnimationTimer() {
+        shrinkTimer = new AnimationTimer() {
             private long lastTime = 0;
-
             @Override
             public void handle(long now) {
                 if (lastTime == 0) {
@@ -157,27 +162,27 @@ public final class PaddleRenderer implements Renderer<Paddle> {
                 lastTime = now;
                 elapsedShrink += delta;
 
-                // Tính frame hiện tại
                 int currentFrame = Math.min((int)(elapsedShrink / FRAME_DURATION), FRAME_COUNT - 1);
+                Image frame = shrinkFrames.get(currentFrame);
+                node.setImage(frame);
+                node.setFitWidth(frame.getWidth());
+                node.setFitHeight(frame.getHeight());
 
-                // Cập nhật hình ảnh
-                node.setImage(shrinkFrames.get(currentFrame));
-
-                // Khi đã tới frame cuối cùng
                 if (elapsedShrink >= TOTAL_DURATION) {
                     stop();
-                    startPulsate(); // chuyển sang animation pulsate
+                    isTransforming = false;
+                    startPulsate();
                     if (onFinished != null) onFinished.run();
                 }
             }
         };
-
         shrinkTimer.start();
     }
 
-
     public void stopAnimation() {
         if (currentAnimation != null) currentAnimation.stop();
+        if (expandTimer != null) expandTimer.stop();
+        if (shrinkTimer != null) shrinkTimer.stop();
     }
 
     private void playFrameSequence(List<Image> frames, double frameDurationMs, boolean loop, Runnable onFinished) {
@@ -187,7 +192,11 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         for (int i = 0; i < frames.size(); i++) {
             Image frame = frames.get(i);
             currentAnimation.getKeyFrames().add(
-                new KeyFrame(Duration.millis(i * frameDurationMs), e -> node.setImage(frame))
+                new KeyFrame(Duration.millis(i * frameDurationMs), e -> {
+                    node.setImage(frame);
+                    node.setFitWidth(frame.getWidth());
+                    node.setFitHeight(frame.getHeight());
+                })
             );
         }
 

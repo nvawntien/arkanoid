@@ -131,7 +131,8 @@
             <id>default-cli</id>
             <configuration>
               <mainClass>com.game.arkanoid/com.game.arkanoid.app.Main</mainClass>
-              <jvmArgs>--enable-native-access=javafx.graphics</jvmArgs>
+                <!-- enable native access and ensure javafx.media module is available at runtime -->
+                <jvmArgs>--enable-native-access=javafx.graphics --add-modules=javafx.media</jvmArgs>
               <launcher>app</launcher>
               <jlinkZipName>app</jlinkZipName>
               <jlinkImageName>app</jlinkImageName>
