@@ -1,5 +1,6 @@
 package com.game.arkanoid.services;
 
+import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.events.BrickDestroyedEvent;
 import com.game.arkanoid.events.BrickHitEvent;
 import com.game.arkanoid.events.GameEventBus;
@@ -12,8 +13,10 @@ import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.models.PowerUp;
+import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.utils.Constants;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Core game orchestration logic. Talks only to other services/models, publishing events for
@@ -25,6 +28,7 @@ public final class GameService {
     private final PaddleService paddleSvc;
     private final BricksService bricksSvc;
     private final PowerUpService powerUpSvc;
+    private final BulletService bulletSvc;
     private final RoundService roundSvc;
     private GameState boundState;
 
@@ -33,12 +37,14 @@ public final class GameService {
             PaddleService paddleSvc,
             BricksService bricksSvc,
             PowerUpService powerUpSvc,
+            BulletService bulletSvc,
             RoundService roundSvc
     ) {
         this.ballSvc = ballSvc;
         this.paddleSvc = paddleSvc;
         this.bricksSvc = bricksSvc;
         this.powerUpSvc = powerUpSvc;
+        this.bulletSvc = bulletSvc;
         this.roundSvc = roundSvc;
     }
 
@@ -53,10 +59,13 @@ public final class GameService {
 
         double scaledDt = dt * state.timeScale;
 
+        bulletSvc.tickCooldown(state, scaledDt);
         handleInput(state, in, scaledDt, worldW);
         updatePrimaryBall(state, scaledDt, worldW, worldH);
         updateSecondaryBalls(state, scaledDt, worldW, worldH);
+        updateBullets(state, scaledDt, worldH);
         powerUpSvc.update(state, scaledDt, worldW, worldH);
+        checkLevelCleared(state);
     }
 
     private void handleInput(GameState state, InputState in, double dt, double worldW) {
@@ -72,6 +81,9 @@ public final class GameService {
         }
         if (in.launch && !state.ball.isMoving()) {
             ballSvc.launch(state.ball);
+        }
+        if (in.fire && state.activePowerUps.containsKey(PowerUpType.LASER_PADDLE)) {
+            bulletSvc.tryFire(state, state.paddle);
         }
     }
 
@@ -115,6 +127,25 @@ public final class GameService {
         }
     }
 
+    private void updateBullets(GameState state, double dt, double worldH) {
+        List<BulletService.Impact> impacts = bulletSvc.update(state, state.bricks, dt, worldH);
+        for (BulletService.Impact impact : impacts) {
+            Brick brick = impact.brick();
+
+            // 1) giống như bóng: để bricksSvc xử lý hit + set destroyed nếu đủ
+            boolean destroyed = bricksSvc.handleBrickHit(brick);
+
+            // 2) fire sự kiện hit (trước hay sau handleBrickHit đều ok, giữ consistent với luồng bóng)
+            GameEventBus.getInstance().publish(new BrickHitEvent(brick));
+
+            // 3) nếu đã phá
+            if (destroyed) {
+                processDestroyedBrick(state, brick); // spawn powerup + cộng điểm + re-check clear
+            }
+        }
+    }
+
+
     private void handlePaddleCollision(Ball ball, GameState state) {
         if (ballSvc.checkCollision(ball, state.paddle)) {
             ballSvc.bounceOff(ball, state.paddle);
@@ -134,16 +165,7 @@ public final class GameService {
                 GameEventBus.getInstance().publish(new BrickHitEvent(brick));
                 boolean destroyed = bricksSvc.handleBrickHit(brick);
                 if (destroyed) {
-                    state.score += 100;
-                    GameEventBus.getInstance().publish(new BrickDestroyedEvent(brick));
-                    PowerUp spawned = null;
-                    if (countAliveBricks(state) > 1) {
-                        spawned = powerUpSvc.spawnPowerUpIfAny(brick.getX(), brick.getY(), brick.getWidth());
-                    }
-                    if (spawned != null) {
-                        state.powerUps.add(spawned);
-                    }
-                    checkLevelCleared(state);
+                    processDestroyedBrick(state, brick);
                 }
                 break;
             }
@@ -161,14 +183,34 @@ public final class GameService {
     }
 
     private void checkLevelCleared(GameState state) {
+        // Nếu đang chờ transition thì bỏ qua
         if (state.levelTransitionPending) {
             return;
         }
+
+        // Kiểm tra xem còn gạch không
         if (bricksSvc.allBricksCleared(state.bricks)) {
+            System.out.println("[GameService] All bricks cleared at level " + state.level);
             state.levelTransitionPending = true;
             state.running = false;
+
+            // Phát sự kiện LevelCleared
             GameEventBus.getInstance().publish(new LevelClearedEvent(state.level));
         }
+    }
+
+
+    private void processDestroyedBrick(GameState state, Brick brick) {
+        state.score++;
+        GameEventBus.getInstance().publish(new BrickDestroyedEvent(brick));
+        PowerUp spawned = null;
+        if (countAliveBricks(state) > 1) {
+            spawned = powerUpSvc.spawnPowerUpIfAny(brick.getX(), brick.getY(), brick.getWidth());
+        }
+        if (spawned != null) {
+            state.powerUps.add(spawned);
+        }
+        checkLevelCleared(state);
     }
 
     private void copyBallState(Ball source, Ball target) {

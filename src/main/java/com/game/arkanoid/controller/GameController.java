@@ -1,10 +1,12 @@
 package com.game.arkanoid.controller;
 
+import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.view.renderer.BallRenderer;
+import com.game.arkanoid.view.renderer.BulletRenderer;
 import com.game.arkanoid.view.renderer.BricksRenderer;
 import com.game.arkanoid.view.renderer.ExtraBallsRenderer;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
@@ -51,8 +53,8 @@ public final class GameController {
     @FXML private HBox lifeBox;
     @FXML private StackPane overlayLayer;
     @FXML private StackPane bannerLayer;
-    @FXML private Label bannerLabel;
     @FXML private Label livesLabel;
+    @FXML private Label bannerLabel;
     @FXML private Label scoreLabel;
     @FXML private Label highScoreLabel;
 
@@ -70,6 +72,7 @@ public final class GameController {
     private BricksRenderer bricksRenderer;
     private ExtraBallsRenderer extraBallsRenderer;
     private PowerUpRenderer powerUpRenderer;
+    private BulletRenderer bulletRenderer;
 
     // --- State Tracking ---
     private AnimationTimer loop;
@@ -127,6 +130,7 @@ public final class GameController {
                 ballRenderer.render(gameState.ball);
                 extraBallsRenderer.render(gameState.extraBalls);
                 powerUpRenderer.render(gameState.powerUps);
+                bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
 
                 // Update HUD
@@ -153,6 +157,7 @@ public final class GameController {
         in.left   = activeKeys.contains(KeyCode.LEFT)  || activeKeys.contains(KeyCode.A);
         in.right  = activeKeys.contains(KeyCode.RIGHT) || activeKeys.contains(KeyCode.D);
         in.launch = activeKeys.contains(KeyCode.SPACE);
+        in.fire   = activeKeys.contains(KeyCode.SPACE);
         return in;
     }
 
@@ -210,23 +215,33 @@ public final class GameController {
 
     private void onLevelCleared(LevelClearedEvent event) {
         Platform.runLater(() -> {
+            System.out.println("[GameController] LevelClearedEvent received for level " + event.level());
+
+            // Hiện banner thông báo
             bannerLayer.setVisible(true);
             bannerLayer.setManaged(true);
             bannerLabel.setText("LEVEL " + event.level() + " CLEARED!");
 
+            // Dừng 1.2 giây trước khi chuyển màn
             PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
             pause.setOnFinished(e -> {
+                System.out.println("[GameController] Loading next level...");
                 gameService.loadNextLevel(gameState);
+
+                // Nếu hết level thì quay lại menu
                 if (gameState.gameCompleted) {
+                    System.out.println("[GameController] Game completed!");
                     stopLoopAndNavigate(SceneId.MENU, navigator.transitions().menuTransition());
                     return;
                 }
+
                 lastLevelObserved = gameState.level;
                 startLevelIntro();
             });
             pause.play();
         });
     }
+
 
     private void trackLevelTransition() {
         int currentLevel = gameState.level;
@@ -237,7 +252,11 @@ public final class GameController {
     }
 
     private void startLevelIntro() {
-        if (levelIntroSequence != null) levelIntroSequence.stop();
+        if (levelIntroSequence != null) {
+            levelIntroSequence.stop();
+        }
+
+        System.out.println("[GameController] Starting level intro for level " + gameState.level);
 
         bannerLayer.setVisible(true);
         bannerLayer.setManaged(true);
@@ -250,12 +269,14 @@ public final class GameController {
 
         levelIntroSequence = new SequentialTransition(showLevel, countdown3, countdown2, countdown1);
         levelIntroSequence.setOnFinished(e -> {
+            System.out.println("[GameController] Countdown finished → startNextLevel()");
             bannerLayer.setVisible(false);
             bannerLayer.setManaged(false);
             gameService.startNextLevel(gameState);
         });
         levelIntroSequence.playFromStart();
     }
+
 
     private PauseTransition createBannerStep(String text, double seconds) {
         PauseTransition pt = new PauseTransition(Duration.seconds(seconds));
@@ -363,6 +384,7 @@ public final class GameController {
         bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
         extraBallsRenderer = new ExtraBallsRenderer(gamePane);
         powerUpRenderer = new PowerUpRenderer(gamePane);
+        bulletRenderer = new BulletRenderer(gamePane);
 
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);
@@ -380,6 +402,8 @@ public final class GameController {
         if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
         if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
     }
+
+    
 
     private void refreshLifeIcons() {
         if (gameState.lives != lastLifeCount) {

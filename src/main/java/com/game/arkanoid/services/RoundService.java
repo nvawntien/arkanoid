@@ -37,7 +37,9 @@ public final class RoundService {
         bricksService.recalculateBricksRemaining(state.bricks);
         state.extraBalls.clear();
         state.powerUps.clear();
+        state.bullets.clear();
         state.activePowerUps.clear();
+        state.laserCooldown = 0.0;
         // Reset ball on paddle for new level
         ballService.resetOnPaddle(state.ball, state.paddle);
     }
@@ -46,10 +48,31 @@ public final class RoundService {
      * Advance to the next level if any. If already at the last level, mark the game as completed.
      */
     public void loadNextLevel(GameState state) {
-        if (state.level >= levelResources.length) {
+        System.out.println("[RoundService] Loading next level... current=" + state.level);
+
+        // Nếu vượt quá số level thì kết thúc game
+        if (state.level >= levelResources.length - 1) {
             state.gameCompleted = true;
+            System.out.println("[RoundService] Game completed!");
             return;
         }
+
+        // Tăng level và nạp level mới
         loadLevel(state, state.level + 1);
+        System.out.println("[RoundService] Now at level " + state.level);
+
+        // Reset flags
+        state.levelTransitionPending = false;
+        state.running = false;  // sẽ được bật ở startNextLevel()
+        state.paused = true;
+
+        // Dọn dẹp entity
+        state.extraBalls.clear();
+        state.powerUps.clear();
+        state.bullets.clear();
+
+        // Reset bóng về paddle
+        state.ball.setMoving(false);
     }
+
 }

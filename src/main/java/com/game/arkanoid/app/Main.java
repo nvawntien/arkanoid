@@ -3,6 +3,7 @@ package com.game.arkanoid.app;
 import com.game.arkanoid.controller.SceneController;
 
 import javafx.application.Application;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class Main extends Application {
