@@ -1,5 +1,8 @@
 package com.game.arkanoid.controller;
 
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
+import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.services.GameService;
@@ -9,6 +12,9 @@ import com.game.arkanoid.view.ExtraBallsRenderer;
 import com.game.arkanoid.view.PaddleRenderer;
 import com.game.arkanoid.view.PowerUpRenderer;
 import com.game.arkanoid.view.SceneNavigator;
+
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javafx.animation.AnimationTimer;
@@ -27,6 +33,7 @@ public final class GameController {
     private final GameService gameService;
     private final GameState gameState;
     private final SceneNavigator navigator;
+    private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
 
     private BallRenderer ballRenderer;
     private PaddleRenderer paddleRenderer;
@@ -47,12 +54,8 @@ public final class GameController {
 
     @FXML
     public void initialize() {
-        paddleRenderer = new PaddleRenderer(gamePane);
-        ballRenderer = new BallRenderer(gamePane, gameState.ball);
-        bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
-        extraBallsRenderer = new ExtraBallsRenderer(gamePane);
-        powerUpRenderer = new PowerUpRenderer(gamePane);
-
+        setUpRenderers();
+        registerEventListeners();
         gamePane.setOnKeyPressed(event -> {
             KeyCode code = event.getCode();
             if (code == KeyCode.ESCAPE) {
@@ -71,7 +74,15 @@ public final class GameController {
         Platform.runLater(gamePane::requestFocus);
         // Play paddle intro animation
         paddleRenderer.playIntro();
-        
+        startGameLoop();
+    }
+
+    private void registerEventListeners() {
+        subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpActivatedEvent.class, paddleRenderer::onPowerUpActivated));
+        subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpExpiredEvent.class, paddleRenderer::onPowerUpExpired));
+    }
+
+    private void startGameLoop() {
         loop = new AnimationTimer() {
             private long last = -1;
 
@@ -86,7 +97,7 @@ public final class GameController {
                 last = now;
 
                 InputState in = readInput();
-                gameService.update(gameState, paddleRenderer, in, dt, gamePane.getWidth(), gamePane.getHeight());
+                gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
                 
                
                 paddleRenderer.render(gameState.paddle);
@@ -95,9 +106,7 @@ public final class GameController {
                 powerUpRenderer.render(gameState.powerUps);
                 bricksRenderer.render(gameState.bricks);
 
-                if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
-                if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
-                if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
+                updateHud();
 
                 if (gameState.gameOver) {
                     stop();
@@ -115,6 +124,20 @@ public final class GameController {
         loop.start();
     }
 
+    private void updateHud() {
+        if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
+        if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
+        if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
+    }
+
+    private void setUpRenderers() {
+        paddleRenderer = new PaddleRenderer(gamePane);
+        ballRenderer = new BallRenderer(gamePane, gameState.ball);
+        bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
+        extraBallsRenderer = new ExtraBallsRenderer(gamePane);
+        powerUpRenderer = new PowerUpRenderer(gamePane);
+    }
+
     private InputState readInput() {
         InputState in = new InputState();
         in.left = activeKeys.contains(KeyCode.LEFT) || activeKeys.contains(KeyCode.A);
@@ -127,5 +150,8 @@ public final class GameController {
         if (loop != null) {
             loop.stop();
         }
+
+        subscriptions.forEach(GameEventBus.Subscription::close);
+        subscriptions.clear();
     }
 }

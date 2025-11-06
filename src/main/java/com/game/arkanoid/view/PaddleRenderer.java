@@ -1,5 +1,7 @@
 package com.game.arkanoid.view;
 
+import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
+import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
 import com.game.arkanoid.models.Paddle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -79,6 +81,30 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         node = new ImageView(introFrames.get(0));
         node.setSmooth(true);
         pane.getChildren().add(node);
+    }
+
+    public void onPowerUpActivated(PowerUpActivatedEvent event) {
+        switch (event.type()) {
+            case EXPAND_PADDLE -> {
+                playExpand(null);
+            }
+            case LASER_PADDLE -> {
+                playLaser(null);
+            }
+            default -> {}
+        }
+    }
+
+    public void onPowerUpExpired(PowerUpExpiredEvent event) {
+        switch (event.type()) {
+            case EXPAND_PADDLE -> {
+                playShrink(null);
+            }
+            case LASER_PADDLE -> {
+                startPulsate();
+            }
+            default -> {}
+        }
     }
 
     @Override
@@ -199,7 +225,7 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         stopAnimation();
 
         final int FRAME_COUNT = laserFrames.size();
-        final double FRAME_DURATION = 0.08;
+        final double FRAME_DURATION = 0.06;
         final double TOTAL_DURATION = FRAME_COUNT * FRAME_DURATION;
         elapsedLaser = 0;
         isTransforming = true;

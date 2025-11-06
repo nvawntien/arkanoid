@@ -25,7 +25,7 @@ public final class GameService {
         this.roundSvc = roundSvc;
     }
 
-    public void update(GameState state, PaddleRenderer paddleRenderer, InputState in, double dt, double worldW, double worldH) {
+    public void update(GameState state, InputState in, double dt, double worldW, double worldH) {
         if (!state.running) {
             return;
         }
@@ -39,7 +39,7 @@ public final class GameService {
         handleInput(state, in, scaledDt, worldW);
         updatePrimaryBall(state, scaledDt, worldW, worldH);
         updateSecondaryBalls(state, scaledDt, worldW, worldH);
-        powerUpSvc.update(ballSvc, paddleRenderer, state, scaledDt, worldW, worldH);
+        powerUpSvc.update(state, scaledDt, worldW, worldH);
 
         // Level progression
         if (bricksSvc.allBricksCleared(state.bricks)) {
