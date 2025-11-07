@@ -1,6 +1,5 @@
 package com.game.arkanoid.services;
 
-import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.events.*;
 import com.game.arkanoid.models.*;
 import com.game.arkanoid.utils.Constants;

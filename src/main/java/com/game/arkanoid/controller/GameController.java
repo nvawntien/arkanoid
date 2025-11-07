@@ -220,6 +220,12 @@ public final class GameController {
 
             bannerLayer.setVisible(true);
             bannerLayer.setManaged(true);
+            // Apply bigger style for cleared banner; remove countdown style
+            bannerLabel.getStyleClass().remove("level-banner-countdown");
+            bannerLabel.getStyleClass().remove("level-banner-start");
+            if (!bannerLabel.getStyleClass().contains("level-banner-cleared")) {
+                bannerLabel.getStyleClass().add("level-banner-cleared");
+            }
             bannerLabel.setText("LEVEL " + event.level() + " CLEARED!");
 
             PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
@@ -287,7 +293,35 @@ public final class GameController {
     private PauseTransition createBannerStep(String text, double seconds) {
         PauseTransition pt = new PauseTransition(Duration.seconds(seconds));
         pt.statusProperty().addListener((obs, oldStatus, newStatus) -> {
-            if (newStatus == Animation.Status.RUNNING) bannerLabel.setText(text);
+            if (newStatus == Animation.Status.RUNNING) {
+                bannerLabel.setText(text);
+
+                // Determine which banner variant to show
+                boolean isCountdown = text.chars().allMatch(Character::isDigit);
+                boolean isCleared = text.contains("CLEARED!");
+                boolean isLevelStart = text.startsWith("LEVEL ") && text.length() > 6 &&
+                        text.substring(6).chars().allMatch(Character::isDigit);
+
+                // Reset all variant classes first
+                bannerLabel.getStyleClass().remove("level-banner-countdown");
+                bannerLabel.getStyleClass().remove("level-banner-cleared");
+                bannerLabel.getStyleClass().remove("level-banner-start");
+
+                // Apply appropriate class
+                if (isCountdown) {
+                    if (!bannerLabel.getStyleClass().contains("level-banner-countdown")) {
+                        bannerLabel.getStyleClass().add("level-banner-countdown");
+                    }
+                } else if (isCleared) {
+                    if (!bannerLabel.getStyleClass().contains("level-banner-cleared")) {
+                        bannerLabel.getStyleClass().add("level-banner-cleared");
+                    }
+                } else if (isLevelStart) {
+                    if (!bannerLabel.getStyleClass().contains("level-banner-start")) {
+                        bannerLabel.getStyleClass().add("level-banner-start");
+                    }
+                }
+            }
         });
         return pt;
     }

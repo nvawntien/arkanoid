@@ -5,7 +5,6 @@ import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.PowerUpActivatedEvent;
 import com.game.arkanoid.events.PowerUpExpiredEvent;
 import com.game.arkanoid.models.Ball;
-import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.models.PowerUp;

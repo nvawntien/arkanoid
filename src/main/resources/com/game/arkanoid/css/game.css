@@ -155,3 +155,21 @@
     -fx-font-weight: bold;
     -fx-alignment: center;
 }
+
+/* Larger, bolder style specifically for countdown numbers (3,2,1) */
+.level-banner-countdown {
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+}
+
+/* Bigger style for the "LEVEL X CLEARED!" banner */
+.level-banner-cleared {
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+}
+
+/* Bigger style for the "LEVEL X" banner at level start */
+.level-banner-start {
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+}
