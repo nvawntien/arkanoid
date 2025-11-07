@@ -11,6 +11,9 @@ import com.game.arkanoid.utils.Constants;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.function.Consumer;
+
+import javafx.application.Platform;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -83,13 +86,15 @@ public final class SceneController {
 
     /** Show the gameplay scene with default transition. */
     public void showGame() {
-        showGame(transitionManager.gameTransition());
+        // Start from Round 1 using the new per-round FXMLs
+        showGameRound(1);
     }
 
     private void showGame(TransitionStrategy transition) {
+        // Keep compatibility if explicitly called, but prefer showGameRound
         stopActiveGame();
-        Container container = new Container();
-        Parent root = load("/com/game/arkanoid/fxml/GameView.fxml", loader -> {
+        Container container = Container.getInstance();
+        Parent root = load("/com/game/arkanoid/fxml/Round1View.fxml", loader -> {
             loader.setControllerFactory(cls -> {
                 if (cls == GameController.class) {
                     return new GameController(container.getGameState(), container.getGameService(), this);
@@ -99,6 +104,26 @@ public final class SceneController {
         });
         setScene(SceneId.GAME, root, transition);
     }
+
+    public void showGameRound(int round) {
+        stopActiveGame();
+        Container container = Container.getInstance();
+
+        // Tạo đường dẫn tương ứng với round
+        String path = String.format("/com/game/arkanoid/fxml/Round%dView.fxml", round);
+
+        Parent root = load(path, loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == GameController.class) {
+                    return new GameController(container.getGameState(), container.getGameService(), this);
+                }
+                throw buildUnknownController(cls);
+            });
+        });
+
+        setScene(SceneId.GAME, root, transitionManager.levelBannerTransition());
+    }
+
 
     /** Show the game over scene with default transition. */
     public void showGameOver() {
@@ -126,7 +151,7 @@ public final class SceneController {
     private void setScene(SceneId sceneId, Parent root, TransitionStrategy transition) {
         Scene scene = new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
         stage.setScene(scene);
-        transitionManager.play(scene.getRoot(), transition, null);
+        Platform.runLater(() -> transitionManager.play(scene.getRoot(), transition, null));
     }
 
     private void stopActiveGame() {
