@@ -8,9 +8,9 @@
     <children>
       <Pane prefHeight="800.0" prefWidth="600.0" styleClass="menu-root">
          <children>
-                <Button fx:id="startButton" defaultButton="true" focusTraversable="false" layoutX="210.0" layoutY="612.0" onAction="#onStartGame" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
+                <Button fx:id="startButton" defaultButton="false" focusTraversable="false" layoutX="210.0" layoutY="612.0" onAction="#onStartGame" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
                 <Button fx:id="optionButton" focusTraversable="false" layoutY="538.0" minHeight="0.0" minWidth="0.0" onAction="#onOpenSettings" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
-                <Button fx:id="exitButton" cancelButton="true" focusTraversable="false" layoutX="420.0" layoutY="538.0" onAction="#onExit" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
+                <Button fx:id="exitButton" cancelButton="false" focusTraversable="false" layoutX="420.0" layoutY="538.0" onAction="#onExit" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
          </children>
       </Pane>
     </children>

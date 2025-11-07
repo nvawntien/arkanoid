@@ -13,21 +13,19 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
-import javafx.util.Duration;
 
 public final class GameController {
 
-    @FXML
-    private Button Pause;
-    @FXML
-    private Pane gamePane;
-    @FXML
-    private MediaView vidStart;
+    @FXML private Button Pause;
+    @FXML private Pane gamePane;
+    @FXML private Pane bgGame;
+
+    @FXML private Label livesLabel;
+    @FXML private Label scoreLabel;
+    @FXML private Label highScoreLabel;
 
     private final Set<KeyCode> activeKeys = new HashSet<>();
     private final GameService gameService;
@@ -41,8 +39,6 @@ public final class GameController {
     private PowerUpRenderer powerUpRenderer;
     private AnimationTimer loop;
 
-    private MediaPlayer mediaPlayer;
-
     public GameController(GameState gameState, GameService gameService, SceneNavigator navigator) {
         this.gameState = gameState;
         this.gameService = gameService;
@@ -51,48 +47,35 @@ public final class GameController {
 
     @FXML
     public void initialize() {
-        setupIntroVideo();
+        bgGame.setVisible(true);
+        setLevelBackground(gameState.level);
+        startGameLoop();
     }
 
-    private void setupIntroVideo() {
-        try {
-            // Đường dẫn video trong resources
-            String videoPath = getClass().getResource("/com/game/arkanoid/videos/intro.mp4").toExternalForm();
-            Media media = new Media(videoPath);
-            mediaPlayer = new MediaPlayer(media);
-            vidStart.setMediaPlayer(mediaPlayer);
-            vidStart.setPreserveRatio(true);
+    /**
+     * 💡 Gán class CSS nền theo level.
+     */
+    private void setLevelBackground(int level) {
+        // Xóa tất cả class cũ để tránh bị chồng style
+        bgGame.getStyleClass().removeAll("level-1", "level-2", "level-3", "level-4", "level-5");
 
-            // Ẩn game khi video đang phát
-            gamePane.setVisible(false);
-
-            // Khi video phát xong → ẩn video, hiện game
-            mediaPlayer.setOnEndOfMedia(() -> {
-                vidStart.setVisible(false);
-                gamePane.setVisible(true);
-                startGameLoop();
-            });
-
-            // Bắt đầu phát video
-            mediaPlayer.setVolume(0); // Nếu bạn không cần âm thanh
-            mediaPlayer.play();
-
-        } catch (Exception e) {
-            System.err.println("Không thể tải video intro: " + e.getMessage());
-            // Nếu lỗi → bỏ qua video, vào game luôn
-            vidStart.setVisible(false);
-            gamePane.setVisible(true);
-            startGameLoop();
+        switch (level) {
+            case 2 -> bgGame.getStyleClass().add("level-2");
+            case 3 -> bgGame.getStyleClass().add("level-3");
+            case 4 -> bgGame.getStyleClass().add("level-4");
+            case 5 -> bgGame.getStyleClass().add("level-5");
+            default -> bgGame.getStyleClass().add("level-1"); // ⚠️ bạn viết nhầm 'bggame' ở bản cũ
         }
     }
 
     private void startGameLoop() {
-        paddleRenderer = new PaddleRenderer(gamePane, gameState.paddle);
+        paddleRenderer = new PaddleRenderer(gamePane);
         ballRenderer = new BallRenderer(gamePane, gameState.ball);
         bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
         extraBallsRenderer = new ExtraBallsRenderer(gamePane);
         powerUpRenderer = new PowerUpRenderer(gamePane);
 
+        // Lắng nghe phím
         gamePane.setOnKeyPressed(event -> {
             KeyCode code = event.getCode();
             if (code == KeyCode.ESCAPE) {
@@ -111,6 +94,9 @@ public final class GameController {
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);
 
+        // Chạy animation paddle
+        paddleRenderer.playIntro();
+
         loop = new AnimationTimer() {
             private long last = -1;
 
@@ -127,11 +113,32 @@ public final class GameController {
                 InputState in = readInput();
                 gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
 
+                // Render từng thành phần
                 paddleRenderer.render(gameState.paddle);
                 ballRenderer.render(gameState.ball);
                 extraBallsRenderer.render(gameState.extraBalls);
                 powerUpRenderer.render(gameState.powerUps);
                 bricksRenderer.render(gameState.bricks);
+
+                // HUD
+                if (livesLabel != null)
+                    livesLabel.setText("1UP " + Math.max(0, gameState.lives));
+                if (scoreLabel != null)
+                    scoreLabel.setText(Integer.toString(gameState.score));
+                if (highScoreLabel != null)
+                    highScoreLabel.setText("HIGH SCORE 00000");
+
+                // Kiểm tra trạng thái game
+                if (gameState.gameOver) {
+                    stop();
+                    navigator.showGameOver();
+                    return;
+                }
+
+                if (gameState.gameCompleted) {
+                    stop();
+                    navigator.showMenu();
+                }
             }
         };
 
@@ -147,12 +154,7 @@ public final class GameController {
     }
 
     public void stop() {
-        if (loop != null) {
-            loop.stop();
-        }
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-        }
+        if (loop != null) loop.stop();
     }
 
     @FXML

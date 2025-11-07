@@ -1,55 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane
-    xmlns="http://javafx.com/javafx/25"
-    xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="com.game.arkanoid.controller.GameController"
-    stylesheets="@../css/game.css"
-    prefWidth="600.0" prefHeight="800.0">
+<AnchorPane prefHeight="800.0" prefWidth="600.0" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.GameController">
 
     <children>
-
-        <!-- Video Intro (hiện đầu tiên) -->
-        <MediaView fx:id="vidStart"
-                   fitWidth="600.0"
-                   fitHeight="800.0"
-                   preserveRatio="true"
-                   AnchorPane.topAnchor="0.0"
-                   AnchorPane.leftAnchor="0.0"
-                   AnchorPane.rightAnchor="0.0"
-                   AnchorPane.bottomAnchor="0.0" />
-
-        <!-- Game Pane (ẩn khi video đang chạy) -->
-        <Pane fx:id="gamePane"
-              prefWidth="600.0" prefHeight="800.0"
-              visible="false"
-              AnchorPane.topAnchor="0.0"
-              AnchorPane.leftAnchor="0.0"
-              AnchorPane.rightAnchor="0.0"
-              AnchorPane.bottomAnchor="0.0">
+        <!-- Game Pane -->
+        <Pane fx:id="gamePane" prefHeight="800.0" prefWidth="600.0" styleClass="game-pane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 
             <children>
-                <!-- Các viền -->
+            <Pane fx:id="bgGame" layoutY="150.0" prefHeight="650.0" prefWidth="600.0" />
+
+                <!-- Viền trái -->
                 <ImageView fx:id="edge_left" fitHeight="650.0" fitWidth="22.0" layoutY="150.0">
                     <image>
                         <Image url="@../images/edge_left.png" />
                     </image>
                 </ImageView>
 
+                <!-- Viền trên -->
                 <ImageView fx:id="edge_top" fitHeight="22.0" fitWidth="556.0" layoutX="22.0" layoutY="150.0">
                     <image>
                         <Image url="@../images/door_top_right_1.png" />
                     </image>
                 </ImageView>
 
+                <!-- Viền phải -->
                 <ImageView fx:id="edge_right" fitHeight="650.0" fitWidth="22.0" layoutX="578.0" layoutY="150.0">
                     <image>
                         <Image url="@../images/edge_right.png" />
@@ -57,23 +39,32 @@
                 </ImageView>
 
                 <!-- Logo -->
-                <ImageView fx:id="title" fitHeight="145.0" fitWidth="400.0" layoutX="100.0">
+                <ImageView fx:id="title" fitHeight="145.0" fitWidth="400.0">
                     <image>
                         <Image url="@../images/logo.png" />
                     </image>
                 </ImageView>
 
                 <!-- Nút Pause -->
-                <Button fx:id="Pause"
-                        layoutX="550.0" layoutY="172.0"
-                        mnemonicParsing="false"
-                        onAction="#onPause"
-                        prefHeight="30.0" prefWidth="28.0"
-                        text="| |" textAlignment="CENTER">
+                <Button fx:id="Pause" layoutX="550.0" layoutY="172.0" mnemonicParsing="false" onAction="#onPause" prefHeight="30.0" prefWidth="28.0" text="| |" textAlignment="CENTER">
                     <font>
                         <Font name="Dubai Medium" size="12.0" />
                     </font>
                 </Button>
+
+                <!-- HUD -->
+                <Label fx:id="livesLabel" layoutX="509.0" layoutY="36.0" prefHeight="30.0" prefWidth="51.0" styleClass="hud-label" text="1UP 3" textFill="RED">
+               <font>
+                  <Font name="Century Gothic Bold Italic" size="18.0" />
+               </font></Label>
+                <Label fx:id="scoreLabel" layoutX="567.0" layoutY="37.0" prefHeight="30.0" prefWidth="22.0" styleClass="hud-label" text="0" textFill="RED">
+               <font>
+                  <Font name="Century Gothic Bold Italic" size="18.0" />
+               </font></Label>
+                <Label fx:id="highScoreLabel" layoutX="448.0" layoutY="73.0" prefHeight="46.0" prefWidth="141.0" styleClass="hud-label" text="HIGH SCORE 00000" textFill="RED">
+               <font>
+                  <Font name="Gadugi Bold" size="15.0" />
+               </font></Label>
 
             </children>
         </Pane>
