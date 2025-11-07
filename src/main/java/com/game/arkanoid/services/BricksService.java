@@ -46,22 +46,31 @@ public final class BricksService {
     public List<Brick> createBricksFromResource(String resourcePath) {
         List<String> lines = readResourceLines(resourcePath);
         List<Brick> bricks = new ArrayList<>();
+
         for (int row = 0; row < lines.size(); row++) {
             String line = lines.get(row).trim();
-            for (int col = 0; col < line.length(); col++) {
-                char ch = line.charAt(col);
-                if (ch < '0' || ch > '9') {
-                    continue;
+
+            // Tokenize by whitespace so layouts like "1 0 2 ..." map to proper columns (0..BRICK_COLS-1)
+            String[] tokens = line.isEmpty() ? new String[0] : line.split("\\s+");
+
+            int maxCols = Math.min(tokens.length, Constants.BRICK_COLS);
+            for (int col = 0; col < maxCols; col++) {
+                String token = tokens[col];
+                if (token.isEmpty()) continue;
+                int health;
+                try {
+                    health = Integer.parseInt(token);
+                } catch (NumberFormatException ex) {
+                    continue; // ignore unknown symbols
                 }
-                int health = ch - '0';
-                if (health <= 0) {
-                    continue;
-                }
+                if (health <= 0) continue;
+
                 double x = col * Constants.BRICK_WIDTH + 22;
                 double y = row * Constants.BRICK_HEIGHT + 172;
                 bricks.add(new Brick(x, y, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, Math.min(health, 4)));
             }
         }
+
         bricksRemaining = bricks.size();
         return bricks;
     }

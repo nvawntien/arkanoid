@@ -1,7 +1,8 @@
 package com.game.arkanoid.controller;
 
 import com.game.arkanoid.view.animator.MenuAnimator;
-import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.view.sound.SoundManager;
+import com.game.arkanoid.container.Container;
 import com.game.arkanoid.controller.SceneController;
 
 import javafx.event.ActionEvent;
@@ -14,7 +15,7 @@ import javafx.scene.layout.AnchorPane;
 public final class MenuController {
 
     private final SceneController navigator;
-    private final SoundRenderer sound = SoundRenderer.getInstance();
+    private final SoundManager sound = SoundManager.getInstance();
 
     @FXML private AnchorPane root;
     @FXML private Button optionButton;
@@ -56,6 +57,7 @@ public final class MenuController {
     private void onStartGame(ActionEvent event) {
         sound.playSfx("menu_click");
         sound.fade("menu_bgm", 0.0);
+        Container.reset();      // 🔹 Reset toàn bộ game state (Container singleton)
         navigator.showGame();
     }
 

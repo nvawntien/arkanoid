@@ -19,7 +19,6 @@ public class BallService {
         double t = Math.toRadians(Constants.BALL_LAUNCH_ANGLE);
         ball.setVelocity(speed * Math.cos(t), -speed * Math.sin(t));
         ball.setMoving(true);
-        ball.setStuck(false);
     }
 
     public void step(Ball ball, double dt) {
@@ -85,31 +84,18 @@ public class BallService {
             double vy = -Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION;
 
             if (other instanceof Paddle) {
-                if (ball.isStuck()) {
-                    // Nếu bóng đã được "catch" bởi power-up: gắn bóng vào vị trí va chạm trên paddle
-                    Paddle paddle = (Paddle) other;
-                    double paddleX = paddle.getX();
-                    double paddleW = paddle.getWidth();
-                    // Giữ bóng nằm trong biên paddle (theo trục X)
-                    double collisionX = Math.max(paddleX + ball.getRadius(), Math.min(ball.getCenterX(), paddleX + paddleW - ball.getRadius()));
-                    // Đặt bóng lên trên paddle, dừng chuyển động và ghi offset để theo paddle
-                    ball.setCenter(collisionX, oT - ball.getRadius() - Constants.BALL_NUDGE);
-                    ball.setVelocity(0.0, 0.0);
-                    ball.setMoving(false);
-                    ball.setStuck(true);
-                    ball.setStuckOffsetX(collisionX - paddleX);
-                    return;
-                }
                 Paddle paddle = (Paddle) other;
 
                 // Đưa bóng ra khỏi paddle một chút
                 ball.setCenter(ball.getX(), oT - ball.getRadius() - Constants.BALL_NUDGE);
 
                 double paddleX = paddle.getX();
+                double paddleY = paddle.getY();
                 double paddleW = paddle.getWidth();
                 double paddleH = paddle.getHeight();
 
                 double ballX = ball.getCenterX();
+                double ballY = ball.getCenterY();
 
                 // --- 1. Tính vị trí va chạm tương đối ---
                 double relX = (ballX - paddleX) / paddleW; // 0..1

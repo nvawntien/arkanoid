@@ -1,6 +1,14 @@
 package com.game.arkanoid.view.sound;
 
 import com.game.arkanoid.config.GameSettings;
+import com.game.arkanoid.events.BrickDestroyedEvent;
+import com.game.arkanoid.events.BrickHitEvent;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.GameOverEvent;
+import com.game.arkanoid.events.LevelClearedEvent;
+import com.game.arkanoid.events.LifeLostEvent;
+import com.game.arkanoid.events.PaddleHitEvent;
+import com.game.arkanoid.events.PowerUpExpiredEvent;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +23,21 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
 /**
- * Presentation-layer audio manager used by controllers/services to trigger SFX/BGM directly.
+ * Presentation-layer audio manager. Subscribes to domain events to drive SFX/BGM playback.
  */
-public final class SoundRenderer {
+public final class SoundManager {
 
     private static final String SOUND_ROOT = "/com/game/arkanoid/sounds/";
+
+    private static final Map<Class<?>, String> EVENT_SFX = Map.ofEntries(
+            Map.entry(PaddleHitEvent.class, "paddle_hit"),
+            Map.entry(BrickHitEvent.class, "brick_hit"),
+            Map.entry(BrickDestroyedEvent.class, "brick_break"),
+            Map.entry(PowerUpExpiredEvent.class, "powerup_collect"),
+            Map.entry(LifeLostEvent.class, "life_lost"),
+            Map.entry(GameOverEvent.class, "game_over"),
+            Map.entry(LevelClearedEvent.class, "level_clear")
+    );
 
     private static final Map<String, String> SFX_FILES = Map.ofEntries(
             Map.entry("paddle_hit", "ball_paddle.wav"),
@@ -40,7 +58,7 @@ public final class SoundRenderer {
             Map.entry("level_bgm", "ball_hard_block.wav")
     );
 
-    private static SoundRenderer instance;
+    private static SoundManager instance;
 
     private final Map<String, AudioClip> sfxClips = new HashMap<>();
     private final Map<String, MediaPlayer> bgmPlayers = new HashMap<>();
@@ -50,18 +68,26 @@ public final class SoundRenderer {
     private final DoubleProperty musicVolume = new SimpleDoubleProperty(0.7);
     private final DoubleProperty sfxVolume = new SimpleDoubleProperty(0.8);
 
-    private SoundRenderer() {
+    private SoundManager() {
         preloadSfx();
         preloadBgm();
         bindSettingDefaults();
         setupVolumePropagation();
+        attachEventListeners();
     }
 
-    public static synchronized SoundRenderer getInstance() {
+    public static synchronized SoundManager getInstance() {
         if (instance == null) {
-            instance = new SoundRenderer();
+            instance = new SoundManager();
         }
         return instance;
+    }
+
+    private void attachEventListeners() {
+        GameEventBus bus = GameEventBus.getInstance();
+        EVENT_SFX.forEach((eventType, sfxId) ->
+                bus.subscribe(eventType, evt -> playSfx(sfxId))
+        );
     }
 
     private void preloadSfx() {
@@ -193,7 +219,7 @@ public final class SoundRenderer {
     }
 
     private URL getResource(String path) {
-        return SoundRenderer.class.getResource(path);
+        return SoundManager.class.getResource(path);
     }
 
     private double clamp(double v) {
