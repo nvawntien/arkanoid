@@ -17,7 +17,7 @@ import java.util.List;
 import com.game.arkanoid.events.LevelClearedEvent;
 import com.game.arkanoid.events.PowerUpActivatedEvent;
 import com.game.arkanoid.events.PowerUpExpiredEvent;
-import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.view.sound.SoundManager;
 import com.game.arkanoid.view.transition.TransitionStrategy;
 
 import java.io.IOException;
@@ -62,7 +62,7 @@ public final class GameController {
     private final GameService gameService;
     private final GameState gameState;
     private final SceneController navigator;
-    private final SoundRenderer soundService = SoundRenderer.getInstance();
+    private final SoundManager soundMng = SoundManager.getInstance();
     private final Set<KeyCode> activeKeys = new HashSet<>();
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
 
@@ -98,8 +98,8 @@ public final class GameController {
         updateHud();
         registerEventListeners();
         // region SOUND - initialize BGM
-        soundService.stopBgm("menu_bgm");
-        soundService.loopBgm("level_bgm");
+        soundMng.stopBgm("menu_bgm");
+        soundMng.loopBgm("level_bgm");
         // endregion
 
         startGameLoop();
@@ -215,32 +215,38 @@ public final class GameController {
 
     private void onLevelCleared(LevelClearedEvent event) {
         Platform.runLater(() -> {
-            System.out.println("[GameController] LevelClearedEvent received for level " + event.level());
+            if (loop != null) loop.stop();
+            gameState.paused = true;
 
-            // Hiện banner thông báo
             bannerLayer.setVisible(true);
             bannerLayer.setManaged(true);
             bannerLabel.setText("LEVEL " + event.level() + " CLEARED!");
 
-            // Dừng 1.2 giây trước khi chuyển màn
             PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
             pause.setOnFinished(e -> {
-                System.out.println("[GameController] Loading next level...");
-                gameService.loadNextLevel(gameState);
+                int nextLevel = gameState.level + 1;
 
-                // Nếu hết level thì quay lại menu
+                // Ensure nothing persists to next round
+                gameState.bullets.clear();
+                gameState.powerUps.clear();
+                gameState.activePowerUps.clear();
+                gameState.extraBalls.clear();
+                gameState.laserCooldown = 0.0;
+
+                gameService.loadNextLevel(gameState);
                 if (gameState.gameCompleted) {
-                    System.out.println("[GameController] Game completed!");
                     stopLoopAndNavigate(SceneId.MENU, navigator.transitions().menuTransition());
                     return;
                 }
 
-                lastLevelObserved = gameState.level;
-                startLevelIntro();
+                // 🔹 Chuyển qua Round mới bằng SceneController
+                navigator.showGameRound(nextLevel);
             });
             pause.play();
         });
     }
+
+
 
 
     private void trackLevelTransition() {
@@ -318,8 +324,8 @@ public final class GameController {
         ft.play();
 
         // region SOUND - Pause feedback
-        soundService.playSfx("pause_on");
-        soundService.fade("level_bgm", soundService.effectiveMusicVolume() * 0.35, Duration.millis(250));
+        soundMng.playSfx("pause_on");
+        soundMng.fade("level_bgm", soundMng.effectiveMusicVolume() * 0.35, Duration.millis(250));
         // endregion
 
         pauseOverlay.requestFocus();
@@ -343,8 +349,8 @@ public final class GameController {
         gameState.paused = false;
 
         // region SOUND - Resume feedback
-        soundService.playSfx("pause_off");
-        soundService.fade("level_bgm", soundService.effectiveMusicVolume(), Duration.millis(220));
+        soundMng.playSfx("pause_off");
+        soundMng.fade("level_bgm", soundMng.effectiveMusicVolume(), Duration.millis(220));
         // endregion
 
         Platform.runLater(gamePane::requestFocus);
@@ -359,7 +365,7 @@ public final class GameController {
         startLevelIntro();
 
         // region SOUND
-        soundService.playSfx("menu_click");
+        soundMng.playSfx("menu_click");
         // endregion
 
         Platform.runLater(gamePane::requestFocus);
@@ -458,7 +464,7 @@ public final class GameController {
     public void stop() {
         if (loop != null) loop.stop();
         if (levelIntroSequence != null) levelIntroSequence.stop();
-        soundService.stopBgm("level_bgm");
+        soundMng.stopBgm("level_bgm");
         subscriptions.forEach(GameEventBus.Subscription::close);
         subscriptions.clear();
     }
