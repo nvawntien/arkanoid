@@ -3,16 +3,22 @@ package com.game.arkanoid.utils;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Locale;
 
 /**
- * Minimal SHA-256 password hasher. Use username as salt.
+ * Minimal SHA-256 password hasher. Uses normalized username as salt.
  */
 public final class PasswordHasher {
 
     private PasswordHasher() {}
 
+    /** Lowercase + trim as canonical username form. */
+    public static String normalize(String username) {
+        return username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+    }
+
     public static String hash(String username, String plain) {
-        String salted = username + ":" + plain;
+        String salted = normalize(username) + ":" + (plain == null ? "" : plain);
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] digest = md.digest(salted.getBytes(StandardCharsets.UTF_8));
@@ -35,4 +41,3 @@ public final class PasswordHasher {
         return sb.toString();
     }
 }
-
