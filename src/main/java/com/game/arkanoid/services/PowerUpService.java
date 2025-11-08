@@ -11,7 +11,6 @@ import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.utils.Constants;
-import com.game.arkanoid.view.sound.SoundManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +30,7 @@ public final class PowerUpService {
         if (random.nextDouble() > Constants.POWER_UP_DROP_CHANCE) {
             return null;
         }
-        PowerUpType[] types = {PowerUpType.EXPAND_PADDLE};
+        PowerUpType[] types = {PowerUpType.LASER_PADDLE};
         PowerUpType type = types[random.nextInt(types.length)];
         double spawnX = x + (width - Constants.POWER_UP_WIDTH) / 2.0;
         double spawnY = y + Constants.BRICK_HEIGHT;
@@ -87,6 +86,7 @@ public final class PowerUpService {
                 state.activePowerUps.remove(PowerUpType.EXPAND_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_LASER_FACTOR);
                 state.activePowerUps.put(PowerUpType.LASER_PADDLE, Constants.POWER_UP_DURATION);
+                state.laserCooldown = 0.0;
             }
             case CATCH_BALL -> {
                 state.ball.setStuck(true);
@@ -151,6 +151,10 @@ public final class PowerUpService {
             case EXPAND_PADDLE, LASER_PADDLE -> {
                 state.paddle.setWidthClamped(state.basePaddleWidth);
                 clampPaddle(state.paddle, worldW);
+                if (type == PowerUpType.LASER_PADDLE) {
+                    state.bullets.clear();
+                    state.laserCooldown = 0.0;
+                }
             }
             case SLOW_BALL -> state.timeScale = 1.0;
             default -> { }

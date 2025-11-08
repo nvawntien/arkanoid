@@ -35,6 +35,7 @@ public final class GameSettings {
     private static double musicVolume = 0.7;
     private static double sfxVolume = 0.8;
     private static Difficulty difficulty = Difficulty.MEDIUM;
+    private static int highScore = 0;
 
     private GameSettings() {
     }
@@ -85,6 +86,14 @@ public final class GameSettings {
 
     public static double getPaddleWidthMultiplier() {
         return difficulty.paddleWidthMultiplier();
+    }
+
+    public static int getHighScore() {
+        return Math.max(0, highScore);
+    }
+
+    public static void setHighScore(int score) {
+        highScore = Math.max(highScore, Math.max(0, score));
     }
 
     private static double clamp01(double value) {

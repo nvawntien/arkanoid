@@ -45,6 +45,13 @@ public class Constants {
     public static final double POWER_UP_LASER_FACTOR = 1.0;
     public static final double POWER_UP_SLOW_BALL_SCALE = 0.6;
 
+    // Laser paddle / bullets
+    public static final double BULLET_WIDTH = 8.0;
+    public static final double BULLET_HEIGHT = 24.0;
+    public static final double BULLET_SPEED = 24.0;
+    public static final double LASER_FIRE_COOLDOWN = 22.0;
+    public static final double LASER_BARREL_INSET = 10.0;
+
     public static final int DEFAULT_SCORE = 0;
     public static final int DEFAULT_LIVES = 3;
     public static final int DEFAULT_LEVEL = 1;

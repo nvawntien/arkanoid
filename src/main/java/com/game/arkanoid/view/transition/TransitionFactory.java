@@ -26,4 +26,10 @@ public final class TransitionFactory {
     public TransitionStrategy forLevelBanner() {
         return new SlideFadeStrategy(Duration.millis(320), 45.0);
     }
+
+    public TransitionStrategy forLevelScene() {
+        return new FadeTransitionStrategy(Duration.millis(400), 0.0, 1.0);
+        
+        // or return new SlideFadeStrategy(Duration.millis(400), 40.0);
+    }
 }

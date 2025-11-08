@@ -2,7 +2,7 @@ package com.game.arkanoid.controller;
 
 import com.game.arkanoid.view.animator.MenuAnimator;
 import com.game.arkanoid.view.sound.SoundManager;
-import com.almasb.fxgl.audio.Sound;
+import com.game.arkanoid.container.Container;
 import com.game.arkanoid.controller.SceneController;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.sound.GameBGMSoundEvent;
@@ -63,6 +63,7 @@ public final class MenuController {
     @FXML
     private void onStartGame(ActionEvent event) {
         eventBus.publish(new StopBGMSoundEvent());
+        Container.reset();      // 🔹 Reset toàn bộ game state (Container singleton)
         navigator.showGame();
     }
 

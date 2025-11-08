@@ -30,6 +30,11 @@ public final class TransitionManager {
         return factory.forLevelBanner();
     }
 
+    public TransitionStrategy levelTransition() {
+        return factory.forLevelScene(); // gọi hàm mới trong TransitionFactory
+    }
+
+
     public void play(Node root, TransitionStrategy strategy, Runnable onFinished) {
         if (strategy == null || root == null) {
             if (onFinished != null) {

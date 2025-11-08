@@ -1,0 +1,57 @@
+package com.game.arkanoid.view.renderer;
+
+import com.game.arkanoid.models.Bullet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+
+/**
+ * Renders paddle bullets fired during the laser power-up.
+ */
+public final class BulletRenderer implements Renderer<List<Bullet>> {
+
+    private final Pane pane;
+    private final Map<Bullet, ImageView> nodes = new IdentityHashMap<>();
+    private final Image bulletImage;
+
+    public BulletRenderer(Pane pane) {
+        this.pane = pane;
+        this.bulletImage = new Image(getClass().getResourceAsStream("/com/game/arkanoid/images/laser_bullet.png"));
+    }
+
+    @Override
+    public void render(List<Bullet> bullets) {
+        Iterator<Map.Entry<Bullet, ImageView>> it = nodes.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Bullet, ImageView> entry = it.next();
+            if (!bullets.contains(entry.getKey())) {
+                pane.getChildren().remove(entry.getValue());
+                it.remove();
+            }
+        }
+
+        for (Bullet bullet : bullets) {
+            ImageView view = nodes.computeIfAbsent(bullet, this::createNode);
+            view.setTranslateX(bullet.getX());
+            view.setTranslateY(bullet.getY());
+        }
+    }
+
+    private ImageView createNode(Bullet bullet) {
+        ImageView view = new ImageView(bulletImage);
+        view.setFitWidth(bullet.getWidth());
+        view.setFitHeight(bullet.getHeight());
+        view.setSmooth(true);
+        pane.getChildren().add(view);
+        return view;
+    }
+
+    @Override
+    public ImageView getNode() {
+        return null;
+    }
+}

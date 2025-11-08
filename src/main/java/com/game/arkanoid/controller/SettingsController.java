@@ -2,7 +2,6 @@ package com.game.arkanoid.controller;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.config.GameSettings.Difficulty;
-import com.game.arkanoid.controller.SceneController;
 import com.game.arkanoid.view.sound.SoundManager;
 
 import javafx.event.ActionEvent;
@@ -23,6 +22,7 @@ public final class SettingsController {
     private ComboBox<Difficulty> difficultyCombo;
 
     private final SceneController navigator;
+    private final SoundManager sound = SoundManager.getInstance();
 
     @FXML
     private Slider masterSlider;
