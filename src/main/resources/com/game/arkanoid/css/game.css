@@ -1,9 +1,35 @@
+
 .gamePane {
-    -fx-background-color: #0b0f1a;
-    /* -fx-border-color: rgba(46, 119, 255, 1);
-    -fx-border-width: 3;*/
+    -fx-background-color:#000000;
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+}
+#gamePane {
+     -fx-background-color:#000000;
+}
+.settingPane {
+    -fx-background-color:#000000;
+}
+/* Level 1 */
+.level-1 {
+    -fx-background-image: url("../images/bg_level1.png");
 }
 
+/* Level 2 */
+.level-2 {
+    -fx-background-image: url("../images/bg_level2.png");
+}
+
+/* Level 3 */
+.level-3 {
+    -fx-background-image: url("../images/bg_level3.png");
+}
+.level-4 {
+     -fx-background-image: url("../images/bg_level4.png");
+}
+.level-5 {
+     -fx-background-image: url("../images/bg_level5.png");
+}
 .paddle { 
     -fx-fill: #e6e6e6; 
 }
@@ -77,7 +103,12 @@
 #exitButton {
     -fx-background-image: url("../images/exitbutton.png");
 }
-
+#rankingButton {
+     -fx-background-image: url("../images/rankingbutton.png")
+}
+#continueButton {
+     -fx-background-image: url("../images/continuebutton.png")
+}
 /* Power-up styles */
 .powerup {
     -fx-arc-width: 8;

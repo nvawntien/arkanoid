@@ -2,6 +2,7 @@ module com.game.arkanoid {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
+    requires javafx.media;
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
@@ -17,5 +18,4 @@ module com.game.arkanoid {
     exports com.game.arkanoid.controller;
     opens com.game.arkanoid.controller to javafx.fxml;
 
-    requires javafx.media;
 }

@@ -1,8 +1,10 @@
 package com.game.arkanoid.view.sound;
 
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import javafx.beans.property.DoubleProperty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +31,9 @@ public final class SoundManager {
     private final Map<String, Media> soundMap = new HashMap<>();
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
     private final List<MediaPlayer> activePlayers = new ArrayList<>();
-
+    private final DoubleProperty masterVolume = new SimpleDoubleProperty(1.0);
+    private final DoubleProperty musicVolume = new SimpleDoubleProperty(0.7);
+    private final DoubleProperty sfxVolume = new SimpleDoubleProperty(0.8);
     private MediaPlayer bgmPlayer;
 
     private SoundManager() {
@@ -143,6 +147,18 @@ public final class SoundManager {
             bgmPlayer.dispose();
             bgmPlayer = null;
         }
+    }
+
+    public DoubleProperty masterVolumeProperty() {
+        return masterVolume;
+    }
+
+    public DoubleProperty musicVolumeProperty() {
+        return musicVolume;
+    }
+
+    public DoubleProperty sfxVolumeProperty() {
+        return sfxVolume;
     }
 
     public void dispose() {
