@@ -1,37 +1,46 @@
 package com.game.arkanoid.services;
 
 import com.game.arkanoid.config.GameSettings;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.PowerUpActivatedEvent;
+import com.game.arkanoid.events.PowerUpExpiredEvent;
 import com.game.arkanoid.models.Ball;
-import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.utils.Constants;
+import com.game.arkanoid.view.sound.SoundManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Orchestrates the spawning, updating and application of power-ups.
+ * Handles spawning, updating and applying power-ups. Talks directly to renderers for animations.
  */
 public final class PowerUpService {
 
+    private final SoundManager soundService;
     private final Random random = new Random();
+    private final GameEventBus eventBus = GameEventBus.getInstance();
 
-    public PowerUp spawnPowerUpIfAny(Brick brick) {
+    public PowerUpService(SoundManager soundService) {
+        this.soundService = soundService;
+    }
+
+    public PowerUp spawnPowerUpIfAny( double x, double y, double width) {
         if (random.nextDouble() > Constants.POWER_UP_DROP_CHANCE) {
             return null;
         }
-        PowerUpType[] types = PowerUpType.values();
+        PowerUpType[] types = {PowerUpType.LASER_PADDLE};
         PowerUpType type = types[random.nextInt(types.length)];
-        double x = brick.getX() + (brick.getWidth() - Constants.POWER_UP_WIDTH) / 2.0;
-        double y = brick.getY() + brick.getHeight();
-        return new PowerUp(type, x, y, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
+        double spawnX = x + (width - Constants.POWER_UP_WIDTH) / 2.0;
+        double spawnY = y + Constants.BRICK_HEIGHT;
+        return new PowerUp(type, spawnX, spawnY, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
-    public void update(BallService ballSvc, GameState state, double dt, double worldW, double worldH) {
+    public void update(GameState state, double dt, double worldW, double worldH) {
         List<PowerUp> toRemove = new ArrayList<>();
         for (PowerUp powerUp : state.powerUps) {
             powerUp.update(dt);
@@ -40,8 +49,9 @@ public final class PowerUpService {
                 continue;
             }
             if (intersects(powerUp, state.paddle)) {
-                applyPowerUp(ballSvc, state, powerUp.getType(), worldW);
+                applyPowerUp(state, powerUp.getType(), worldW);
                 toRemove.add(powerUp);
+                soundService.playSfx("powerup_collect");
             }
         }
         state.powerUps.removeAll(toRemove);
@@ -62,30 +72,35 @@ public final class PowerUpService {
         return ox1 < px2 && ox2 > px1 && oy1 < py2 && oy2 > py1;
     }
 
-    private void applyPowerUp(BallService ballSvc, GameState state, PowerUpType type, double worldW) {
+    private void applyPowerUp(GameState state, PowerUpType type, double worldW) {
         switch (type) {
             case EXPAND_PADDLE -> {
+                if (!state.activePowerUps.containsKey(PowerUpType.EXPAND_PADDLE)) {
+                    eventBus.publish(new PowerUpActivatedEvent(PowerUpType.EXPAND_PADDLE));
+                }
                 state.activePowerUps.remove(PowerUpType.LASER_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_EXPAND_FACTOR);
                 state.activePowerUps.put(PowerUpType.EXPAND_PADDLE, Constants.POWER_UP_DURATION);
             }
             case LASER_PADDLE -> {
+                if (!state.activePowerUps.containsKey(PowerUpType.LASER_PADDLE)) {
+                    eventBus.publish(new PowerUpActivatedEvent(PowerUpType.LASER_PADDLE));
+                }
                 state.activePowerUps.remove(PowerUpType.EXPAND_PADDLE);
                 state.paddle.setWidthClamped(state.basePaddleWidth * Constants.POWER_UP_LASER_FACTOR);
                 state.activePowerUps.put(PowerUpType.LASER_PADDLE, Constants.POWER_UP_DURATION);
+                state.laserCooldown = 0.0;
             }
             case CATCH_BALL -> {
-                ballSvc.resetOnPaddle(state.ball, state.paddle);
-                   // Currently no timed effect for catch ball; implement if needed.
+                state.ball.setStuck(true);
             }
             case MULTI_BALL -> spawnAdditionalBalls(state);
-            case EXTRA_LIFE -> state.lives++;
+            case EXTRA_LIFE -> state.incrementLives();
             case SLOW_BALL -> {
                 state.timeScale = Constants.POWER_UP_SLOW_BALL_SCALE;
                 state.activePowerUps.put(PowerUpType.SLOW_BALL, Constants.POWER_UP_DURATION);
-            }
+            }           
         }
-        // Ensure paddle stays inside bounds when width changed.
         clampPaddle(state.paddle, worldW);
     }
 
@@ -139,9 +154,15 @@ public final class PowerUpService {
             case EXPAND_PADDLE, LASER_PADDLE -> {
                 state.paddle.setWidthClamped(state.basePaddleWidth);
                 clampPaddle(state.paddle, worldW);
+                if (type == PowerUpType.LASER_PADDLE) {
+                    state.bullets.clear();
+                    state.laserCooldown = 0.0;
+                }
             }
             case SLOW_BALL -> state.timeScale = 1.0;
             default -> { }
         }
+
+        eventBus.publish(new PowerUpExpiredEvent(type));
     }
 }

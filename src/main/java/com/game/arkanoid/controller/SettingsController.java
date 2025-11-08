@@ -2,39 +2,64 @@ package com.game.arkanoid.controller;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.config.GameSettings.Difficulty;
-import com.game.arkanoid.view.SceneNavigator;
+import com.game.arkanoid.view.sound.SoundManager;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Slider;
 
 /**
  * Controller that binds the Settings UI to the static configuration store.
+ * Removed soundToggle CheckBox.
  */
 public final class SettingsController {
 
     @FXML
-    private CheckBox soundToggle;
-
-    @FXML
     private ComboBox<Difficulty> difficultyCombo;
 
-    private final SceneNavigator navigator;
+    private final SceneController navigator;
+    private final SoundManager sound = SoundManager.getInstance();
 
-    public SettingsController(SceneNavigator navigator) {
+    @FXML
+    private Slider masterSlider;
+
+    @FXML
+    private Slider musicSlider;
+
+    @FXML
+    private Slider sfxSlider;
+
+    private double previousMasterVolume = GameSettings.getMasterVolume();
+
+    public SettingsController(SceneController navigator) {
         this.navigator = navigator;
     }
 
     @FXML
     private void initialize() {
+        // Difficulty setup
         difficultyCombo.getItems().setAll(Difficulty.values());
         difficultyCombo.getSelectionModel().select(GameSettings.getDifficulty());
-        soundToggle.setSelected(GameSettings.isSoundEnabled());
-    }
 
-    @FXML
-    private void onSoundToggled(ActionEvent event) {
-        GameSettings.setSoundEnabled(soundToggle.isSelected());
+        // Bind sliders
+        masterSlider.valueProperty().bindBidirectional(sound.masterVolumeProperty());
+        musicSlider.valueProperty().bindBidirectional(sound.musicVolumeProperty());
+        sfxSlider.valueProperty().bindBidirectional(sound.sfxVolumeProperty());
+        masterSlider.valueProperty().addListener((obs, oldV, newV) -> {
+            if (!masterSlider.isDisabled()) {
+                previousMasterVolume = newV.doubleValue();
+            }
+        });
+
+        // Disable sliders if master volume is 0
+        boolean enabled = masterSlider.getValue() > 0;
+        masterSlider.setDisable(!enabled);
+        musicSlider.setDisable(!enabled);
+        sfxSlider.setDisable(!enabled);
+        if (enabled) {
+            previousMasterVolume = masterSlider.getValue();
+        }
     }
 
     @FXML

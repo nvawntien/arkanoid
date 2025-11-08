@@ -3,6 +3,24 @@ package com.game.arkanoid.models;
 public class Ball extends MovableObject {
     private double radius;
     private boolean isMoving;
+    private boolean isStuck;  // Bóng dính vào paddle
+    private double stuckOffsetX; // horizontal offset from paddle.x when ball is stuck
+    
+    public boolean isStuck() {
+        return isStuck;
+    }
+
+    public void setStuck(boolean isStuck) {
+        this.isStuck = isStuck;
+    }
+
+    public double getStuckOffsetX() {
+        return stuckOffsetX;
+    }
+
+    public void setStuckOffsetX(double stuckOffsetX) {
+        this.stuckOffsetX = stuckOffsetX;
+    }
 
     /**
      * Ball constructor 1.
@@ -15,6 +33,8 @@ public class Ball extends MovableObject {
         if (radius <= 0) throw new IllegalArgumentException("radius must be > 0");
         this.radius = radius;
         this.isMoving = false;
+        this.isStuck = false;
+        this.stuckOffsetX = 0.0;
     }
 
     //getters and setters

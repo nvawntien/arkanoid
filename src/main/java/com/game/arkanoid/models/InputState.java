@@ -8,5 +8,6 @@ public final class InputState {
     public boolean left;
     public boolean right;
     public boolean launch;
+    public boolean fire;
     public boolean pause;
 }

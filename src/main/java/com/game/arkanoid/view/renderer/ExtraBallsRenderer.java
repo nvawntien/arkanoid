@@ -1,6 +1,7 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.view.renderer;
 
 import com.game.arkanoid.models.Ball;
+
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;

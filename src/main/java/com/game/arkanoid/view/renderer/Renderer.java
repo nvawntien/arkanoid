@@ -1,4 +1,4 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.view.renderer;
 
 import javafx.scene.Node;
 

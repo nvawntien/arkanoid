@@ -1,4 +1,4 @@
-package com.game.arkanoid.view;
+package com.game.arkanoid.view.renderer;
 
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;
@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Renders falling power-ups with animation (8-frame sprite per power-up).
  */
-public final class PowerUpRenderer {
+public final class PowerUpRenderer implements Renderer<List<PowerUp>> {
     private final Pane pane;
     private final Map<PowerUp, ImageView> nodes = new IdentityHashMap<>();
 
@@ -55,6 +55,7 @@ public final class PowerUpRenderer {
         return frames;
     }
 
+    @Override
     public void render(List<PowerUp> powerUps) {
         Iterator<Map.Entry<PowerUp, ImageView>> it = nodes.entrySet().iterator();
         while (it.hasNext()) {
@@ -72,6 +73,12 @@ public final class PowerUpRenderer {
         }
     }
 
+    @Override
+    public ImageView getNode() {
+        // Not applicable for list renderer 
+        return null;
+    }
+    
     private ImageView createNode(PowerUp powerUp) {
         ImageView imageView = new ImageView(spriteMap.get(powerUp.getType())[0]);
         imageView.setFitWidth(powerUp.getWidth());

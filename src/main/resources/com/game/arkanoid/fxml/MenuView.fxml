@@ -6,12 +6,18 @@
 
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="600.0" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.MenuController">
     <children>
-      <Pane prefHeight="800.0" prefWidth="600.0" styleClass="menu-root">
-         <children>
+        <Pane prefHeight="800.0" prefWidth="600.0" styleClass="menu-root">
+            <children>
                 <Button fx:id="startButton" defaultButton="false" focusTraversable="false" layoutX="210.0" layoutY="612.0" onAction="#onStartGame" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
-                <Button fx:id="optionButton" focusTraversable="false" layoutY="538.0" minHeight="0.0" minWidth="0.0" onAction="#onOpenSettings" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
+
+                <Button fx:id="optionButton" focusTraversable="false" layoutX="0.0" layoutY="538.0" onAction="#onOpenSettings" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
+
                 <Button fx:id="exitButton" cancelButton="false" focusTraversable="false" layoutX="420.0" layoutY="538.0" onAction="#onExit" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
-         </children>
-      </Pane>
+
+                <Button fx:id="continueButton" focusTraversable="false" layoutX="-76.0" layoutY="464.0" onAction="#onContinueGame" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
+
+                <Button fx:id="rankingButton" focusTraversable="false" layoutX="522.0" layoutY="453.0" onAction="#onShowRanking" prefHeight="37.0" prefWidth="180.0" styleClass="menu-button" />
+            </children>
+        </Pane>
     </children>
 </AnchorPane>

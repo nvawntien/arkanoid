@@ -38,6 +38,10 @@ public final class RoundService {
         state.level = idx;
         state.extraBalls.clear();
         state.powerUps.clear();
+        state.activePowerUps.clear();
+        state.levelTransitionPending = false;
+        state.paused = true;
+        state.running = false;
         // Reset ball on paddle for new level
         ballService.resetOnPaddle(state.ball, state.paddle);
     }
@@ -46,10 +50,11 @@ public final class RoundService {
      * Advance to the next level if any. If already at the last level, mark the game as completed.
      */
     public void loadNextLevel(GameState state) {
-        if (state.level >= levelResources.length) {
+        int nextIndex = state.level + 1;
+        if (nextIndex > levelResources.length) {
             state.gameCompleted = true;
             return;
         }
-        loadLevel(state, state.level + 1);
+        loadLevel(state, nextIndex);
     }
 }

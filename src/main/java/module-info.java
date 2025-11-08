@@ -17,4 +17,5 @@ module com.game.arkanoid {
     opens com.game.arkanoid.app to javafx.fxml;
     exports com.game.arkanoid.controller;
     opens com.game.arkanoid.controller to javafx.fxml;
+
 }
