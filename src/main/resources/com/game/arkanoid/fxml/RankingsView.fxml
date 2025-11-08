@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="800.0" prefWidth="600.0" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.RankingsController">
+    <children>
+        <VBox alignment="CENTER" spacing="8.0" prefWidth="600.0" prefHeight="800.0">
+            <children>
+                <Label text="Rankings" styleClass="menu-title" />
+                <TableView fx:id="table" prefWidth="520.0" prefHeight="560.0">
+                    <columns>
+                        <TableColumn fx:id="colRank" text="Rank" prefWidth="80.0" />
+                        <TableColumn fx:id="colName" text="Name" prefWidth="180.0" />
+                        <TableColumn fx:id="colScore" text="Score" prefWidth="130.0" />
+                        <TableColumn fx:id="colRound" text="Round" prefWidth="130.0" />
+                    </columns>
+                </TableView>
+                <Button fx:id="backButton" text="Back" minWidth="160.0" />
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>
+
