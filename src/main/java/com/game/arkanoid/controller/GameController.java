@@ -1,6 +1,5 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.game.LevelClearedEvent;
 import com.game.arkanoid.models.GameState;
@@ -12,14 +11,13 @@ import com.game.arkanoid.view.renderer.BricksRenderer;
 import com.game.arkanoid.view.renderer.ExtraBallsRenderer;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
 import com.game.arkanoid.view.renderer.PowerUpRenderer;
-
+import com.game.arkanoid.view.renderer.LifeRenderer;
 
 import java.util.List;
 
 import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
 import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
 import com.game.arkanoid.events.sound.GameBGMSoundEvent;
-import com.game.arkanoid.events.sound.RoundStartSoundEvent;
 import com.game.arkanoid.view.transition.TransitionStrategy;
 
 import java.io.IOException;
@@ -47,8 +45,6 @@ import javafx.util.Duration;
  */
 public final class GameController {
 
-    private static final double LIFE_ICON_WIDTH = 38.0;
-
     // --- FXML UI Components ---
     @FXML private StackPane rootStack;
     @FXML private Pane gamePane;
@@ -74,13 +70,12 @@ public final class GameController {
     private ExtraBallsRenderer extraBallsRenderer;
     private PowerUpRenderer powerUpRenderer;
     private BulletRenderer bulletRenderer;
+    private LifeRenderer lifeRenderer;
 
     // --- State Tracking ---
     private AnimationTimer loop;
     private SequentialTransition levelIntroSequence;
     private Parent pauseOverlay;
-    private Image lifeIcon;
-    private int lastLifeCount = Integer.MIN_VALUE;
     private int lastLevelObserved = Integer.MIN_VALUE;
 
     // Constructor ------------------------------------------------------------
@@ -95,7 +90,6 @@ public final class GameController {
         setupRenderers();
         setupPauseOverlay();
         setupInputHandlers();
-        initLifeIcons();
         updateHud();
         registerEventListeners();
 
@@ -129,10 +123,9 @@ public final class GameController {
                 powerUpRenderer.render(gameState.powerUps);
                 bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
-
+                lifeRenderer.render(gameState.lives);
                 // Update HUD
                 updateHud();
-                refreshLifeIcons();
                 trackLevelTransition();
 
                 // --- Transition to other scenes ---
@@ -391,8 +384,7 @@ public final class GameController {
         hidePauseMenu();
         gameService.restartLevel(gameState);
         lastLevelObserved = gameState.level;
-        lastLifeCount = Integer.MIN_VALUE;
-        refreshLifeIcons();
+        lifeRenderer.reset();
         startLevelIntro();
 
         // region SOUND
@@ -422,44 +414,18 @@ public final class GameController {
         extraBallsRenderer = new ExtraBallsRenderer(gamePane);
         powerUpRenderer = new PowerUpRenderer(gamePane);
         bulletRenderer = new BulletRenderer(gamePane);
+        lifeRenderer = new LifeRenderer(lifeBox);
 
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);
         paddleRenderer.playIntro();
     }
 
-    private void initLifeIcons() {
-        lifeIcon = new Image(getClass().getResourceAsStream("/com/game/arkanoid/images/paddle_life.png"));
-        updateLifeIcons(gameState.lives);
-        lastLifeCount = gameState.lives;
-    }
 
     private void updateHud() {
         if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
         if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
         if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
-    }
-
-    
-
-    private void refreshLifeIcons() {
-        if (gameState.lives != lastLifeCount) {
-            updateLifeIcons(gameState.lives);
-            lastLifeCount = gameState.lives;
-        }
-    }
-
-    private void updateLifeIcons(int lives) {
-        if (lifeIcon == null || lifeBox == null) return;
-        lifeBox.getChildren().clear();
-        int displayLives = Math.max(0, lives);
-        for (int i = 0; i < displayLives; i++) {
-            ImageView icon = new ImageView(lifeIcon);
-            icon.setPreserveRatio(true);
-            icon.setFitWidth(LIFE_ICON_WIDTH);
-            icon.getStyleClass().add("life-icon");
-            lifeBox.getChildren().add(icon);
-        }
     }
 
     private void setupPauseOverlay() {
