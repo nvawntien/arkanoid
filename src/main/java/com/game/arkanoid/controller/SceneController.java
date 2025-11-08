@@ -104,7 +104,6 @@ public final class SceneController {
     public void showGameRound(int round) {
         stopActiveGame();
         Container container = Container.getInstance();
-
         // Tạo đường dẫn tương ứng với round
         String path = String.format("/com/game/arkanoid/fxml/Round%dView.fxml", round);
 
