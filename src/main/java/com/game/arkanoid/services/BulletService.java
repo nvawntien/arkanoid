@@ -1,5 +1,7 @@
 package com.game.arkanoid.services;
 
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.sound.BulletFireSoundEvent;
 import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.Bullet;
 import com.game.arkanoid.models.GameState;
@@ -43,7 +45,7 @@ public final class BulletService {
         state.bullets.add(new Bullet(leftX, y, width, height, Constants.BULLET_SPEED));
         state.bullets.add(new Bullet(rightX, y, width, height, Constants.BULLET_SPEED));
         state.laserCooldown = Constants.LASER_FIRE_COOLDOWN;
-
+        GameEventBus.getInstance().publish(new BulletFireSoundEvent());
         return true;
     }
 

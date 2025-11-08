@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.sound.BrickHitSoundEvent;
+import com.game.arkanoid.events.sound.BulletFireSoundEvent;
 import com.game.arkanoid.events.sound.GameBGMSoundEvent;
 import com.game.arkanoid.events.sound.MenuBGMSoundEvent;
 import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
@@ -55,6 +56,7 @@ public final class SoundManager {
         subscriptions.add(eventBus.subscribe(WallHitSoundEvent.class, e -> playWallHit()));
         subscriptions.add(eventBus.subscribe(StopBGMSoundEvent.class, e -> stopBGM()));
         subscriptions.add(eventBus.subscribe(PowerUpHitSoundEvent.class, e-> playPowerUpHit()));
+        subscriptions.add(eventBus.subscribe(BulletFireSoundEvent.class, e -> playBulletFire()));
     }
 
     /** --------------------------
@@ -131,6 +133,7 @@ public final class SoundManager {
     public void playGameOver() { play("game_over"); }
 
     public void playPowerUpHit() { play("powerup_hit"); }
+
     /** --------------------------
      *  Cleanup
      *  -------------------------- */
