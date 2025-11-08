@@ -36,10 +36,12 @@ public final class SceneController {
     /** Navigate to a scene with a custom transition strategy. */
     public void navigateTo(SceneId sceneId, TransitionStrategy transition) {
         switch (sceneId) {
+            case LOGIN -> showLogin(transition);
             case MENU -> showMenu(transition);
             case SETTINGS -> showSettings(transition);
             case GAME -> showGame(transition);
             case GAME_OVER -> showGameOver(transition);
+            case RANKINGS -> showRankings(transition);
             default -> throw new IllegalArgumentException("Unhandled scene: " + sceneId);
         }
     }
@@ -119,14 +121,28 @@ public final class SceneController {
         setScene(SceneId.GAME, root, transitionManager.levelBannerTransition());
     }
 
+    public void showRankings() {
+        showRankings(transitionManager.menuTransition());
+    }
+
+    private void showRankings(TransitionStrategy transition) {
+        stopActiveGame();
+        Parent root = load("/com/game/arkanoid/fxml/RankingsView.fxml", loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == RankingsController.class) return new RankingsController(this);
+                throw buildUnknownController(cls);
+            });
+        });
+        setScene(SceneId.RANKINGS, root, transition);
+    }
 
     /** Show the game over scene with default transition. */
     public void showGameOver() {
         showGameOver(transitionManager.gameOverTransition());
     }
-    public void showRanking() {}
+    public void continueGame() {
 
-    public void continueGame() {}
+    }
     
     private void showGameOver(TransitionStrategy transition) {
         stopActiveGame();
@@ -178,4 +194,43 @@ public final class SceneController {
     private RuntimeException buildUnknownController(Class<?> cls) {
         return new IllegalArgumentException("Unsupported controller request: " + cls.getName());
     }
+
+
+    /** Show the login screen. */
+    public void showLogin() { showLogin(transitionManager.menuTransition()); }
+
+    private void showLogin(TransitionStrategy transition) {
+        stopActiveGame();
+        Parent root = load("/com/game/arkanoid/fxml/LoginView.fxml", loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == LoginController.class) return new LoginController(this);
+                throw buildUnknownController(cls);
+            });
+        });
+        setScene(SceneId.LOGIN, root, transition);
+    }
+
+
+    /** Load the requested level and then apply snapshot + resume countdown. */
+    public void startGameFromSnapshot(com.game.arkanoid.models.GameStateSnapshot snapshot) {
+        int round = Math.max(1, snapshot.currentLevel);
+        stopActiveGame();
+        Container container = Container.getInstance();
+        String path = String.format("/com/game/arkanoid/fxml/Round%dView.fxml", round);
+        Parent root = load(path, loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == GameController.class) {
+                    return new GameController(container.getGameState(), container.getGameService(), this);
+                }
+                throw buildUnknownController(cls);
+            });
+        });
+        setScene(SceneId.GAME, root, transitionManager.gameTransition());
+        if (activeGameController != null) {
+            // apply snapshot then run resume countdown
+            activeGameController.applySnapshot(snapshot);
+            activeGameController.resumeWithCountdown();
+        }
+    }
+
 }
