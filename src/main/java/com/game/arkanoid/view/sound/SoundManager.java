@@ -1,8 +1,10 @@
 package com.game.arkanoid.view.sound;
 
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import javafx.beans.property.DoubleProperty;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +13,7 @@ import java.util.List;
 
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.sound.BrickHitSoundEvent;
+import com.game.arkanoid.events.sound.BulletFireSoundEvent;
 import com.game.arkanoid.events.sound.GameBGMSoundEvent;
 import com.game.arkanoid.events.sound.MenuBGMSoundEvent;
 import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
@@ -28,7 +31,9 @@ public final class SoundManager {
     private final Map<String, Media> soundMap = new HashMap<>();
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
     private final List<MediaPlayer> activePlayers = new ArrayList<>();
-
+    private final DoubleProperty masterVolume = new SimpleDoubleProperty(1.0);
+    private final DoubleProperty musicVolume = new SimpleDoubleProperty(0.7);
+    private final DoubleProperty sfxVolume = new SimpleDoubleProperty(0.8);
     private MediaPlayer bgmPlayer;
 
     private SoundManager() {
@@ -55,6 +60,7 @@ public final class SoundManager {
         subscriptions.add(eventBus.subscribe(WallHitSoundEvent.class, e -> playWallHit()));
         subscriptions.add(eventBus.subscribe(StopBGMSoundEvent.class, e -> stopBGM()));
         subscriptions.add(eventBus.subscribe(PowerUpHitSoundEvent.class, e-> playPowerUpHit()));
+        subscriptions.add(eventBus.subscribe(BulletFireSoundEvent.class, e -> playBulletFire()));
     }
 
     /** --------------------------
@@ -131,6 +137,7 @@ public final class SoundManager {
     public void playGameOver() { play("game_over"); }
 
     public void playPowerUpHit() { play("powerup_hit"); }
+
     /** --------------------------
      *  Cleanup
      *  -------------------------- */
@@ -140,6 +147,18 @@ public final class SoundManager {
             bgmPlayer.dispose();
             bgmPlayer = null;
         }
+    }
+
+    public DoubleProperty masterVolumeProperty() {
+        return masterVolume;
+    }
+
+    public DoubleProperty musicVolumeProperty() {
+        return musicVolume;
+    }
+
+    public DoubleProperty sfxVolumeProperty() {
+        return sfxVolume;
     }
 
     public void dispose() {

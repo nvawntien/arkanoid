@@ -41,7 +41,7 @@ public final class Container {
         SoundManager sound = SoundManager.getInstance();
         PowerUpService powerUpSvc = new PowerUpService();
         BulletService bulletSvc = new BulletService(bricksSvc);
-        RoundService roundSvc = new RoundService(bricksSvc, ballSvc);
+        RoundService roundSvc = new RoundService(bricksSvc, ballSvc, paddleSvc);
         roundSvc.loadLevel(this.state, 1);
 
         this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, bulletSvc, roundSvc);

@@ -11,7 +11,7 @@ public class Main extends Application {
         stage.setTitle("Arkanoid");      
         stage.setResizable(false);
         SceneController navigator = new SceneController(stage);
-        navigator.showMenu();
+        navigator.showLogin();
         stage.show();
     }
     public static void main(String[] args) {

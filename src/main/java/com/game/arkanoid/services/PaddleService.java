@@ -1,7 +1,9 @@
 // src/main/java/com/game/arkanoid/services/PaddleService.java
 package com.game.arkanoid.services;
 
+import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.Paddle;
+import com.game.arkanoid.utils.Constants;
 
 
 /**
@@ -75,6 +77,15 @@ public class PaddleService {
     public void scaleWidth(Paddle paddle, double factor, double worldW) {
         paddle.setWidthClamped(paddle.getWidth() * factor);
         clampWithin(paddle, worldW);
+    }
+
+    /**
+     * reset paddle position
+     * @param paddle
+     */
+    public void resetPaddlePosition(Paddle paddle) {
+        paddle.setX(Constants.GAME_WIDTH / 2.0 - paddle.getWidth() / 2.0);
+        paddle.setY(Constants.GAME_HEIGHT - Constants.PADDLE_HEIGHT - Constants.PADDLE_MARGIN_BOTTOM);
     }
 
 }

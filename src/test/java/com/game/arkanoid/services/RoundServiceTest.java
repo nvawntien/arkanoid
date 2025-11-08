@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
 class RoundServiceTest {
 
     private BricksService bricksService;
-    private BallService ballService;
+    private BallService ballService;    
+    private PaddleService paddleService;
     private RoundService roundService;
     private GameState state;
 
@@ -20,7 +21,8 @@ class RoundServiceTest {
     void setUp() {
         bricksService = new BricksService();
         ballService = new BallService();
-        roundService = new RoundService(bricksService, ballService);
+        paddleService = new PaddleService();
+        roundService = new RoundService(bricksService, ballService, paddleService);
 
         double paddleWidth = Constants.PADDLE_WIDTH;
         Paddle paddle = new Paddle(

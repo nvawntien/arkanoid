@@ -13,6 +13,7 @@ public final class RoundService {
 
     private final BricksService bricksService;
     private final BallService ballService;
+    private final PaddleService paddleService;
 
     private final String[] levelResources = new String[] {
         "/com/game/arkanoid/levels/level1.txt",
@@ -21,9 +22,10 @@ public final class RoundService {
         "/com/game/arkanoid/levels/level4.txt"
     };
 
-    public RoundService(BricksService bricksService, BallService ballService) {
+    public RoundService(BricksService bricksService, BallService ballService, PaddleService paddleService) {
         this.bricksService = bricksService;
         this.ballService = ballService;
+        this.paddleService = paddleService;
     }
 
     /** Load the given 1-based level index. */
@@ -42,6 +44,7 @@ public final class RoundService {
         state.levelTransitionPending = false;
         state.paused = true;
         state.running = false;
+        paddleService.resetPaddlePosition(state.paddle);
         // Reset ball on paddle for new level
         ballService.resetOnPaddle(state.ball, state.paddle);
     }

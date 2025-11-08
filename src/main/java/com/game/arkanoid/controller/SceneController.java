@@ -104,7 +104,6 @@ public final class SceneController {
     public void showGameRound(int round) {
         stopActiveGame();
         Container container = Container.getInstance();
-
         // Tạo đường dẫn tương ứng với round
         String path = String.format("/com/game/arkanoid/fxml/Round%dView.fxml", round);
 
@@ -125,7 +124,10 @@ public final class SceneController {
     public void showGameOver() {
         showGameOver(transitionManager.gameOverTransition());
     }
+    public void showRanking() {}
 
+    public void continueGame() {}
+    
     private void showGameOver(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
@@ -138,6 +140,7 @@ public final class SceneController {
         });
         setScene(SceneId.GAME_OVER, root, transition);
     }
+    
 
     /** Exit the application. */
     public void exit() {

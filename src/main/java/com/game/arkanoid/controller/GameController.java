@@ -1,10 +1,12 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.config.GameSettings;
+import com.game.arkanoid.container.AppContext;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.game.LevelClearedEvent;
 import com.game.arkanoid.models.GameState;
+import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
+import com.game.arkanoid.models.User;
 import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.view.renderer.BallRenderer;
 import com.game.arkanoid.view.renderer.BulletRenderer;
@@ -12,14 +14,13 @@ import com.game.arkanoid.view.renderer.BricksRenderer;
 import com.game.arkanoid.view.renderer.ExtraBallsRenderer;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
 import com.game.arkanoid.view.renderer.PowerUpRenderer;
-
+import com.game.arkanoid.view.renderer.LifeRenderer;
 
 import java.util.List;
 
 import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
 import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
 import com.game.arkanoid.events.sound.GameBGMSoundEvent;
-import com.game.arkanoid.events.sound.RoundStartSoundEvent;
 import com.game.arkanoid.view.transition.TransitionStrategy;
 
 import java.io.IOException;
@@ -28,7 +29,9 @@ import java.util.HashSet;
 import java.util.Set;
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
@@ -46,8 +49,6 @@ import javafx.util.Duration;
  * Handles game loop, input, rendering, events, transitions, and pause menu.
  */
 public final class GameController {
-
-    private static final double LIFE_ICON_WIDTH = 38.0;
 
     // --- FXML UI Components ---
     @FXML private StackPane rootStack;
@@ -74,13 +75,12 @@ public final class GameController {
     private ExtraBallsRenderer extraBallsRenderer;
     private PowerUpRenderer powerUpRenderer;
     private BulletRenderer bulletRenderer;
+    private LifeRenderer lifeRenderer;
 
     // --- State Tracking ---
     private AnimationTimer loop;
     private SequentialTransition levelIntroSequence;
     private Parent pauseOverlay;
-    private Image lifeIcon;
-    private int lastLifeCount = Integer.MIN_VALUE;
     private int lastLevelObserved = Integer.MIN_VALUE;
 
     // Constructor ------------------------------------------------------------
@@ -95,7 +95,6 @@ public final class GameController {
         setupRenderers();
         setupPauseOverlay();
         setupInputHandlers();
-        initLifeIcons();
         updateHud();
         registerEventListeners();
 
@@ -129,14 +128,21 @@ public final class GameController {
                 powerUpRenderer.render(gameState.powerUps);
                 bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
-
-                // Update HUD
+                lifeRenderer.render(gameState.lives);
+                // Update hud
                 updateHud();
-                refreshLifeIcons();
                 trackLevelTransition();
 
                 // --- Transition to other scenes ---
                 if (gameState.gameOver) {
+                    // persist bests and clear in-progress
+                    User u = AppContext.getInstance().getCurrentUser();
+                    if (u != null) {
+                        int bestRound = Math.max(u.getBestRound(), gameState.level);
+                        int bestScore = Math.max(u.getBestScore(), gameState.score);
+                        AppContext.getInstance().db().updateBest(u.getId(), bestRound, bestScore);
+                        AppContext.getInstance().db().clearInProgress(u.getId());
+                    }
                     stopLoopAndNavigate(SceneId.GAME_OVER, navigator.transitions().gameOverTransition());
                     return;
                 }
@@ -375,24 +381,31 @@ public final class GameController {
         ft.play();
     }
 
+    // TODO: CHECK
     private void resumeGame() {
         hidePauseMenu();
-        gameState.paused = false;
+        // show 3-2-1 countdown before resuming
+        bannerLayer.setVisible(true);
+        bannerLayer.setManaged(true);
 
-        // region SOUND - Resume feedback
-        //soundService.playSfx("pause_off");
-        //soundService.fade("level_bgm", soundService.effectiveMusicVolume(), Duration.millis(220));
-        // endregion
-
-        Platform.runLater(gamePane::requestFocus);
+        PauseTransition three = createBannerStep("3", 0.6);
+        PauseTransition two = createBannerStep("2", 0.6);
+        PauseTransition one = createBannerStep("1", 0.6);
+        SequentialTransition seq = new SequentialTransition(three, two, one);
+        seq.setOnFinished(e -> {
+            bannerLayer.setVisible(false);
+            bannerLayer.setManaged(false);
+            gameState.paused = false;
+            Platform.runLater(gamePane::requestFocus);
+        });
+        seq.playFromStart();
     }
 
     private void restartLevel() {
         hidePauseMenu();
         gameService.restartLevel(gameState);
         lastLevelObserved = gameState.level;
-        lastLifeCount = Integer.MIN_VALUE;
-        refreshLifeIcons();
+        lifeRenderer.reset();
         startLevelIntro();
 
         // region SOUND
@@ -404,6 +417,12 @@ public final class GameController {
 
     private void exitToMenu() {
         hidePauseMenu();
+        // Save in-progress game state for current user
+        User u = AppContext.getInstance().getCurrentUser();
+        if (u != null) {
+            GameStateSnapshot snap = GameStateSnapshot.from(gameState);
+            AppContext.getInstance().db().saveInProgress(u.getId(), snap);
+        }
         stop();
         navigator.navigateTo(SceneId.MENU, navigator.transitions().menuTransition());
     }
@@ -422,44 +441,18 @@ public final class GameController {
         extraBallsRenderer = new ExtraBallsRenderer(gamePane);
         powerUpRenderer = new PowerUpRenderer(gamePane);
         bulletRenderer = new BulletRenderer(gamePane);
+        lifeRenderer = new LifeRenderer(lifeBox);
 
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);
         paddleRenderer.playIntro();
     }
 
-    private void initLifeIcons() {
-        lifeIcon = new Image(getClass().getResourceAsStream("/com/game/arkanoid/images/paddle_life.png"));
-        updateLifeIcons(gameState.lives);
-        lastLifeCount = gameState.lives;
-    }
 
     private void updateHud() {
         if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
         if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
         if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
-    }
-
-    
-
-    private void refreshLifeIcons() {
-        if (gameState.lives != lastLifeCount) {
-            updateLifeIcons(gameState.lives);
-            lastLifeCount = gameState.lives;
-        }
-    }
-
-    private void updateLifeIcons(int lives) {
-        if (lifeIcon == null || lifeBox == null) return;
-        lifeBox.getChildren().clear();
-        int displayLives = Math.max(0, lives);
-        for (int i = 0; i < displayLives; i++) {
-            ImageView icon = new ImageView(lifeIcon);
-            icon.setPreserveRatio(true);
-            icon.setFitWidth(LIFE_ICON_WIDTH);
-            icon.getStyleClass().add("life-icon");
-            lifeBox.getChildren().add(icon);
-        }
     }
 
     private void setupPauseOverlay() {
@@ -501,4 +494,33 @@ public final class GameController {
     }
 
     // endregion
+
+    // ============================================================
+    // region 7. CONTINUE SUPPORT (apply snapshot + countdown)
+    // ============================================================
+
+    public void applySnapshot(GameStateSnapshot snapshot) {
+        // Ensure correct level is loaded before applying: handled by SceneController
+        snapshot.applyTo(gameState);
+        updateHud();
+        lifeRenderer.reset();
+    }
+
+    public void resumeWithCountdown() {
+        bannerLayer.setVisible(true);
+        bannerLayer.setManaged(true);
+        PauseTransition three = createBannerStep("3", 0.6);
+        PauseTransition two = createBannerStep("2", 0.6);
+        PauseTransition one = createBannerStep("1", 0.6);
+        SequentialTransition seq = new SequentialTransition(three, two, one);
+        seq.setOnFinished(e -> {
+            bannerLayer.setVisible(false);
+            bannerLayer.setManaged(false);
+            gameService.startNextLevel(gameState); // simply resume running
+        });
+        seq.playFromStart();
+    }
+    // endregion
 }
+
+
