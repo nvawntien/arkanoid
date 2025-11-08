@@ -25,6 +25,7 @@ public class LifeRenderer implements Renderer<Integer> {
     }
 
     @Override
+    // hàm render hiển thị số mạng sống hiện tại
     public void render(Integer lives) {
         if (lives == null || lifeBox == null) return;
         if (lives == lastLifeCount) return; // không cần render lại nếu không đổi
