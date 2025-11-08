@@ -1,3 +1,3 @@
-package com.game.arkanoid.events;
+package com.game.arkanoid.events.game;
 
 public record LevelClearedEvent(int level) { }

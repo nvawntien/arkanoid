@@ -2,16 +2,16 @@ package com.game.arkanoid.services;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.events.GameEventBus;
-import com.game.arkanoid.events.PowerUpActivatedEvent;
-import com.game.arkanoid.events.PowerUpExpiredEvent;
+import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
+import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
+import com.game.arkanoid.events.sound.PowerUpHitSoundEvent;
 import com.game.arkanoid.models.Ball;
-import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.models.PowerUp;
 import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.utils.Constants;
-import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.view.sound.SoundManager;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,13 +21,10 @@ import java.util.Random;
  * Handles spawning, updating and applying power-ups. Talks directly to renderers for animations.
  */
 public final class PowerUpService {
-
-    private final SoundRenderer soundService;
     private final Random random = new Random();
     private final GameEventBus eventBus = GameEventBus.getInstance();
 
-    public PowerUpService(SoundRenderer soundService) {
-        this.soundService = soundService;
+    public PowerUpService() {
     }
 
     public PowerUp spawnPowerUpIfAny( double x, double y, double width) {
@@ -50,9 +47,9 @@ public final class PowerUpService {
                 continue;
             }
             if (intersects(powerUp, state.paddle)) {
+                GameEventBus.getInstance().publish(new PowerUpHitSoundEvent());
                 applyPowerUp(state, powerUp.getType(), worldW);
                 toRemove.add(powerUp);
-                soundService.playSfx("powerup_collect");
             }
         }
         state.powerUps.removeAll(toRemove);

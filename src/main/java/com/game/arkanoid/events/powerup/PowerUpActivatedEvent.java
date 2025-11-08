@@ -1,4 +1,4 @@
-package com.game.arkanoid.events;
+package com.game.arkanoid.events.powerup;
 
 import com.game.arkanoid.models.PowerUpType;
 

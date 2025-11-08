@@ -1,8 +1,14 @@
 package com.game.arkanoid.controller;
 
 import com.game.arkanoid.view.animator.MenuAnimator;
-import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.view.sound.SoundManager;
+import com.almasb.fxgl.audio.Sound;
 import com.game.arkanoid.controller.SceneController;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.sound.GameBGMSoundEvent;
+import com.game.arkanoid.events.sound.MenuBGMSoundEvent;
+import com.game.arkanoid.events.sound.RoundStartSoundEvent;
+import com.game.arkanoid.events.sound.StopBGMSoundEvent;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,9 +18,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 
 public final class MenuController {
-
     private final SceneController navigator;
-    private final SoundRenderer sound = SoundRenderer.getInstance();
+    private final GameEventBus eventBus = GameEventBus.getInstance();
+    private final SoundManager sound = SoundManager.getInstance();
 
     @FXML private AnchorPane root;
     @FXML private Button optionButton;
@@ -30,7 +36,9 @@ public final class MenuController {
     @FXML
     private void initialize() {
         animator = new MenuAnimator(optionButton, startButton, exitButton);
-        sound.loopBgm("menu_bgm");
+        //eventBus.publish(new GameBGMSoundEvent());
+        //eventBus.publish(new RoundStartSoundEvent());
+        eventBus.publish(new MenuBGMSoundEvent());
 
         root.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
@@ -54,21 +62,20 @@ public final class MenuController {
 
     @FXML
     private void onStartGame(ActionEvent event) {
-        sound.playSfx("menu_click");
-        sound.fade("menu_bgm", 0.0);
+        eventBus.publish(new StopBGMSoundEvent());
         navigator.showGame();
     }
 
     @FXML
     private void onOpenSettings(ActionEvent event) {
-        sound.playSfx("menu_click");
+        //sound.playSfx("menu_click");
         navigator.showSettings();
     }
 
     @FXML
     private void onExit(ActionEvent event) {
-        sound.playSfx("menu_click");
-        sound.stopAll();
+        //sound.playSfx("menu_click");
+        //sound.stopAll();
         navigator.exit();
     }
 }

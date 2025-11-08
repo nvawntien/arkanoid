@@ -1,12 +1,11 @@
 package com.game.arkanoid.services;
 
-import com.game.arkanoid.events.BrickDestroyedEvent;
-import com.game.arkanoid.events.BrickHitEvent;
 import com.game.arkanoid.events.GameEventBus;
-import com.game.arkanoid.events.GameOverEvent;
-import com.game.arkanoid.events.LevelClearedEvent;
-import com.game.arkanoid.events.LifeLostEvent;
-import com.game.arkanoid.events.PaddleHitEvent;
+import com.game.arkanoid.events.game.GameOverEvent;
+import com.game.arkanoid.events.game.LevelClearedEvent;
+import com.game.arkanoid.events.game.LifeLostEvent;
+import com.game.arkanoid.events.sound.BrickHitSoundEvent;
+import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
 import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.Brick;
 import com.game.arkanoid.models.GameState;
@@ -117,9 +116,9 @@ public final class GameService {
 
     private void handlePaddleCollision(Ball ball, GameState state) {
         if (ballSvc.checkCollision(ball, state.paddle)) {
+            GameEventBus.getInstance().publish(new PaddleHitSoundEvent());
             ballSvc.bounceOff(ball, state.paddle);
             ball.setCenter(ball.getCenterX(), state.paddle.getY() - ball.getRadius() - Constants.BALL_NUDGE);
-            GameEventBus.getInstance().publish(new PaddleHitEvent());
         }
     }
 
@@ -131,11 +130,10 @@ public final class GameService {
 
             if (ballSvc.checkCollision(ball, brick)) {
                 ballSvc.bounceOff(ball, brick);
-                GameEventBus.getInstance().publish(new BrickHitEvent(brick));
+                GameEventBus.getInstance().publish(new BrickHitSoundEvent());
                 boolean destroyed = bricksSvc.handleBrickHit(brick);
                 if (destroyed) {
                     state.score += 100;
-                    GameEventBus.getInstance().publish(new BrickDestroyedEvent(brick));
                     PowerUp spawned = null;
                     if (countAliveBricks(state) > 1) {
                         spawned = powerUpSvc.spawnPowerUpIfAny(brick.getX(), brick.getY(), brick.getWidth());

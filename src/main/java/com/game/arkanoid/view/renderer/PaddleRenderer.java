@@ -1,7 +1,7 @@
 package com.game.arkanoid.view.renderer;
 
-import com.game.arkanoid.events.PowerUpActivatedEvent;
-import com.game.arkanoid.events.PowerUpExpiredEvent;
+import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
+import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
 import com.game.arkanoid.models.Paddle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

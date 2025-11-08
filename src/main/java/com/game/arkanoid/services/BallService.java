@@ -1,6 +1,9 @@
 package com.game.arkanoid.services;
 
 import com.game.arkanoid.config.GameSettings;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
+import com.game.arkanoid.events.sound.WallHitSoundEvent;
 import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.GameObject;
 import com.game.arkanoid.models.Paddle;
@@ -28,17 +31,22 @@ public class BallService {
 
     public void bounceWorld(Ball ball, double worldW, double worldH) {
         double r = ball.getRadius();
+        boolean check = false;
         if (ball.getCenterX() - r < 22) {
             ball.setCenter(r + 22, ball.getCenterY());
             ball.setVelocity(Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
+            check = true;
         } else if (ball.getCenterX() + r > worldW - 22) {
             ball.setCenter(worldW - 22 - r, ball.getCenterY());
             ball.setVelocity(-Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
+            check = true;
         }
         if (ball.getCenterY() - r < 172) {
             ball.setCenter(ball.getCenterX(), r + 172);
             ball.setVelocity(ball.getDx(), Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION);
+            check = true;
         }
+        if (check) GameEventBus.getInstance().publish(new WallHitSoundEvent());
     }
 
     public boolean fellBelow(Ball ball, double worldH) {

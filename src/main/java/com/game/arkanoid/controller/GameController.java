@@ -1,6 +1,7 @@
 package com.game.arkanoid.controller;
 
 import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.game.LevelClearedEvent;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.services.GameService;
@@ -12,10 +13,11 @@ import com.game.arkanoid.view.renderer.PowerUpRenderer;
 
 
 import java.util.List;
-import com.game.arkanoid.events.LevelClearedEvent;
-import com.game.arkanoid.events.PowerUpActivatedEvent;
-import com.game.arkanoid.events.PowerUpExpiredEvent;
-import com.game.arkanoid.view.sound.SoundRenderer;
+
+import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
+import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
+import com.game.arkanoid.events.sound.GameBGMSoundEvent;
+import com.game.arkanoid.events.sound.RoundStartSoundEvent;
 import com.game.arkanoid.view.transition.TransitionStrategy;
 
 import java.io.IOException;
@@ -60,7 +62,7 @@ public final class GameController {
     private final GameService gameService;
     private final GameState gameState;
     private final SceneController navigator;
-    private final SoundRenderer soundService = SoundRenderer.getInstance();
+    //private final SoundManager sound = SoundManager.getInstance();
     private final Set<KeyCode> activeKeys = new HashSet<>();
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
 
@@ -94,12 +96,9 @@ public final class GameController {
         initLifeIcons();
         updateHud();
         registerEventListeners();
-        // region SOUND - initialize BGM
-        soundService.stopBgm("menu_bgm");
-        soundService.loopBgm("level_bgm");
-        // endregion
 
         startGameLoop();
+        GameEventBus.getInstance().publish(new GameBGMSoundEvent());
         lastLevelObserved = gameState.level;
         startLevelIntro();
     }
@@ -121,7 +120,6 @@ public final class GameController {
 
                 InputState in = readInput();
                 gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
-
                 // Render updated state
                 paddleRenderer.render(gameState.paddle);
                 ballRenderer.render(gameState.ball);
@@ -297,8 +295,8 @@ public final class GameController {
         ft.play();
 
         // region SOUND - Pause feedback
-        soundService.playSfx("pause_on");
-        soundService.fade("level_bgm", soundService.effectiveMusicVolume() * 0.35, Duration.millis(250));
+       // soundService.playSfx("pause_on");
+        //soundService.fade("level_bgm", soundService.effectiveMusicVolume() * 0.35, Duration.millis(250));
         // endregion
 
         pauseOverlay.requestFocus();
@@ -322,8 +320,8 @@ public final class GameController {
         gameState.paused = false;
 
         // region SOUND - Resume feedback
-        soundService.playSfx("pause_off");
-        soundService.fade("level_bgm", soundService.effectiveMusicVolume(), Duration.millis(220));
+        //soundService.playSfx("pause_off");
+        //soundService.fade("level_bgm", soundService.effectiveMusicVolume(), Duration.millis(220));
         // endregion
 
         Platform.runLater(gamePane::requestFocus);
@@ -338,7 +336,7 @@ public final class GameController {
         startLevelIntro();
 
         // region SOUND
-        soundService.playSfx("menu_click");
+        //soundService.playSfx("menu_click");
         // endregion
 
         Platform.runLater(gamePane::requestFocus);
@@ -434,7 +432,7 @@ public final class GameController {
     public void stop() {
         if (loop != null) loop.stop();
         if (levelIntroSequence != null) levelIntroSequence.stop();
-        soundService.stopBgm("level_bgm");
+        //soundService.stopBgm("level_bgm");
         subscriptions.forEach(GameEventBus.Subscription::close);
         subscriptions.clear();
     }

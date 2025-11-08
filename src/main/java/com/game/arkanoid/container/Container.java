@@ -10,7 +10,6 @@ import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.services.RoundService;
 import com.game.arkanoid.services.PaddleService;
 import com.game.arkanoid.services.PowerUpService;
-import com.game.arkanoid.view.sound.SoundRenderer;
 import com.game.arkanoid.utils.Constants;
 
 
@@ -18,7 +17,7 @@ public final class Container {
 
     private final GameState state;
     private final GameService game;
-
+    
     public Container() {
         double paddleWidth = Constants.PADDLE_WIDTH * GameSettings.getPaddleWidthMultiplier();
         Paddle paddle = new Paddle(
@@ -44,9 +43,7 @@ public final class Container {
         BricksService bricksSvc = new BricksService();
         BallService ballSvc = new BallService();
         PaddleService paddleSvc = new PaddleService();
-        SoundRenderer sound = SoundRenderer.getInstance();
-        PowerUpService powerUpSvc = new PowerUpService(sound);
-
+        PowerUpService powerUpSvc = new PowerUpService();
         RoundService roundSvc = new RoundService(bricksSvc, ballSvc);
         // Load level 1 from resources directory
         roundSvc.loadLevel(this.state, 1);

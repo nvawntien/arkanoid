@@ -3,7 +3,7 @@ package com.game.arkanoid.controller;
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.config.GameSettings.Difficulty;
 import com.game.arkanoid.controller.SceneController;
-import com.game.arkanoid.view.sound.SoundRenderer;
+import com.game.arkanoid.view.sound.SoundManager;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,7 +23,6 @@ public final class SettingsController {
     private ComboBox<Difficulty> difficultyCombo;
 
     private final SceneController navigator;
-    private final SoundRenderer sound = SoundRenderer.getInstance();
 
     @FXML
     private Slider masterSlider;
@@ -46,9 +45,6 @@ public final class SettingsController {
         difficultyCombo.getSelectionModel().select(GameSettings.getDifficulty());
         soundToggle.setSelected(GameSettings.isSoundEnabled());
 
-        masterSlider.valueProperty().bindBidirectional(sound.masterVolumeProperty());
-        musicSlider.valueProperty().bindBidirectional(sound.musicVolumeProperty());
-        sfxSlider.valueProperty().bindBidirectional(sound.sfxVolumeProperty());
         masterSlider.valueProperty().addListener((obs, oldV, newV) -> {
             if (!masterSlider.isDisabled()) {
                 previousMasterVolume = newV.doubleValue();
@@ -70,10 +66,10 @@ public final class SettingsController {
         GameSettings.setSoundEnabled(enabled);
         if (enabled) {
             double restoreValue = previousMasterVolume > 0 ? previousMasterVolume : 1.0;
-            sound.masterVolumeProperty().set(restoreValue);
+            //sound.masterVolumeProperty().set(restoreValue);
         } else {
-            previousMasterVolume = sound.masterVolumeProperty().get();
-            sound.masterVolumeProperty().set(0.0);
+            //previousMasterVolume = sound.masterVolumeProperty().get();
+           // sound.masterVolumeProperty().set(0.0);
         }
         masterSlider.setDisable(!enabled);
         musicSlider.setDisable(!enabled);
