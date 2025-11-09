@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="800.0" prefWidth="600.0" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.LoginController">
+    <children>
+        <VBox alignment="CENTER" spacing="12" prefWidth="600.0" prefHeight="800.0">
+            <children>
+                <Label text="Welcome to Arkanoid" styleClass="menu-title" />
+                <TextField fx:id="usernameField" promptText="Username" maxWidth="260" />
+                <PasswordField fx:id="passwordField" promptText="Password" maxWidth="260" />
+                <Button fx:id="loginButton" text="Login" minWidth="160" />
+                <Label fx:id="messageLabel" textFill="red" />
+            </children>
+            <padding>
+                <Insets top="220" />
+            </padding>
+        </VBox>
+    </children>
+</AnchorPane>
+

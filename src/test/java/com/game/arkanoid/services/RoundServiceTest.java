@@ -63,7 +63,7 @@ class RoundServiceTest {
     void loadLevelResetsBallAndClearsState() {
         state.ball.setCenter(0, 0);
         state.ball.setMoving(true);
-        state.extraBalls.add(new Ball(10, 10, Constants.BALL_RADIUS));
+        state.balls.add(new Ball(10, 10, Constants.BALL_RADIUS));
 
         roundService.loadLevel(state, 2);
 
@@ -72,6 +72,6 @@ class RoundServiceTest {
         double expectedY = state.paddle.getY() - state.ball.getRadius() - Constants.BALL_SPAWN_OFFSET;
         assertEquals(expectedX, state.ball.getCenterX());
         assertEquals(expectedY, state.ball.getCenterY());
-        assertTrue(state.extraBalls.isEmpty());
+        assertTrue(state.balls.isEmpty());
     }
 }

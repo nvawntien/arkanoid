@@ -30,7 +30,7 @@ public final class PowerUpService {
         if (random.nextDouble() > Constants.POWER_UP_DROP_CHANCE) {
             return null;
         }
-        PowerUpType[] types = PowerUpType.values();
+        PowerUpType[] types = {PowerUpType.CATCH_BALL, PowerUpType.MULTI_BALL};
         PowerUpType type = types[random.nextInt(types.length)];
         double spawnX = x + (width - Constants.POWER_UP_WIDTH) / 2.0;
         double spawnY = y + Constants.BRICK_HEIGHT;
@@ -89,7 +89,9 @@ public final class PowerUpService {
                 state.laserCooldown = 0.0;
             }
             case CATCH_BALL -> {
-                state.ball.setStuck(true);
+                for (Ball ball : state.balls) {
+                    ball.setStuck(true);
+                }
             }
             case MULTI_BALL -> spawnAdditionalBalls(state);
             case EXTRA_LIFE -> state.incrementLives();
@@ -102,24 +104,30 @@ public final class PowerUpService {
     }
 
     private void spawnAdditionalBalls(GameState state) {
-        Ball source = state.ball;
-        if (!source.isMoving()) {
-            return;
-        }
-        double baseSpeed = Math.hypot(source.getDx(), source.getDy());
-        if (baseSpeed < 1e-3) {
-            baseSpeed = Constants.BALL_SPEED * GameSettings.getBallSpeedMultiplier();
+        List <Ball> newBall = new ArrayList<>();
+        for (Ball source : state.balls) {
+            if (!source.isMoving()) {
+                continue;
+            }
+
+            double baseSpeed = Math.hypot(source.getDx(), source.getDy());
+            
+            if (baseSpeed < 1e-3) {
+                baseSpeed = Constants.BALL_SPEED * GameSettings.getBallSpeedMultiplier();
+            }
+
+            double[] angles = {-15.0, 15.0};
+            for (double angleOffset : angles) {
+                Ball extra = new Ball(source.getCenterX(), source.getCenterY(), source.getRadius());
+                double angle = Math.toDegrees(Math.atan2(source.getDy(), source.getDx())) + angleOffset;
+                double rad = Math.toRadians(angle);
+                extra.setVelocity(baseSpeed * Math.cos(rad), baseSpeed * Math.sin(rad));
+                extra.setMoving(true);
+                newBall.add(extra);
+            }
         }
 
-        double[] angles = {-15.0, 15.0};
-        for (double angleOffset : angles) {
-            Ball extra = new Ball(source.getCenterX(), source.getCenterY(), source.getRadius());
-            double angle = Math.toDegrees(Math.atan2(source.getDy(), source.getDx())) + angleOffset;
-            double rad = Math.toRadians(angle);
-            extra.setVelocity(baseSpeed * Math.cos(rad), baseSpeed * Math.sin(rad));
-            extra.setMoving(true);
-            state.extraBalls.add(extra);
-        }
+        state.balls.addAll(newBall);
     }
 
     private void clampPaddle(Paddle paddle, double worldW) {

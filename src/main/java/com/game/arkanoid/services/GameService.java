@@ -3,7 +3,6 @@ package com.game.arkanoid.services;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.game.GameOverEvent;
 import com.game.arkanoid.events.game.LevelClearedEvent;
-import com.game.arkanoid.events.game.LifeLostEvent;
 import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
 import com.game.arkanoid.events.sound.BrickHitSoundEvent;
 import com.game.arkanoid.models.PowerUpType;
@@ -72,8 +71,7 @@ public final class GameService {
 
         // 2. Update projectiles and entities
         bulletSvc.tickCooldown(state, scaledDt);
-        updatePrimaryBall(state, scaledDt, worldW, worldH);
-        updateSecondaryBalls(state, scaledDt, worldW, worldH);
+        updateBalls(state, scaledDt, worldW, worldH);
         updateBullets(state, scaledDt, worldH);
 
         // 3. Power-ups and game progression
@@ -89,23 +87,31 @@ public final class GameService {
         if (in.right) paddleSvc.moveRight(state.paddle, dt, worldW);
 
         // Keep ball attached before launch
-        if (!state.ball.isMoving()) {
-             if (state.ball.isStuck()) {
-                // Ball was caught: keep it attached to the paddle using the stored offset
-                double paddleX = state.paddle.getX();
-                double paddleW = state.paddle.getWidth();
-                double desiredX = paddleX + state.ball.getStuckOffsetX();
-                double minX = paddleX + state.ball.getRadius();
-                double maxX = paddleX + paddleW - state.ball.getRadius();
-                desiredX = Math.max(minX, Math.min(desiredX, maxX));
-                state.ball.setCenter(desiredX, state.paddle.getY() - state.ball.getRadius() - Constants.BALL_NUDGE);
-            } else {
-                ballSvc.resetOnPaddle(state.ball, state.paddle);
+        for (Ball ball : state.balls) {
+            if (!ball.isMoving()) {
+                if (ball.isStuck()) {
+                    // Ball was caught: keep it attached to the paddle using the stored offset
+                    double paddleX = state.paddle.getX();
+                    double paddleW = state.paddle.getWidth();
+                    double desiredX = paddleX + ball.getStuckOffsetX();
+                    double minX = paddleX + ball.getRadius();
+                    double maxX = paddleX + paddleW - ball.getRadius();
+                    desiredX = Math.max(minX, Math.min(desiredX, maxX));
+                    ball.setCenter(desiredX, state.paddle.getY() - ball.getRadius() - Constants.BALL_NUDGE);
+                } else {
+                    ballSvc.resetOnPaddle(ball, state.paddle);
+                }
             }
         }
 
-        if (in.launch && !state.ball.isMoving()) {
-            ballSvc.launch(state.ball);
+        if (in.launch) {
+            for (Ball ball : state.balls) {
+                if (!ball.isMoving()) {
+                    ballSvc.launch(ball);
+                    break;
+                }
+            }
+            in.launch = false;
         }
 
         if (in.fire && state.activePowerUps.containsKey(PowerUpType.LASER_PADDLE)) {
@@ -120,34 +126,22 @@ public final class GameService {
     // region 2. ENTITY UPDATES (Ball, Extra Balls, Bullets, PowerUps)
     // ======================================================================
 
-    /**
-     * Main ball update: physics, wall bounce, paddle + brick collisions, life loss.
-     */
-    private void updatePrimaryBall(GameState state, double dt, double worldW, double worldH) {
-        Ball ball = state.ball;
-        ballSvc.step(ball, dt);
-        ballSvc.bounceWorld(ball, worldW, worldH);
-
-        handlePaddleCollision(ball, state);
-        handleBrickCollisions(state, ball);
-
-        if (ballSvc.fellBelow(ball, worldH)) {
-            handleBallFall(state);
-        }
-    }
-
+  
     /**
      * Updates all extra (duplicated) balls from power-ups.
      */
-    private void updateSecondaryBalls(GameState state, double dt, double worldW, double worldH) {
-        Iterator<Ball> iterator = state.extraBalls.iterator();
+    private void updateBalls(GameState state, double dt, double worldW, double worldH) {
+        Iterator<Ball> iterator = state.balls.iterator();
         while (iterator.hasNext()) {
-            Ball extra = iterator.next();
-            ballSvc.step(extra, dt);
-            ballSvc.bounceWorld(extra, worldW, worldH);
-            handlePaddleCollision(extra, state);
-            handleBrickCollisions(state, extra);
-            if (ballSvc.fellBelow(extra, worldH)) iterator.remove();
+            Ball ball = iterator.next();
+            ballSvc.step(ball, dt);
+            ballSvc.bounceWorld(ball, worldW, worldH);
+            handlePaddleCollision(ball, state);
+            handleBrickCollisions(ball, state);
+            if (ballSvc.fellBelow(ball, worldH)) {
+                iterator.remove();
+                handleBallFall(state);
+            }
         }
     }
 
@@ -181,7 +175,7 @@ public final class GameService {
         }
     }
 
-    private void handleBrickCollisions(GameState state, Ball ball) {
+    private void handleBrickCollisions(Ball ball, GameState state) {
         for (Brick brick : state.bricks) {
             if (brick.isDestroyed()) continue;
 
@@ -192,7 +186,7 @@ public final class GameService {
                 if (destroyed) {
                     state.score += 100;
                     PowerUp spawned = null;
-                    if (countAliveBricks(state) > 1) {
+                    if (countAliveBricks(state) > 0) {
                         spawned = powerUpSvc.spawnPowerUpIfAny(brick.getX(), brick.getY(), brick.getWidth());
                     }
                     if (spawned != null) {
@@ -216,20 +210,16 @@ public final class GameService {
      * Handles ball loss (life decrement, reset, game over check).
      */
     private void handleBallFall(GameState state) {
-        if (!state.extraBalls.isEmpty()) {
-            // Replace main ball with next extra
-            Ball replacement = state.extraBalls.remove(0);
-            copyBallState(replacement, state.ball);
+        if (state.balls.size() > 0) {
             return;
         }
 
         // No extra balls → lose life
         state.decrementLives();
-        GameEventBus.getInstance().publish(new LifeLostEvent(state.lives));
         state.resetForLife();
-        state.extraBalls.clear();
+        state.balls.add(state.ball);
         ballSvc.resetOnPaddle(state.ball, state.paddle);
-
+        
         if (state.lives < 0) {
             state.running = false;
             state.gameOver = true;
@@ -271,12 +261,6 @@ public final class GameService {
             if (!brick.isDestroyed()) alive++;
         }
         return alive;
-    }
-
-    private void copyBallState(Ball source, Ball target) {
-        target.setCenter(source.getCenterX(), source.getCenterY());
-        target.setVelocity(source.getDx(), source.getDy());
-        target.setMoving(source.isMoving());
     }
 
     // endregion

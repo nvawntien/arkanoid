@@ -14,12 +14,12 @@ import javafx.scene.layout.Pane;
 /**
  * Renders secondary balls spawned through the multi-ball power-up.
  */
-public final class ExtraBallsRenderer implements Renderer<List<Ball>> {
+public final class BallsRenderer implements Renderer<List<Ball>> {
     private final Pane pane;
     private final Map<Ball, ImageView> nodes = new IdentityHashMap<>();
     private final Image ballImage;
 
-    public ExtraBallsRenderer(Pane pane) {
+    public BallsRenderer(Pane pane) {
         this.pane = pane;
         this.ballImage = new Image(getClass().getResourceAsStream("/com/game/arkanoid/images/ball.png"));
     }

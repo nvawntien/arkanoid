@@ -10,12 +10,11 @@ import java.util.Map;
  * All runtime state for a single play session.
  */
 public final class GameState {
-
     public final Ball ball;
     public final Paddle paddle;
 
     public final List<Brick> bricks = new ArrayList<>();
-    public final List<Ball> extraBalls = new ArrayList<>();
+    public final List<Ball> balls = new ArrayList<>();
     public final List<Bullet> bullets = new ArrayList<>();
     public final List<PowerUp> powerUps = new ArrayList<>();
     public final Map<PowerUpType, Double> activePowerUps = new EnumMap<>(PowerUpType.class);
@@ -38,6 +37,7 @@ public final class GameState {
     public GameState(Ball ball, Paddle paddle) {
         this.ball = ball;
         this.paddle = paddle;
+        this.balls.add(ball);
     }
 
     public void resetForLife() {
@@ -65,5 +65,4 @@ public final class GameState {
     public void incrementLives() {
         lives++;
     }
-
 }
