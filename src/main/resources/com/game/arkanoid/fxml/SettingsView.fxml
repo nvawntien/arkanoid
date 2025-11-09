@@ -1,71 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Slider?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="settingPane" prefHeight="800.0" prefWidth="600.0" styleClass="settingPane" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.SettingsController">
+<AnchorPane stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.GameController">
     <children>
-        <!-- Hình nền và logo -->
-        <ImageView fitHeight="237.0" fitWidth="600.0" layoutY="465.0" preserveRatio="true">
-            <image>
-                <Image url="@../images/setting.png" />
-            </image>
-        </ImageView>
+        <StackPane fx:id="rootStack" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <Pane fx:id="gamePane" prefHeight="800" prefWidth="600" styleClass="gamePane">
+                    <children>
+                  <ImageView fitHeight="650.0" fitWidth="600.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/bg_level1.png" />
+                     </image>
+                  </ImageView>
+                        <ImageView fx:id="edge_right" fitHeight="650.0" fitWidth="22.0" layoutX="578.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/edge_right.png" />
+                            </image>
+                        </ImageView>
+                        <ImageView fx:id="edge_left" fitHeight="650.0" fitWidth="22.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/edge_left.png" />
+                            </image>
+                        </ImageView>
+                        <ImageView fx:id="edge_top" fitHeight="22.0" fitWidth="556.0" layoutX="22.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/door_top_right_1.png" />
+                            </image>
+                        </ImageView>
+                    </children>
+                </Pane>
 
-        <ImageView fitHeight="276.0" fitWidth="600.0" layoutY="199.0" preserveRatio="true">
-            <image>
-                <Image url="@../images/powerup.png" />
-            </image>
-        </ImageView>
+                            <AnchorPane fx:id="hudLayer" pickOnBounds="false" StackPane.alignment="BOTTOM_LEFT">
+                    <children>
+                        <HBox fx:id="lifeBox" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="34.0" />
 
-        <ImageView fitHeight="107.0" fitWidth="271.0" layoutX="165.0" layoutY="43.0" preserveRatio="true">
-            <image>
-                <Image url="@../images/logo.png" />
-            </image>
-        </ImageView>
+                                    <Label fx:id="livesLabel" layoutX="535.0" layoutY="79.0" styleClass="hud-label" text="1UP 3" textFill="WHITE">
+                     <font>
+                        <Font name="Cambria Math" size="20.0" />
+                     </font>
+                  </Label>
+                        <Label fx:id="highScoreLabel" layoutX="539.0" layoutY="43.0" prefHeight="18.0" prefWidth="53.0" styleClass="hud-label" text="0000" textAlignment="RIGHT" textFill="WHITE">
+                     <font>
+                        <Font name="Cambria Math" size="20.0" />
+                     </font>
+                  </Label>
+                        <Label fx:id="scoreLabel" layoutX="539.0" layoutY="111.0" styleClass="hud-label" text="0000" textFill="WHITE">
+                     <font>
+                        <Font name="Cambria Math" size="20.0" />
+                     </font>
+                  </Label>
+                  <ImageView fitHeight="42.0" fitWidth="116.0" layoutX="416.0" layoutY="48.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/highscore.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fitHeight="14.0" fitWidth="162.0" layoutX="414.0" layoutY="116.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/yourscore2.png" />
+                     </image>
+                  </ImageView>
+                        <ImageView fx:id="tiltle" fitHeight="145.0" fitWidth="400.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/logo.png" />
+                            </image>
+                        </ImageView>
+                        <Button layoutX="539.0" layoutY="183.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="29.0" text="| |" textAlignment="CENTER"
+                                    
+                                    onAction="#handlePauseButton"
+                                    styleClass="hud-pause-button" >
+                                    
+                                <font>
+                                    <Font name="Candara Bold Italic" size="12.0" />
+                                </font>
+                        </Button>
+                    </children>
+                </AnchorPane>
 
-        <!-- Difficulty -->
-        <ImageView fitHeight="40.0" fitWidth="161.0" layoutX="135.0" layoutY="544.0" preserveRatio="true">
-            <image>
-                <Image url="@../images/dificulty.png" />
-            </image>
-        </ImageView>
-        <ComboBox fx:id="difficultyCombo" layoutX="313.0" layoutY="540.0" onAction="#onDifficultyChanged" prefHeight="26.0" prefWidth="129.0" />
+                <StackPane fx:id="bannerLayer" alignment="CENTER" managed="false" pickOnBounds="false" visible="false">
+                    <children>
+                        <Label fx:id="bannerLabel" alignment="CENTER" styleClass="level-banner level-banner-text" text="" />
+                    </children>
+                </StackPane>
 
-        <!-- Sound -->
-        <ImageView fitHeight="40.0" fitWidth="100.0" layoutX="200.0" layoutY="584.0" preserveRatio="true">
-            <image>
-                <Image url="@../images/sound.png" />
-            </image>
-        </ImageView>
-        <Slider fx:id="masterSlider" blockIncrement="0.1" layoutX="310.0" layoutY="586.0" max="1.0" prefHeight="14.0" prefWidth="137.0" />
-        <Slider fx:id="musicSlider" blockIncrement="0.1" layoutX="310.0" layoutY="624.0" max="1.0" prefHeight="14.0" prefWidth="138.0" />
-
-        <Label layoutX="194.0" layoutY="653.0" text="SFX Volume" textFill="white">
-            <font><Font size="16.0" /></font>
-        </Label>
-        <Slider fx:id="sfxSlider" blockIncrement="0.1" layoutX="310.0" layoutY="659.0" max="1.0" prefHeight="14.0" prefWidth="138.0" />
-
-        <!-- Back -->
-        <ImageView fitHeight="61.0" fitWidth="117.0" layoutX="242.0" layoutY="704.0" preserveRatio="true">
-            <image>
-                <Image url="@../images/back.png" />
-            </image>
-        </ImageView>
-        <Button layoutX="239.0" layoutY="709.0" onAction="#onBack" prefHeight="51.0" prefWidth="122.0" styleClass="menu-button" textFill="#fcfcfc">
-            <font><Font size="29.0" /></font>
-        </Button>
-      <ImageView fitHeight="40.0" fitWidth="200.0" layoutX="100.0" layoutY="623.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../images/musicvolume.png" />
-         </image>
-      </ImageView>
-
+                <StackPane fx:id="overlayLayer" alignment="CENTER" managed="false" pickOnBounds="true" visible="false" />
+            </children>
+        </StackPane>
     </children>
 </AnchorPane>
