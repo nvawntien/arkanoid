@@ -11,7 +11,6 @@
 
 <AnchorPane fx:id="settingPane" prefHeight="800.0" prefWidth="600.0" styleClass="settingPane" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.SettingsController">
     <children>
-
         <!-- Hình nền và logo -->
         <ImageView fitHeight="237.0" fitWidth="600.0" layoutY="465.0" preserveRatio="true">
             <image>
