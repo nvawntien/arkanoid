@@ -10,7 +10,7 @@ import java.util.Optional;
 public final class UserRepository {
 
     public Optional<User> findByName(String name) throws SQLException {
-        String sql = "SELECT id, name, password, best_score, best_round, last_login FROM users WHERE name = ?";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/select_user_by_name.sql");
         try (Connection c = DatabaseConfig.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, name);
@@ -25,8 +25,7 @@ public final class UserRepository {
 
     /** Case-insensitive lookup; returns one match if any (prefers highest bests). */
     public Optional<User> findByNameInsensitive(String name) throws SQLException {
-        String sql = "SELECT id, name, password, best_score, best_round, last_login " +
-                "FROM users WHERE LOWER(name) = LOWER(?) ORDER BY best_round DESC, best_score DESC LIMIT 1";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/select_user_by_name_insensitive.sql");
         try (Connection c = DatabaseConfig.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, name);
@@ -39,7 +38,7 @@ public final class UserRepository {
 
 
     public void updatePasswordHash(int userId, String newHash) throws SQLException {
-        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/update_password.sql");
         try (Connection c = DatabaseConfig.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, newHash);
@@ -64,7 +63,7 @@ public final class UserRepository {
 
     
     public User insert(String name, String passwordHash) throws SQLException {
-        String sql = "INSERT INTO users (name, password) VALUES (?, ?) RETURNING id, name, password, best_score, best_round, last_login";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/insert_user.sql");
         try (Connection c = DatabaseConfig.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, name);
@@ -77,7 +76,7 @@ public final class UserRepository {
     }
 
     public void updateBest(int userId, int bestRound, int bestScore) throws SQLException {
-        String sql = "UPDATE users SET best_round = GREATEST(best_round, ?), best_score = GREATEST(best_score, ?), last_login = CURRENT_TIMESTAMP WHERE id = ?";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/update_best.sql");
         try (Connection c = DatabaseConfig.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, bestRound);
