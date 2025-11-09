@@ -14,6 +14,21 @@
             <children>
                 <Pane fx:id="gamePane" prefHeight="800" prefWidth="600" styleClass="gamePane">
                     <children>
+                        <ImageView fx:id="tiltle" fitHeight="145.0" fitWidth="400.0" layoutX="11.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/logo.png" />
+                            </image>
+                        </ImageView>
+                  <ImageView fitHeight="650.0" fitWidth="600.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/bg_level3.png" />
+                     </image>
+                  </ImageView>
+                        <ImageView fx:id="edge_right" fitHeight="650.0" fitWidth="22.0" layoutX="578.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/edge_right.png" />
+                            </image>
+                        </ImageView>
                         <ImageView fx:id="edge_left" fitHeight="650.0" fitWidth="22.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
                             <image>
                                 <Image url="@../images/edge_left.png" />
@@ -24,26 +39,16 @@
                                 <Image url="@../images/door_top_right_1.png" />
                             </image>
                         </ImageView>
-                        <ImageView fx:id="edge_right" fitHeight="650.0" fitWidth="22.0" layoutX="578.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@../images/edge_right.png" />
-                            </image>
-                        </ImageView>
-                        <ImageView fx:id="tiltle" fitHeight="145.0" fitWidth="400.0" layoutX="11.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@../images/logo.png" />
-                            </image>
-                        </ImageView>
-
-                        <Label fx:id="livesLabel" layoutX="32.0" layoutY="8.0" text="1UP 3" styleClass="hud-label" />
-                        <Label fx:id="scoreLabel" layoutX="120.0" layoutY="8.0" text="0" styleClass="hud-label" />
-                        <Label fx:id="highScoreLabel" layoutX="420.0" layoutY="8.0" text="HIGH SCORE 00000" styleClass="hud-label" />
                     </children>
                 </Pane>
 
                 <AnchorPane fx:id="hudLayer" pickOnBounds="false" StackPane.alignment="BOTTOM_LEFT">
                     <children>
                         <HBox fx:id="lifeBox" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="34.0" />
+
+                        <Label fx:id="livesLabel" layoutX="554.0" layoutY="86.0" styleClass="hud-label" text="1UP 3" />
+                        <Label fx:id="highScoreLabel" layoutX="481.0" layoutY="51.0" styleClass="hud-label" text="HIGH SCORE 00000" />
+                        <Label fx:id="scoreLabel" layoutX="570.0" layoutY="117.0" styleClass="hud-label" text="0" />
                     </children>
                 </AnchorPane>
 

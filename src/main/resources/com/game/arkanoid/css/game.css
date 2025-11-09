@@ -109,6 +109,44 @@
 #continueButton {
      -fx-background-image: url("../images/continuebutton.png")
 }
+.gameover-bg {
+    -fx-background-image: url("../images/gameover_bg.png")
+}
+.gameover-button {
+    -fx-background-color: transparent;
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-effect: none; /* Không glow */
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* Khi hover hoặc được chọn  */
+#playAgainButton:hover,
+#playAgainButton.selected {
+    -fx-background-image: url("../images/playagainbutton2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+#mainMenuButton:hover,
+#mainMenuButton.selected {
+    -fx-background-image: url("../images/mainmenubutton2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* Ảnh mặc định */
+#playAgainButton {
+    -fx-background-image: url("../images/playagainbutton.png");
+}
+
+#mainMenuButton {
+    -fx-background-image: url("../images/mainmenubutton.png");
+}
+
 /* Power-up styles */
 .powerup {
     -fx-arc-width: 8;

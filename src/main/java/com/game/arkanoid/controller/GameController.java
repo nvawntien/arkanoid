@@ -430,6 +430,10 @@ public final class GameController {
         if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
     }
 
+    public int getScore() {
+        return gameState.score;
+    }
+
     private void setupPauseOverlay() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/PauseView.fxml"));
