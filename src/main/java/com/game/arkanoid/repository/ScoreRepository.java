@@ -10,11 +10,7 @@ import java.util.List;
 public final class ScoreRepository {
 
     public List<RankingEntry> fetchRankings(int limit) throws SQLException {
-        // Aggregate duplicates that differ only by case, pick max stats
-        String sql = "SELECT name_alias AS name, best_score, best_round FROM (" +
-                "  SELECT LOWER(name) AS key, MAX(best_score) AS best_score, MAX(best_round) AS best_round, MIN(name) AS name_alias " +
-                "  FROM users GROUP BY LOWER(name)" +
-                ") t ORDER BY best_round DESC, best_score DESC LIMIT ?";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/score/select_rankings.sql");
         List<RankingEntry> list = new ArrayList<>();
         try (Connection c = DatabaseConfig.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
