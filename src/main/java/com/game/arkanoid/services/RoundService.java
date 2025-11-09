@@ -38,13 +38,16 @@ public final class RoundService {
         state.bricks.clear();
         state.bricks.addAll(bricks);
         state.level = idx;
-        state.extraBalls.clear();
+        state.balls.clear();
         state.powerUps.clear();
         state.activePowerUps.clear();
         state.levelTransitionPending = false;
         state.paused = true;
         state.running = false;
+        state.paddle.setWidthClamped(state.basePaddleWidth);
+        state.timeScale = 1.0;
         paddleService.resetPaddlePosition(state.paddle);
+        state.balls.add(state.ball);
         // Reset ball on paddle for new level
         ballService.resetOnPaddle(state.ball, state.paddle);
     }
