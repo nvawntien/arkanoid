@@ -233,4 +233,19 @@ public final class SceneController {
         }
     }
 
+    /** Best-effort save of in-progress game when app closes. */
+    public void saveInProgressIfAny() {
+        if (activeGameController == null) return;
+        if (!activeGameController.isResumable()) return;
+        com.game.arkanoid.container.AppContext app = com.game.arkanoid.container.AppContext.getInstance();
+        com.game.arkanoid.models.User u = app.getCurrentUser();
+        if (u == null) return;
+        com.game.arkanoid.models.GameStateSnapshot snap = activeGameController.captureSnapshot();
+        try {
+            app.db().saveInProgress(u.getId(), snap).join();
+        } catch (Exception ignore) {
+            // ignore on shutdown
+        }
+    }
+
 }
