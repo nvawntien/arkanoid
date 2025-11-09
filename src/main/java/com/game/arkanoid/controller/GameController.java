@@ -5,10 +5,9 @@ import com.game.arkanoid.events.game.LevelClearedEvent;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.services.GameService;
-import com.game.arkanoid.view.renderer.BallRenderer;
+import com.game.arkanoid.view.renderer.BallsRenderer;
 import com.game.arkanoid.view.renderer.BulletRenderer;
 import com.game.arkanoid.view.renderer.BricksRenderer;
-import com.game.arkanoid.view.renderer.ExtraBallsRenderer;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
 import com.game.arkanoid.view.renderer.PowerUpRenderer;
 import com.game.arkanoid.view.renderer.LifeRenderer;
@@ -26,14 +25,10 @@ import java.util.HashSet;
 import java.util.Set;
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
@@ -66,10 +61,9 @@ public final class GameController {
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
 
     // --- Rendering Components ---
-    private BallRenderer ballRenderer;
+    private BallsRenderer ballsRenderer;
     private PaddleRenderer paddleRenderer;
     private BricksRenderer bricksRenderer;
-    private ExtraBallsRenderer extraBallsRenderer;
     private PowerUpRenderer powerUpRenderer;
     private BulletRenderer bulletRenderer;
     private LifeRenderer lifeRenderer;
@@ -96,7 +90,7 @@ public final class GameController {
         registerEventListeners();
 
         startGameLoop();
-        GameEventBus.getInstance().publish(new GameBGMSoundEvent());
+        //GameEventBus.getInstance().publish(new GameBGMSoundEvent());
         lastLevelObserved = gameState.level;
         startLevelIntro();
     }
@@ -120,8 +114,7 @@ public final class GameController {
                 gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
                 // Render updated state
                 paddleRenderer.render(gameState.paddle);
-                ballRenderer.render(gameState.ball);
-                extraBallsRenderer.render(gameState.extraBalls);
+                ballsRenderer.render(gameState.balls);
                 powerUpRenderer.render(gameState.powerUps);
                 bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
@@ -228,7 +221,7 @@ public final class GameController {
                 gameState.bullets.clear();
                 gameState.powerUps.clear();
                 gameState.activePowerUps.clear();
-                gameState.extraBalls.clear();
+                gameState.balls.clear();
                 gameState.laserCooldown = 0.0;
 
                 gameService.loadNextLevel(gameState);
@@ -411,9 +404,8 @@ public final class GameController {
 
     private void setupRenderers() {
         paddleRenderer = new PaddleRenderer(gamePane);
-        ballRenderer = new BallRenderer(gamePane, gameState.ball);
-        bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
-        extraBallsRenderer = new ExtraBallsRenderer(gamePane);
+        ballsRenderer = new BallsRenderer(gamePane);
+        bricksRenderer = new BricksRenderer(gamePane);
         powerUpRenderer = new PowerUpRenderer(gamePane);
         bulletRenderer = new BulletRenderer(gamePane);
         lifeRenderer = new LifeRenderer(lifeBox);
