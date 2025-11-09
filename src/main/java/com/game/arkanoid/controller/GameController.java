@@ -421,7 +421,10 @@ public final class GameController {
         User u = AppContext.getInstance().getCurrentUser();
         if (u != null) {
             GameStateSnapshot snap = GameStateSnapshot.from(gameState);
-            AppContext.getInstance().db().saveInProgress(u.getId(), snap);
+            // Ensure save completes before navigating to avoid race on level 1
+            AppContext.getInstance().db().saveInProgress(u.getId(), snap).join();
+            // Optionally refresh bests so Rankings is current
+            AppContext.getInstance().db().updateBest(u.getId(), gameState.level, gameState.score).join();
         }
         stop();
         navigator.navigateTo(SceneId.MENU, navigator.transitions().menuTransition());
@@ -500,10 +503,27 @@ public final class GameController {
     // ============================================================
 
     public void applySnapshot(GameStateSnapshot snapshot) {
+        // Cancel any intro sequence that may have been scheduled in initialize()
+        if (levelIntroSequence != null) {
+            levelIntroSequence.stop();
+            levelIntroSequence = null;
+        }
+        bannerLayer.setVisible(false);
+        bannerLayer.setManaged(false);
+
         // Ensure correct level is loaded before applying: handled by SceneController
         snapshot.applyTo(gameState);
         updateHud();
         lifeRenderer.reset();
+        // Re-notify view about active paddle effects for correct visuals
+        if (gameState.activePowerUps.containsKey(com.game.arkanoid.models.PowerUpType.EXPAND_PADDLE)) {
+            com.game.arkanoid.events.GameEventBus.getInstance().publish(
+                    new com.game.arkanoid.events.powerup.PowerUpActivatedEvent(com.game.arkanoid.models.PowerUpType.EXPAND_PADDLE));
+        }
+        if (gameState.activePowerUps.containsKey(com.game.arkanoid.models.PowerUpType.LASER_PADDLE)) {
+            com.game.arkanoid.events.GameEventBus.getInstance().publish(
+                    new com.game.arkanoid.events.powerup.PowerUpActivatedEvent(com.game.arkanoid.models.PowerUpType.LASER_PADDLE));
+        }
     }
 
     public void resumeWithCountdown() {
@@ -519,6 +539,16 @@ public final class GameController {
             gameService.startNextLevel(gameState); // simply resume running
         });
         seq.playFromStart();
+    }
+
+    /** Whether current state can be resumed (not game over/completed). */
+    public boolean isResumable() {
+        return !gameState.gameOver && !gameState.gameCompleted;
+    }
+
+    /** Capture a snapshot of current game state for persistence. */
+    public GameStateSnapshot captureSnapshot() {
+        return GameStateSnapshot.from(gameState);
     }
     // endregion
 }
