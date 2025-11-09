@@ -1,9 +1,12 @@
 package com.game.arkanoid.controller;
 
+import com.game.arkanoid.container.AppContext;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.game.LevelClearedEvent;
 import com.game.arkanoid.models.GameState;
+import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
+import com.game.arkanoid.models.User;
 import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.view.renderer.BallsRenderer;
 import com.game.arkanoid.view.renderer.BulletRenderer;
@@ -119,12 +122,20 @@ public final class GameController {
                 bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
                 lifeRenderer.render(gameState.lives);
-                // Update HUD
+                // Update hud
                 updateHud();
                 trackLevelTransition();
 
                 // --- Transition to other scenes ---
                 if (gameState.gameOver) {
+                    // persist bests and clear in-progress
+                    User u = AppContext.getInstance().getCurrentUser();
+                    if (u != null) {
+                        int bestRound = Math.max(u.getBestRound(), gameState.level);
+                        int bestScore = Math.max(u.getBestScore(), gameState.score);
+                        AppContext.getInstance().db().updateBest(u.getId(), bestRound, bestScore);
+                        AppContext.getInstance().db().clearInProgress(u.getId());
+                    }
                     stopLoopAndNavigate(SceneId.GAME_OVER, navigator.transitions().gameOverTransition());
                     return;
                 }
@@ -363,16 +374,24 @@ public final class GameController {
         ft.play();
     }
 
+    // TODO: CHECK
     private void resumeGame() {
         hidePauseMenu();
-        gameState.paused = false;
+        // show 3-2-1 countdown before resuming
+        bannerLayer.setVisible(true);
+        bannerLayer.setManaged(true);
 
-        // region SOUND - Resume feedback
-        //soundService.playSfx("pause_off");
-        //soundService.fade("level_bgm", soundService.effectiveMusicVolume(), Duration.millis(220));
-        // endregion
-
-        Platform.runLater(gamePane::requestFocus);
+        PauseTransition three = createBannerStep("3", 0.6);
+        PauseTransition two = createBannerStep("2", 0.6);
+        PauseTransition one = createBannerStep("1", 0.6);
+        SequentialTransition seq = new SequentialTransition(three, two, one);
+        seq.setOnFinished(e -> {
+            bannerLayer.setVisible(false);
+            bannerLayer.setManaged(false);
+            gameState.paused = false;
+            Platform.runLater(gamePane::requestFocus);
+        });
+        seq.playFromStart();
     }
 
     private void restartLevel() {
@@ -391,6 +410,15 @@ public final class GameController {
 
     private void exitToMenu() {
         hidePauseMenu();
+        // Save in-progress game state for current user
+        User u = AppContext.getInstance().getCurrentUser();
+        if (u != null) {
+            GameStateSnapshot snap = GameStateSnapshot.from(gameState);
+            // Ensure save completes before navigating to avoid race on level 1
+            AppContext.getInstance().db().saveInProgress(u.getId(), snap).join();
+            // Optionally refresh bests so Rankings is current
+            AppContext.getInstance().db().updateBest(u.getId(), gameState.level, gameState.score).join();
+        }
         stop();
         navigator.navigateTo(SceneId.MENU, navigator.transitions().menuTransition());
     }
@@ -461,4 +489,60 @@ public final class GameController {
     }
 
     // endregion
+
+    // ============================================================
+    // region 7. CONTINUE SUPPORT (apply snapshot + countdown)
+    // ============================================================
+
+    public void applySnapshot(GameStateSnapshot snapshot) {
+        // Cancel any intro sequence that may have been scheduled in initialize()
+        if (levelIntroSequence != null) {
+            levelIntroSequence.stop();
+            levelIntroSequence = null;
+        }
+        bannerLayer.setVisible(false);
+        bannerLayer.setManaged(false);
+
+        // Ensure correct level is loaded before applying: handled by SceneController
+        snapshot.applyTo(gameState);
+        updateHud();
+        lifeRenderer.reset();
+        // Re-notify view about active paddle effects for correct visuals
+        if (gameState.activePowerUps.containsKey(com.game.arkanoid.models.PowerUpType.EXPAND_PADDLE)) {
+            com.game.arkanoid.events.GameEventBus.getInstance().publish(
+                    new com.game.arkanoid.events.powerup.PowerUpActivatedEvent(com.game.arkanoid.models.PowerUpType.EXPAND_PADDLE));
+        }
+        if (gameState.activePowerUps.containsKey(com.game.arkanoid.models.PowerUpType.LASER_PADDLE)) {
+            com.game.arkanoid.events.GameEventBus.getInstance().publish(
+                    new com.game.arkanoid.events.powerup.PowerUpActivatedEvent(com.game.arkanoid.models.PowerUpType.LASER_PADDLE));
+        }
+    }
+
+    public void resumeWithCountdown() {
+        bannerLayer.setVisible(true);
+        bannerLayer.setManaged(true);
+        PauseTransition three = createBannerStep("3", 0.6);
+        PauseTransition two = createBannerStep("2", 0.6);
+        PauseTransition one = createBannerStep("1", 0.6);
+        SequentialTransition seq = new SequentialTransition(three, two, one);
+        seq.setOnFinished(e -> {
+            bannerLayer.setVisible(false);
+            bannerLayer.setManaged(false);
+            gameService.startNextLevel(gameState); // simply resume running
+        });
+        seq.playFromStart();
+    }
+
+    /** Whether current state can be resumed (not game over/completed). */
+    public boolean isResumable() {
+        return !gameState.gameOver && !gameState.gameCompleted;
+    }
+
+    /** Capture a snapshot of current game state for persistence. */
+    public GameStateSnapshot captureSnapshot() {
+        return GameStateSnapshot.from(gameState);
+    }
+    // endregion
 }
+
+

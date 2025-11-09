@@ -1,9 +1,12 @@
 package com.game.arkanoid.controller;
 
+import com.game.arkanoid.container.AppContext;
 import com.game.arkanoid.container.Container;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.sound.MenuBGMSoundEvent;
 import com.game.arkanoid.events.sound.StopBGMSoundEvent;
+import com.game.arkanoid.models.GameStateSnapshot;
+import com.game.arkanoid.models.User;
 import com.game.arkanoid.view.animator.MenuAnimator;
 import com.game.arkanoid.view.sound.SoundManager;
 import javafx.application.Platform;
@@ -66,6 +69,7 @@ public final class MenuController {
             }
 
             root.requestFocus();
+            updateContinueAvailability();
         });
 
         root.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -99,7 +103,7 @@ public final class MenuController {
     }
 
     @FXML private void onOpenSettings(ActionEvent e) {
-        
+        //TODO: sound.playSfx("menu_click");
         navigator.showSettings();
     }
 
@@ -110,11 +114,33 @@ public final class MenuController {
 
     @FXML private void onContinueGame(ActionEvent e) {
        
-        navigator.continueGame();
+        User current = AppContext.getInstance().getCurrentUser();
+        if (current == null) return;
+        continueButton.setDisable(true);
+        AppContext.getInstance().db().loadInProgressState(current.getId()).whenComplete((opt, err) -> {
+            Platform.runLater(() -> {
+                if (err != null || opt.isEmpty()) {
+                    continueButton.setDisable(false);
+                    return;
+                }
+                GameStateSnapshot snap = opt.get();
+                eventBus.publish(new StopBGMSoundEvent());
+                Container.reset();
+                navigator.startGameFromSnapshot(snap);
+            });
+        });
     }
 
-    @FXML private void onShowRanking(ActionEvent e) {
-       
-        navigator.showRanking();
+    // Cập nhật trạng thái khả dụng của nút Continue
+    private void updateContinueAvailability() {
+        if (continueButton == null) return;
+        continueButton.setDisable(true);
+        User user = AppContext.getInstance().getCurrentUser();
+        if (user == null) return;
+        AppContext.getInstance().db().loadInProgressState(user.getId()).whenComplete((opt, err) -> {
+            Platform.runLater(() -> continueButton.setDisable(err != null || opt.isEmpty()));
+        });
     }
+
+    @FXML private void onShowRanking(ActionEvent e) { navigator.showRankings(); }
 }

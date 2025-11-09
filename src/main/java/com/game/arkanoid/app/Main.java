@@ -6,12 +6,17 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+    private SceneController navigator;
     @Override
     public void start(Stage stage) {
         stage.setTitle("Arkanoid");      
         stage.setResizable(false);
-        SceneController navigator = new SceneController(stage);
-        navigator.showMenu();
+        navigator = new SceneController(stage);
+        stage.setOnCloseRequest(e -> {
+            // Best-effort: save in-progress before closing
+            try { navigator.saveInProgressIfAny(); } catch (Exception ignored) {}
+        });
+        navigator.showLogin();
         stage.show();
     }
     public static void main(String[] args) {
