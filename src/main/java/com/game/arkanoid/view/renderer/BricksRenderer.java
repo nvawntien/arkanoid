@@ -22,9 +22,8 @@ public final class BricksRenderer implements Renderer<List<Brick>> {
     private final Image brick3Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_yellow.png").toExternalForm());
     private final Image brick4Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_green.png").toExternalForm());
 
-    public BricksRenderer(Pane pane, List<Brick> bricks) {
+    public BricksRenderer(Pane pane) {
         this.pane = pane;
-        render(bricks);
     }
 
     @Override
