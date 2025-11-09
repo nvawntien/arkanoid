@@ -40,7 +40,7 @@ public final class DatabaseService {
                         "    name TEXT UNIQUE NOT NULL,\n" +
                         "    password TEXT NOT NULL,\n" +
                         "    best_score INTEGER NOT NULL DEFAULT 0,\n" +
-                        "    best_round INTEGER NOT NULL DEFAULT 0,\n" +
+                        "    best_round INTEGER NO NULL DEFAULT 0,T\n" +
                         "    last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n" +
                         ")");
                 st.executeUpdate("CREATE TABLE IF NOT EXISTS game_states (\n" +

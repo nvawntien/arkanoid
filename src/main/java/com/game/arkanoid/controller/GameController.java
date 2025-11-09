@@ -3,6 +3,7 @@ package com.game.arkanoid.controller;
 import com.game.arkanoid.container.AppContext;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.game.LevelClearedEvent;
+import com.game.arkanoid.events.game.OpenDoorTopLeftEvent;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
@@ -10,6 +11,7 @@ import com.game.arkanoid.models.User;
 import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.view.renderer.BallsRenderer;
 import com.game.arkanoid.view.renderer.BulletRenderer;
+import com.game.arkanoid.view.renderer.DoorTopRenderer;
 import com.game.arkanoid.view.renderer.BricksRenderer;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
 import com.game.arkanoid.view.renderer.PowerUpRenderer;
@@ -37,6 +39,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.image.ImageView;
 import javafx.util.Duration;
 
 /**
@@ -55,6 +58,7 @@ public final class GameController {
     @FXML private Label bannerLabel;
     @FXML private Label scoreLabel;
     @FXML private Label highScoreLabel;
+    @FXML private ImageView edge_top;
 
     // --- Core Dependencies ---
     private final GameService gameService;
@@ -70,6 +74,7 @@ public final class GameController {
     private PowerUpRenderer powerUpRenderer;
     private BulletRenderer bulletRenderer;
     private LifeRenderer lifeRenderer;
+    private DoorTopRenderer doorTopRenderer;
 
     // --- State Tracking ---
     private AnimationTimer loop;
@@ -122,6 +127,9 @@ public final class GameController {
                 bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
                 lifeRenderer.render(gameState.lives);
+
+                edge_top.setVisible(false);
+                GameEventBus.getInstance().publish(new OpenDoorTopLeftEvent());
                 // Update hud
                 updateHud();
                 trackLevelTransition();
@@ -437,6 +445,7 @@ public final class GameController {
         powerUpRenderer = new PowerUpRenderer(gamePane);
         bulletRenderer = new BulletRenderer(gamePane);
         lifeRenderer = new LifeRenderer(lifeBox);
+        doorTopRenderer = new DoorTopRenderer(gamePane, edge_top);
 
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);
