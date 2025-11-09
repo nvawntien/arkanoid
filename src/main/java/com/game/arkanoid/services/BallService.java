@@ -23,6 +23,7 @@ public class BallService {
         ball.setVelocity(speed * Math.cos(t), -speed * Math.sin(t));
         ball.setMoving(true);
         ball.setStuck(false);
+        ball.setStuckOffsetX(0.0);
     }
 
     public void step(Ball ball, double dt) {
@@ -55,6 +56,8 @@ public class BallService {
 
     public void resetOnPaddle(Ball ball, Paddle paddle) {
         ball.setMoving(false);
+        ball.setStuck(false);
+        ball.setStuckOffsetX(0.0);
         ball.setVelocity(0, 0);
         ball.setCenter(
                 paddle.getX() + paddle.getWidth() / 2.0,
@@ -93,9 +96,9 @@ public class BallService {
             double vy = -Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION;
 
             if (other instanceof Paddle) {
+                Paddle paddle = (Paddle) other;
                 if (ball.isStuck()) {
                     // Nếu bóng đã được "catch" bởi power-up: gắn bóng vào vị trí va chạm trên paddle
-                    Paddle paddle = (Paddle) other;
                     double paddleX = paddle.getX();
                     double paddleW = paddle.getWidth();
                     // Giữ bóng nằm trong biên paddle (theo trục X)
@@ -108,8 +111,6 @@ public class BallService {
                     ball.setStuckOffsetX(collisionX - paddleX);
                     return;
                 }
-
-                Paddle paddle = (Paddle) other;
 
                 // Đưa bóng ra khỏi paddle một chút
                 ball.setCenter(ball.getX(), oT - ball.getRadius() - Constants.BALL_NUDGE);
