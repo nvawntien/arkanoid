@@ -57,6 +57,17 @@ public final class DatabaseService {
                         "    in_progress BOOLEAN DEFAULT TRUE,\n" +
                         "    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n" +
                         ")");
+                // Backward-compatible schema extensions for precise resume
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_dx DOUBLE PRECISION DEFAULT 0");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_dy DOUBLE PRECISION DEFAULT 0");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_moving BOOLEAN DEFAULT FALSE");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_downward BOOLEAN DEFAULT TRUE");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_stuck BOOLEAN DEFAULT FALSE");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_stuck_offset_x DOUBLE PRECISION DEFAULT 0");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS paddle_width DOUBLE PRECISION DEFAULT 0");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS time_scale DOUBLE PRECISION DEFAULT 1");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS laser_cooldown DOUBLE PRECISION DEFAULT 0");
+                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS effects JSONB DEFAULT '[]'");
             } catch (SQLException e) {
                 throw new CompletionException(e);
             }
