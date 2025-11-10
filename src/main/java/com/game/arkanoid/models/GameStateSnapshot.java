@@ -109,6 +109,7 @@ public final class GameStateSnapshot {
                     b.getCenterX(), b.getCenterY(), b.getDx(), b.getDy(), b.isMoving(), b.getRadius()
             ));
         }
+        
         return snap;
     }
 
