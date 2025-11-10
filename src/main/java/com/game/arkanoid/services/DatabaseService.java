@@ -69,9 +69,8 @@ public final class DatabaseService {
                     }
                     throw new InvalidCredentialsException();
                 }
-
-                String hash = PasswordHasher.hash(unameNorm, password);
-                return users.insert(unameNorm, hash);
+                // Do NOT auto-create here; login only authenticates existing users
+                throw new UserNotFoundException();
             } catch (SQLException e) {
                 throw new CompletionException(e);
             }
@@ -131,6 +130,22 @@ public final class DatabaseService {
         });
     }
 
+    public CompletableFuture<User> signup(String username, String password) {
+        return runAsync(() -> {
+            try {
+                String unameNorm = com.game.arkanoid.utils.PasswordHasher.normalize(username);
+                // reject if exists (case-insensitive)
+                if (users.findByNameInsensitive(unameNorm).isPresent()) {
+                    throw new NameExistsException();
+                }
+                String hash = com.game.arkanoid.utils.PasswordHasher.hash(unameNorm, password);
+                return users.insert(unameNorm, hash);
+            } catch (SQLException e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
     public void shutdown() { ioPool.shutdownNow(); }
 
     private <T> CompletableFuture<T> runAsync(Callable<T> task) {
@@ -141,4 +156,6 @@ public final class DatabaseService {
 
     // --- domain-specific exceptions ---
     public static final class InvalidCredentialsException extends RuntimeException {}
+    public static final class UserNotFoundException extends RuntimeException {}
+    public static final class NameExistsException extends RuntimeException {}
 }
