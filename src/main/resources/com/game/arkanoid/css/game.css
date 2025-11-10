@@ -138,6 +138,13 @@
     -fx-scale-y: 1.1;
 }
 
+#resumeButton:hover,
+#resumeButton.selected {
+    -fx-background-image: url("../images/resumebutton2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
 /* Ảnh mặc định */
 #playAgainButton {
     -fx-background-image: url("../images/playagainbutton.png");
@@ -145,6 +152,10 @@
 
 #mainMenuButton {
     -fx-background-image: url("../images/mainmenubutton.png");
+}
+
+#resumeButton {
+    -fx-background-image: url("../images/resumebutton.png");
 }
 
 /* Power-up styles */
@@ -162,18 +173,6 @@
 .power-up-slow   { -fx-fill: #9c27b0; }
 .power-up-catch { -fx-fill: #5016e4}
 
-.pause-overlay {
-    -fx-background-color: rgba(5, 8, 18, 0.65);
-}
-
-.pause-card {
-    -fx-background-color: rgba(24, 30, 48, 0.95);
-    -fx-background-radius: 14;
-    -fx-spacing: 18;
-    -fx-alignment: center;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 35, 0.3, 0, 8);
-}
-
 .pause-title {
     -fx-text-fill: linear-gradient(#ffffff, #a8d8ff);
     -fx-font-size: 28px;
@@ -182,24 +181,14 @@
 }
 
 .pause-button {
-    -fx-background-color: rgba(48, 68, 112, 0.85);
-    -fx-text-fill: #ffffff;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 8 18;
+    -fx-background-color: transparent;
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-border-color: transparent;
     -fx-cursor: hand;
-}
-
-.pause-button:hover {
-    -fx-background-color: rgba(70, 104, 168, 0.95);
-}
-
-.pause-button.warning {
-    -fx-background-color: rgba(128, 36, 36, 0.85);
-}
-
-.pause-button.warning:hover {
-    -fx-background-color: rgba(160, 52, 52, 0.95);
+    -fx-effect: none; /* Không glow */
+    -fx-transition: all 0.2s ease-in-out;
 }
 
 #lifeBox {
