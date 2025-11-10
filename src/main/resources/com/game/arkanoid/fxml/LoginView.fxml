@@ -13,6 +13,12 @@
                 <PasswordField fx:id="passwordField" promptText="Password" maxWidth="260" />
                 <Button fx:id="loginButton" text="Login" minWidth="160" />
                 <Label fx:id="messageLabel" textFill="red" />
+                <HBox alignment="CENTER" spacing="6">
+                    <children>
+                        <Label text="New to Arkanoid?" />
+                        <Hyperlink fx:id="createAccountLink" text="Create an account" />
+                    </children>
+                </HBox>
             </children>
             <padding>
                 <Insets top="220" />
@@ -20,4 +26,3 @@
         </VBox>
     </children>
 </AnchorPane>
-
