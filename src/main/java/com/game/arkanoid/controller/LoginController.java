@@ -1,7 +1,6 @@
 package com.game.arkanoid.controller;
 
 import com.game.arkanoid.container.AppContext;
-import com.game.arkanoid.models.User;
 import com.game.arkanoid.services.DatabaseService.InvalidCredentialsException;
 import com.game.arkanoid.services.DatabaseService.UserNotFoundException;
 import javafx.application.Platform;

@@ -12,7 +12,7 @@ public final class Container {
     private final GameState state;
     private final GameService game;
 
-    private Container() { // 🔒 private constructor
+    private Container() { 
         double paddleWidth = Constants.PADDLE_WIDTH * GameSettings.getPaddleWidthMultiplier();
         Paddle paddle = new Paddle(
                 Constants.GAME_WIDTH / 2.0 - paddleWidth / 2.0,
