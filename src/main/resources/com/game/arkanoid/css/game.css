@@ -65,11 +65,8 @@
     -fx-cursor: hand;
 
     /* Hiệu ứng mặc định */
-    -fx-opacity: 0.6;
     -fx-scale-x: 1;
     -fx-scale-y: 1;
-    -fx-effect: dropshadow(gaussian, rgba(150, 142, 142, 0.4), 10, 0.5, 0, 2);
-    -fx-transition: all 0.2s ease-in-out;
 }
 
 /* Khi hover (rê chuột qua) */
@@ -77,7 +74,6 @@
     -fx-opacity: 0.8;
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
-    -fx-effect: dropshadow(gaussian, rgba(227, 216, 216, 0.6), 20, 0.8, 0, 0);
 }
 
 /* Khi được chọn (ở giữa) — highlight đẹp, đều, không viền bẩn */
@@ -86,11 +82,41 @@
     -fx-scale-x: 1.25;
     -fx-scale-y: 1.25;
 
-    /* Glow mượt kết hợp inner + outer */
-    -fx-effect: innershadow(gaussian, rgba(0,255,255,0.6), 20, 0.3, 0, 0),
-                 dropshadow(three-pass-box, rgba(0,255,255,0.7), 30, 0.3, 0, 0);
-
     -fx-transition: all 0.25s ease-in-out;
+}
+#startButton {
+    -fx-background-image: url("../images/startbutton.png");
+}
+#startButton.selected {
+    -fx-background-image: url("../images/startbutton2.png");
+}
+
+#optionButton {
+    -fx-background-image: url("../images/optionbutton.png");
+}
+#optionButton.selected {
+    -fx-background-image: url("../images/optionbutton2.png");
+}
+
+#exitButton {
+    -fx-background-image: url("../images/exitbutton.png");
+}
+#exitButton.selected {
+    -fx-background-image: url("../images/exitbutton2.png");
+}
+
+#continueButton {
+    -fx-background-image: url("../images/continuebutton.png");
+}
+#continueButton.selected {
+    -fx-background-image: url("../images/continuebutton2.png");
+}
+
+#rankingButton {
+    -fx-background-image: url("../images/rankingbutton.png");
+}
+#rankingButton.selected {
+    -fx-background-image: url("../images/rankingbutton2.png");
 }
 
 /* Ảnh nền nút */
@@ -137,6 +163,8 @@
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }
+
+
 
 #resumeButton:hover,
 #resumeButton.selected {
