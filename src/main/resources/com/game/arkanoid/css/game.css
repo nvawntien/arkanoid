@@ -259,3 +259,60 @@
     -fx-font-size: 42px;
     -fx-font-weight: bold;
 }
+
+.ranking-bg {
+      -fx-background-image: url("../images/rankingbg.png");
+}
+
+/* Làm trong suốt hoàn toàn bảng xếp hạng */
+.ranking-table {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-table-cell-border-color: transparent;
+    -fx-control-inner-background: transparent;
+}
+
+/* Header trong suốt và chữ trắng */
+.ranking-table .column-header-background {
+    -fx-background-color: transparent;
+}
+.ranking-table .column-header, 
+.ranking-table .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+/* Dòng dữ liệu trong suốt */
+.ranking-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.ranking-table .table-cell {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+}
+
+/* Ẩn hiệu ứng hover, chọn */
+.ranking-table .table-row-cell:filled:selected,
+.ranking-table .table-row-cell:filled:hover {
+    -fx-background-color: transparent;
+}
+
+/* Ẩn scroll bar */
+.ranking-table .scroll-bar:vertical,
+.ranking-table .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+#backButton {
+     -fx-background-image: url("../images/back.png");
+}
+#backButton:hover,
+#backButton.selected {
+    -fx-background-image: url("../images/back2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
