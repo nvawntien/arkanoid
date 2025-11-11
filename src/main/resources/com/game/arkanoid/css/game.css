@@ -47,6 +47,9 @@
 .login-bg {
     -fx-background-image: url("../images/login_bg.png");
 }
+.win-bg {
+    -fx-background-image: url("../images/kieuvantuyen.png");
+}
 
 .menu-title {
     -fx-text-fill: #ffffff;
@@ -335,6 +338,28 @@
 #createButton:hover,
 #createButton.selected {
     -fx-background-image: url("../images/create2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+
+
+#mainmenuButton2 {
+    -fx-background-image: url("../images/mainmenu3.png");
+}
+#mainmenuButton2:hover,
+#mainmenuButton2.selected {
+    -fx-background-image: url("../images/mainmenu4.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+#continueButton2 {
+    -fx-background-image: url("../images/continue3.png");
+}
+#continueButton2:hover,
+#continueButton2.selected {
+    -fx-background-image: url("../images/continue4.png");
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }
