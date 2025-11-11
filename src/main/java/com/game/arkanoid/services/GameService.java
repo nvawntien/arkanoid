@@ -8,6 +8,7 @@ import com.game.arkanoid.events.sound.BrickHitSoundEvent;
 import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.Brick;
+import com.game.arkanoid.models.DoorType;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.models.PowerUp;
@@ -33,6 +34,7 @@ public final class GameService {
     private final BricksService bricksSvc;
     private final PowerUpService powerUpSvc;
     private final BulletService bulletSvc;
+    private final EnemyService enemySvc;
     private final RoundService roundSvc;
     private GameState boundState;
 
@@ -43,7 +45,8 @@ public final class GameService {
             BricksService bricksSvc,
             PowerUpService powerUpSvc,
             BulletService bulletSvc,
-            RoundService roundSvc
+            RoundService roundSvc,
+            EnemyService enemySvc
     ) {
         this.ballSvc = ballSvc;
         this.paddleSvc = paddleSvc;
@@ -51,6 +54,7 @@ public final class GameService {
         this.powerUpSvc = powerUpSvc;
         this.bulletSvc = bulletSvc;
         this.roundSvc = roundSvc;
+        this.enemySvc = enemySvc;
     }
 
     // ======================================================================
@@ -65,18 +69,18 @@ public final class GameService {
         if (!state.running || state.paused || state.levelTransitionPending) return;
 
         double scaledDt = dt * state.timeScale;
-
         // 1. Handle input
         handleInput(state, in, scaledDt, worldW);
 
+        enemySvc.update(state, scaledDt, worldW, worldH);
         // 2. Update projectiles and entities
         bulletSvc.tickCooldown(state, scaledDt);
         updateBalls(state, scaledDt, worldW, worldH);
         updateBullets(state, scaledDt, worldH);
-
         // 3. Power-ups and game progression
         powerUpSvc.update(state, scaledDt, worldW, worldH);
         checkLevelCleared(state);
+        handleBallFall(state);
     }
 
     /**
@@ -140,7 +144,6 @@ public final class GameService {
             handleBrickCollisions(ball, state);
             if (ballSvc.fellBelow(ball, worldH)) {
                 iterator.remove();
-                handleBallFall(state);
             }
         }
     }
@@ -315,6 +318,9 @@ public final class GameService {
     public void bindState(GameState state) {
         this.boundState = state;
     }
-
+    
+    public EnemyService getEnemyService() {
+        return enemySvc;
+    }
     // endregion
 }

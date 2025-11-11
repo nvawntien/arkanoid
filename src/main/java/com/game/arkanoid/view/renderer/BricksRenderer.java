@@ -1,26 +1,27 @@
 package com.game.arkanoid.view.renderer;
 
 import com.game.arkanoid.models.Brick;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Rectangle;
 
-/**
- * Renders bricks and stays in sync when the brick list changes (e.g., on level transitions).
- */
 public final class BricksRenderer implements Renderer<List<Brick>> {
-    private final Pane pane;
-    private final Map<Brick, Rectangle> brickNodes = new HashMap<>();
 
+    private final Pane pane;
+    private final Map<Brick, ImageView> brickNodes = new HashMap<>();
+
+    // Tải ảnh 1 lần duy nhất
     private final Image brick1Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_blue.png").toExternalForm());
     private final Image brick2Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_red.png").toExternalForm());
     private final Image brick3Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_yellow.png").toExternalForm());
     private final Image brick4Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_green.png").toExternalForm());
+    private final Image brick5Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_cyan.png").toExternalForm());
+    private final Image brick6Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_pink.png").toExternalForm());
+    private final Image brick7Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_orange.png").toExternalForm());
+    private final Image brick8Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_gold.png").toExternalForm());
+    private final Image brick9Img = new Image(getClass().getResource("/com/game/arkanoid/images/brick_silver.png").toExternalForm());
+    
 
     public BricksRenderer(Pane pane) {
         this.pane = pane;
@@ -28,54 +29,72 @@ public final class BricksRenderer implements Renderer<List<Brick>> {
 
     @Override
     public void render(List<Brick> bricks) {
-        // Remove nodes for bricks that no longer exist
-        Iterator<Map.Entry<Brick, Rectangle>> it = brickNodes.entrySet().iterator();
+        // copy để tránh ConcurrentModificationException
+        List<Brick> snapshot = List.copyOf(bricks);
+
+        // Xóa brick không còn tồn tại (ví dụ: khi chuyển level)
+        Iterator<Map.Entry<Brick, ImageView>> it = brickNodes.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Brick, Rectangle> e = it.next();
-            if (!bricks.contains(e.getKey())) {
-                pane.getChildren().remove(e.getValue());
+            Map.Entry<Brick, ImageView> entry = it.next();
+            if (!snapshot.contains(entry.getKey())) {
+                pane.getChildren().remove(entry.getValue());
                 it.remove();
             }
         }
 
-        // Add or update nodes for current bricks
-        for (Brick b : bricks) {
-            Rectangle r = brickNodes.get(b);
-            if (r == null) {
-                r = new Rectangle();
-                r.setArcWidth(6);
-                r.setArcHeight(6);
-                r.getStyleClass().add("brick-style");
-                pane.getChildren().add(r);
-                brickNodes.put(b, r);
+        // Vẽ brick hiện tại
+        for (Brick b : snapshot) {
+            ImageView iv = brickNodes.get(b);
+            if (iv == null) {
+                // Tạo mới nếu chưa có trong map
+                iv = new ImageView();
+                iv.setPreserveRatio(false); // để không méo khi scale
+                pane.getChildren().add(iv);
+                brickNodes.put(b, iv);
             }
 
-            r.setX(b.getX());
-            r.setY(b.getY());
-            r.setWidth(b.getWidth());
-            r.setHeight(b.getHeight());
+            // set ảnh theo health (ĐÃ SỬA LỖI Ở DÒNG NÀY)
+            iv.setImage(getBrickImage(b)); 
 
-            if (b.isDestroyed()) {
-                r.setVisible(false);
-            } else {
-                r.setVisible(true);
-                r.setFill(getBrickImagePattern(b.getHealth()));
-            }
+            // set vị trí & kích thước
+            iv.setX(b.getX());
+            iv.setY(b.getY());
+            iv.setFitWidth(b.getWidth());
+            iv.setFitHeight(b.getHeight());
+
+            // Ẩn gạch nếu đã bị phá hủy (nhưng chưa bị xóa khỏi list)
+            iv.setVisible(!b.isDestroyed());
         }
     }
-
     @Override
-    public Rectangle getNode() {
+    public ImageView getNode() {
         // Not applicable for list renderer 
         return null;
     }
-       
-    private ImagePattern getBrickImagePattern(int health) {
-        return switch (health) {
-            case 4 -> new ImagePattern(brick4Img);
-            case 3 -> new ImagePattern(brick3Img);
-            case 2 -> new ImagePattern(brick2Img);
-            default -> new ImagePattern(brick1Img);
+
+    /**
+     * Lấy ảnh tương ứng với loại gạch (Brick).
+     * Hàm này nhận vào Brick (thay vì int) để kiểm tra isIndestructible()
+     */
+    private Image getBrickImage(Brick b) {
+        // Ưu tiên kiểm tra gạch bạc (bất tử) trước
+        // Dựa trên logic của class Brick (isIndestructible() là health == 9)
+        if (b.isIndestructible()) {
+            return brick9Img; // silver brick
+        }
+
+        // Nếu không phải gạch bạc, chọn ảnh theo số máu còn lại
+        return switch (b.getHealth()) {
+            case 8 -> brick8Img;
+            case 7 -> brick7Img;
+            case 6 -> brick6Img;
+            case 5 -> brick5Img;
+            case 4 -> brick4Img;
+            case 3 -> brick3Img;
+            case 2 -> brick2Img;
+            // case 1 và case <= 0 (đã vỡ) sẽ dùng ảnh default
+            default -> brick1Img; 
         };
     }
+
 }
