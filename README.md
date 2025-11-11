@@ -100,7 +100,7 @@ mvn clean test
 Make sure you have Java 24+ and Maven installed.
 ```bash
 # Clone and build
-git clone https://github.com/yourusername/arkanoid.git
+git clone https://github.com/nvawntien/arkanoid.git
 cd arkanoid
 mvn clean install
 
