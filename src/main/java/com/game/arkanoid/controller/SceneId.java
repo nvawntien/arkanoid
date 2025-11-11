@@ -8,5 +8,4 @@ public enum SceneId {
     GAME,
     GAME_OVER,
     RANKINGS,
-    SELECT_LEVEL
 }
