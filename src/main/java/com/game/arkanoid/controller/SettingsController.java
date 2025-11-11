@@ -39,27 +39,13 @@ public final class SettingsController {
     @FXML
     private void initialize() {
         // Difficulty setup
-        difficultyCombo.getItems().setAll(Difficulty.values());
+        difficultyCombo.getItems().setAll(GameSettings.Difficulty.values());
         difficultyCombo.getSelectionModel().select(GameSettings.getDifficulty());
 
-        // Bind sliders
+        // Bind sliders với SoundManager
         masterSlider.valueProperty().bindBidirectional(sound.masterVolumeProperty());
         musicSlider.valueProperty().bindBidirectional(sound.musicVolumeProperty());
         sfxSlider.valueProperty().bindBidirectional(sound.sfxVolumeProperty());
-        masterSlider.valueProperty().addListener((obs, oldV, newV) -> {
-            if (!masterSlider.isDisabled()) {
-                previousMasterVolume = newV.doubleValue();
-            }
-        });
-
-        // Disable sliders if master volume is 0
-        boolean enabled = masterSlider.getValue() > 0;
-        masterSlider.setDisable(!enabled);
-        musicSlider.setDisable(!enabled);
-        sfxSlider.setDisable(!enabled);
-        if (enabled) {
-            previousMasterVolume = masterSlider.getValue();
-        }
     }
 
     @FXML
