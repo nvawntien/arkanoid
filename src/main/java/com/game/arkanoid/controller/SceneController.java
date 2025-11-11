@@ -203,14 +203,14 @@ public final class SceneController {
     }
 
     private void showGameOver(TransitionStrategy transition) {
-        final int finalScore; // phải là final hoặc effectively final
+        final int finalScore; 
 
         if (activeGameController != null) {
             finalScore = activeGameController.getScore();
             activeGameController.stop();
             activeGameController = null;
         } else {
-            finalScore = 0; // thêm dòng này để đảm bảo luôn được gán
+            finalScore = 0; 
         }
 
         Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
