@@ -95,7 +95,6 @@ public final class MenuController {
         });
     }
 
-    // ===== Các hành động của menu =====
     @FXML private void onStartGame(ActionEvent e) {
         eventBus.publish(new StopBGMSoundEvent());
         Container.reset();
@@ -130,7 +129,6 @@ public final class MenuController {
         });
     }
 
-    // Cập nhật trạng thái khả dụng của nút Continue
     private void updateContinueAvailability() {
         if (continueButton == null) return;
         continueButton.setDisable(true);
