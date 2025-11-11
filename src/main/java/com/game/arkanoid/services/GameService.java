@@ -3,12 +3,12 @@ package com.game.arkanoid.services;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.game.GameOverEvent;
 import com.game.arkanoid.events.game.LevelClearedEvent;
+import com.game.arkanoid.events.paddle.ExplodePaddleEvent;
 import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
 import com.game.arkanoid.events.sound.BrickHitSoundEvent;
 import com.game.arkanoid.models.PowerUpType;
 import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.Brick;
-import com.game.arkanoid.models.DoorType;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.models.PowerUp;
@@ -36,6 +36,43 @@ public final class GameService {
     private final BulletService bulletSvc;
     private final EnemyService enemySvc;
     private final RoundService roundSvc;
+
+    public BallService getBallSvc() {
+        return ballSvc;
+    }
+
+    public PaddleService getPaddleSvc() {
+        return paddleSvc;
+    }
+
+    public BricksService getBricksSvc() {
+        return bricksSvc;
+    }
+
+    public PowerUpService getPowerUpSvc() {
+        return powerUpSvc;
+    }
+
+    public BulletService getBulletSvc() {
+        return bulletSvc;
+    }
+
+    public EnemyService getEnemySvc() {
+        return enemySvc;
+    }
+
+    public RoundService getRoundSvc() {
+        return roundSvc;
+    }
+
+    public GameState getBoundState() {
+        return boundState;
+    }
+
+    public void setBoundState(GameState boundState) {
+        this.boundState = boundState;
+    }
+
     private GameState boundState;
 
     // --- Constructor -------------------------------------------------------
@@ -220,16 +257,17 @@ public final class GameService {
         // No extra balls → lose life
         state.decrementLives();
         state.resetForLife();
-        state.balls.add(state.ball);
-        ballSvc.resetOnPaddle(state.ball, state.paddle);
-        
+
         if (state.lives < 0) {
             state.running = false;
-            state.gameOver = true;
+            GameEventBus.getInstance().publish(new ExplodePaddleEvent());
             GameEventBus.getInstance().publish(new GameOverEvent());
         }
+        else {
+            state.balls.add(state.ball);
+            ballSvc.resetOnPaddle(state.ball, state.paddle);
+        }
     }
-
     /**
      * Called whenever a brick is destroyed.
      * Updates score, spawns power-up, and re-checks for level completion.
@@ -317,10 +355,6 @@ public final class GameService {
 
     public void bindState(GameState state) {
         this.boundState = state;
-    }
-    
-    public EnemyService getEnemyService() {
-        return enemySvc;
     }
     // endregion
 }

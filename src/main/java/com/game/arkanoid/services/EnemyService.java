@@ -96,6 +96,10 @@ public final class EnemyService {
             case MOLECULE -> fastAllBalls(state);
             case PYRAMID -> state.decrementScore(50); // giảm điểm
         }
+
+        if (enemy.getType() != EnemyType.CUBE) {
+            ball.setVelocity(ball.getDx(), -ball.getDy());
+        }
     }
 
     private void fastAllBalls(GameState state) {
@@ -123,19 +127,41 @@ public final class EnemyService {
         }
     }
 
-    private void handleBrickCollision(Enemy enemy, GameState state) {
-        boolean collided = false;
+  private void handleBrickCollision(Enemy enemy, GameState state) {
+        // Trục Y trước (rơi lên/xuống)
+        boolean collidedY = false;
         for (GameObject brick : state.bricks) {
             if (intersects(enemy, brick)) {
+                collidedY = true;
+                if (enemy.getVy() > 0) { // rơi xuống
+                    enemy.setY(brick.getY() - enemy.getHeight());
+                } else if (enemy.getVy() < 0) { // đi lên
+                    enemy.setY(brick.getY() + brick.getHeight());
+                }
                 enemy.setVy(0);
-                collided = true;
+                break;
             }
         }
-
-        if (!collided) {
+        if (!collidedY) {
             enemy.setVy(Constants.ENEMY_SPEED_Y);
         }
+
+        // Trục X (nếu muốn enemy đổi hướng khi chạm tường brick)
+        boolean collidedX = false;
+        for (GameObject brick : state.bricks) {
+            if (intersects(enemy, brick)) {
+                collidedX = true;
+                if (enemy.getVx() > 0) { // đi sang phải
+                    enemy.setX(brick.getX() - enemy.getWidth());
+                } else if (enemy.getVx() < 0) { // đi sang trái
+                    enemy.setX(brick.getX() + brick.getWidth());
+                }
+                enemy.setVx(-enemy.getVx()); // đổi hướng ngang nhẹ
+                break;
+            }
+        }
     }
+
 
     private void spawnExplosion(Enemy enemy) {
         eventBus.publish(new ExplosionSoundEvent());

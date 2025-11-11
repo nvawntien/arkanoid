@@ -107,7 +107,6 @@ public final class MenuController {
     }
 
     @FXML private void onOpenSettings(ActionEvent e) {
-        //TODO: sound.playSfx("menu_click");
         navigator.showSettings();
     }
 

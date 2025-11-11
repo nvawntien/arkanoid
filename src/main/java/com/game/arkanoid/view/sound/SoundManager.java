@@ -38,7 +38,7 @@ public final class SoundManager {
 
     private SoundManager() {
         loadSounds();
-        registerEventListeners();
+        //registerEventListeners();
     }
 
     public static SoundManager getInstance() {

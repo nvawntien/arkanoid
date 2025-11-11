@@ -1,7 +1,11 @@
 package com.game.arkanoid.view.renderer;
 
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.paddle.ExplodePaddleEvent;
+import com.game.arkanoid.events.paddle.IntroPaddleEvent;
 import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
 import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
+import com.game.arkanoid.events.paddle.ExplodePaddleFinishedEvent;
 import com.game.arkanoid.models.Paddle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -24,6 +28,9 @@ public final class PaddleRenderer implements Renderer<Paddle> {
     private final List<Image> widePulsateFrames = new ArrayList<>();
     private final List<Image> laserFrames = new ArrayList<>();
     private final List<Image> laserPulsateFrames = new ArrayList<>();
+    private final List<Image> explodeFrames = new ArrayList<>();
+    private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
+
     private Timeline currentAnimation;
     private AnimationTimer expandTimer, shrinkTimer, laserTimer;
     private double elapsedExpand = 0;
@@ -78,9 +85,22 @@ public final class PaddleRenderer implements Renderer<Paddle> {
             )));
         }
 
+        // Load explode frames
+        for (int i = 1; i <= 8; i++) {
+            explodeFrames.add(new Image(getClass().getResourceAsStream(
+                String.format("/com/game/arkanoid/images/paddle_explode_%d.png", i)
+            )));
+        }
+
+        registerEventListeners();
         node = new ImageView(introFrames.get(0));
         node.setSmooth(true);
         pane.getChildren().add(node);
+    }
+
+    public void registerEventListeners() {
+        subscriptions.add(GameEventBus.getInstance().subscribe(IntroPaddleEvent.class, e -> playIntro(this::startPulsate)));
+        subscriptions.add(GameEventBus.getInstance().subscribe(ExplodePaddleEvent.class,e -> playExplosion()));
     }
 
     public void onPowerUpActivated(PowerUpActivatedEvent event) {
@@ -126,9 +146,18 @@ public final class PaddleRenderer implements Renderer<Paddle> {
     }
 
     // --- Animation controls ---
-    public void playIntro() {
+    public void playIntro(Runnable onFinished) {
         if (introFrames.isEmpty()) return;
-        playFrameSequence(introFrames, 80, false, this::startPulsate);
+        playFrameSequence(introFrames, 80, false, onFinished);
+    }
+
+    public void playExplosion() {
+        if (explodeFrames.isEmpty()) return;
+        playFrameSequence(explodeFrames, 80, false, this::publishExplodeFinishedEvent);
+    }
+
+    private void publishExplodeFinishedEvent() {
+        GameEventBus.getInstance().publish(new ExplodePaddleFinishedEvent(true));
     }
 
     public void startPulsate() {

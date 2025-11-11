@@ -210,7 +210,7 @@ public final class SceneController {
     }
 
     /** Show the given game round (Round1View.fxml, Round2View.fxml, etc.). */
-    public void showGameRound(int round) {
+    public void  showGameRound(int round) {
         stopActiveGame();
         Container container = Container.getInstance();
         String path = String.format("/com/game/arkanoid/fxml/Round%dView.fxml", round);

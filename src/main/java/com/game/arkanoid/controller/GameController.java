@@ -8,13 +8,15 @@ import com.game.arkanoid.events.game.DoorOpenedEvent;
 import com.game.arkanoid.events.game.LevelClearedEvent;
 import com.game.arkanoid.events.game.OpenDoorTopLeftEvent;
 import com.game.arkanoid.events.game.OpenDoorTopRightEvent;
+import com.game.arkanoid.events.paddle.ExplodePaddleEvent;
+import com.game.arkanoid.events.paddle.ExplodePaddleFinishedEvent;
+import com.game.arkanoid.events.paddle.IntroPaddleEvent;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.models.User;
 import com.game.arkanoid.models.DoorType;
 import com.game.arkanoid.services.GameService;
-import com.game.arkanoid.services.EnemyService;
 import com.game.arkanoid.view.renderer.BallsRenderer;
 import com.game.arkanoid.view.renderer.BulletRenderer;
 import com.game.arkanoid.view.renderer.DoorTopRenderer;
@@ -245,15 +247,24 @@ public final class GameController {
         subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpExpiredEvent.class, paddleRenderer::onPowerUpExpired));
         subscriptions.add(GameEventBus.getInstance().subscribe(DoorOpenedEvent.class, ev -> {
             if (ev.left()) {    
-                gameService.getEnemyService().spawnEnemy(gameState, Constants.DOOR_TOP_X_LEFT, Constants.DOOR_TOP_Y);
+                gameService.getEnemySvc().spawnEnemy(gameState, Constants.DOOR_TOP_X_LEFT, Constants.DOOR_TOP_Y);
                 GameEventBus.getInstance().publish(new CloseDoorTopLeftEvent());
             } else {
-                gameService.getEnemyService().spawnEnemy(gameState, Constants.DOOR_TOP_X_RIGHT, Constants.DOOR_TOP_Y);
+                gameService.getEnemySvc().spawnEnemy(gameState, Constants.DOOR_TOP_X_RIGHT, Constants.DOOR_TOP_Y);
                 GameEventBus.getInstance().publish(new CloseDoorTopRightEvent());
             }
         }));
+
+        subscriptions.add(GameEventBus.getInstance().subscribe(ExplodePaddleFinishedEvent.class, fn -> {
+            if (fn.finished()) {
+                gameState.gameOver = true;  
+                gameState.balls.add(gameState.ball);
+                gameService.getBallSvc().resetOnPaddle(gameState.ball, gameState.paddle);
+            }
+        }));
     }
-// ...existing code...  
+
+    // ...existing code...
 
     private void onLevelCleared(LevelClearedEvent event) {
         Platform.runLater(() -> {
@@ -420,7 +431,6 @@ public final class GameController {
         ft.play();
     }
 
-    // TODO: CHECK
     private void resumeGame() {
         hidePauseMenu();
         // show 3-2-1 countdown before resuming
@@ -488,7 +498,7 @@ public final class GameController {
 
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);
-        paddleRenderer.playIntro();
+        GameEventBus.getInstance().publish(new IntroPaddleEvent());
     }
 
 
