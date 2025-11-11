@@ -109,6 +109,7 @@ public final class GameStateSnapshot {
                     b.getCenterX(), b.getCenterY(), b.getDx(), b.getDy(), b.isMoving(), b.getRadius()
             ));
         }
+        
         return snap;
     }
 
@@ -116,6 +117,7 @@ public final class GameStateSnapshot {
     public void applyTo(GameState s) {
         s.score = this.score;
         s.lives = this.lives;
+        s.level = Math.max(1, this.currentLevel);
         s.ball.setCenter(this.ballX, this.ballY);
         double vx = this.ballDx;
         double vy = this.ballDy;
@@ -182,14 +184,25 @@ public final class GameStateSnapshot {
             s.powerUps.add(pu);
         }
 
-        // Extra balls
+        // Balls list (first should map to s.ball to keep reference consistent)
         s.balls.clear();
-        for (BallsState eb : balls) {
-            double r = eb.radius > 0 ? eb.radius : Constants.BALL_RADIUS;
-            Ball b = new Ball(eb.x, eb.y, r);
-            b.setVelocity(eb.dx, eb.dy);
-            b.setMoving(eb.moving);
-            s.balls.add(b);
+        if (!balls.isEmpty()) {
+            BallsState b0 = balls.get(0);
+            s.ball.setCenter(b0.x, b0.y);
+            s.ball.setVelocity(b0.dx, b0.dy);
+            s.ball.setMoving(b0.moving);
+            s.balls.add(s.ball);
+            for (int i = 1; i < balls.size(); i++) {
+                BallsState eb = balls.get(i);
+                double r = eb.radius > 0 ? eb.radius : Constants.BALL_RADIUS;
+                Ball b = new Ball(eb.x, eb.y, r);
+                b.setVelocity(eb.dx, eb.dy);
+                b.setMoving(eb.moving);
+                s.balls.add(b);
+            }
+        } else {
+            // Fallback: ensure main ball present in list
+            s.balls.add(s.ball);
         }
         s.running = false;  // countdown before resume will start running
         s.paused = true;

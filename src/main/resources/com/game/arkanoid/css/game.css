@@ -44,6 +44,9 @@
     -fx-background-image: url("../images/menu_background.png");
     -fx-padding: 40;
 }
+.login-bg {
+    -fx-background-image: url("../images/login_bg.png");
+}
 
 .menu-title {
     -fx-text-fill: #ffffff;
@@ -313,6 +316,25 @@
 #backButton:hover,
 #backButton.selected {
     -fx-background-image: url("../images/back2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+#loginButton {
+    -fx-background-image: url("../images/login.png");
+}
+#loginButton:hover,
+#loginButton.selected {
+    -fx-background-image: url("../images/login2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+#createButton {
+    -fx-background-image: url("../images/create.png");
+}
+#createButton:hover,
+#createButton.selected {
+    -fx-background-image: url("../images/create2.png");
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }

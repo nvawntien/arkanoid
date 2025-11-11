@@ -3,9 +3,11 @@ package com.game.arkanoid.controller;
 import com.game.arkanoid.container.AppContext;
 import com.game.arkanoid.models.User;
 import com.game.arkanoid.services.DatabaseService.InvalidCredentialsException;
+import com.game.arkanoid.services.DatabaseService.UserNotFoundException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -20,6 +22,7 @@ public final class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private Button loginButton;
     @FXML private Label messageLabel;
+    @FXML private Hyperlink createAccountLink;
 
     public LoginController(SceneController navigator) {
         this.navigator = Objects.requireNonNull(navigator);
@@ -29,6 +32,7 @@ public final class LoginController {
     private void initialize() {
         messageLabel.setText("");
         loginButton.setOnAction(e -> onLogin());
+        if (createAccountLink != null) createAccountLink.setOnAction(e -> navigator.showSignup());
     }
 
     private void onLogin() {
@@ -48,7 +52,9 @@ public final class LoginController {
                         if (err != null) {
                             Throwable cause = (err.getCause() != null) ? err.getCause() : err;
                             if (cause instanceof InvalidCredentialsException) {
-                                showMessage("Invalid password! Please try again.");
+                                showMessage("Incorrect username or password! Please try again.");
+                            } else if (cause instanceof UserNotFoundException) {
+                                showMessage("User not found. Please create an account.");
                             } else {
                                 showMessage("Login failed: " + cause.getClass().getSimpleName());
                                 System.err.println("Login error: ");

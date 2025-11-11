@@ -31,48 +31,9 @@ public final class DatabaseService {
     private final ScoreRepository scores = new ScoreRepository();
     private final GameStateRepository states = new GameStateRepository();
 
-    /** Ensure required tables exist. */
+    /** No-op: schema is managed externally (e.g., Supabase). */
     public java.util.concurrent.CompletableFuture<Void> initializeSchema() {
-        return runAsync(() -> {
-            try (Connection c = DatabaseConfig.getConnection(); Statement st = c.createStatement()) {
-                st.executeUpdate("CREATE TABLE IF NOT EXISTS users (\n" +
-                        "    id SERIAL PRIMARY KEY,\n" +
-                        "    name TEXT UNIQUE NOT NULL,\n" +
-                        "    password TEXT NOT NULL,\n" +
-                        "    best_score INTEGER NOT NULL DEFAULT 0,\n" +
-                        "    best_round INTEGER NOT NULL DEFAULT 0,\n" +
-                        "    last_login TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n" +
-                        ")");
-                st.executeUpdate("CREATE TABLE IF NOT EXISTS game_states (\n" +
-                        "    id SERIAL PRIMARY KEY,\n" +
-                        "    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,\n" +
-                        "    current_level INTEGER NOT NULL DEFAULT 1,\n" +
-                        "    score INTEGER NOT NULL DEFAULT 0,\n" +
-                        "    lives INTEGER NOT NULL DEFAULT 3,\n" +
-                        "    paddle_x DOUBLE PRECISION DEFAULT 0,\n" +
-                        "    ball_x DOUBLE PRECISION DEFAULT 0,\n" +
-                        "    ball_y DOUBLE PRECISION DEFAULT 0,\n" +
-                        "    bricks JSONB DEFAULT '[]',\n" +
-                        "    powerups JSONB DEFAULT '[]',\n" +
-                        "    in_progress BOOLEAN DEFAULT TRUE,\n" +
-                        "    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n" +
-                        ")");
-                // Backward-compatible schema extensions for precise resume
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_dx DOUBLE PRECISION DEFAULT 0");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_dy DOUBLE PRECISION DEFAULT 0");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_moving BOOLEAN DEFAULT FALSE");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_downward BOOLEAN DEFAULT TRUE");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_stuck BOOLEAN DEFAULT FALSE");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS ball_stuck_offset_x DOUBLE PRECISION DEFAULT 0");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS paddle_width DOUBLE PRECISION DEFAULT 0");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS time_scale DOUBLE PRECISION DEFAULT 1");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS laser_cooldown DOUBLE PRECISION DEFAULT 0");
-                st.executeUpdate("ALTER TABLE game_states ADD COLUMN IF NOT EXISTS effects JSONB DEFAULT '[]'");
-            } catch (SQLException e) {
-                throw new CompletionException(e);
-            }
-            return null;
-        });
+        return java.util.concurrent.CompletableFuture.completedFuture(null);
     }
 
     public CompletableFuture<User> login(String username, String password) {
@@ -108,9 +69,8 @@ public final class DatabaseService {
                     }
                     throw new InvalidCredentialsException();
                 }
-
-                String hash = PasswordHasher.hash(unameNorm, password);
-                return users.insert(unameNorm, hash);
+                // Do NOT auto-create here; login only authenticates existing users
+                throw new UserNotFoundException();
             } catch (SQLException e) {
                 throw new CompletionException(e);
             }
@@ -170,6 +130,22 @@ public final class DatabaseService {
         });
     }
 
+    public CompletableFuture<User> signup(String username, String password) {
+        return runAsync(() -> {
+            try {
+                String unameNorm = com.game.arkanoid.utils.PasswordHasher.normalize(username);
+                // reject if exists (case-insensitive)
+                if (users.findByNameInsensitive(unameNorm).isPresent()) {
+                    throw new NameExistsException();
+                }
+                String hash = com.game.arkanoid.utils.PasswordHasher.hash(unameNorm, password);
+                return users.insert(unameNorm, hash);
+            } catch (SQLException e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
     public void shutdown() { ioPool.shutdownNow(); }
 
     private <T> CompletableFuture<T> runAsync(Callable<T> task) {
@@ -180,4 +156,6 @@ public final class DatabaseService {
 
     // --- domain-specific exceptions ---
     public static final class InvalidCredentialsException extends RuntimeException {}
+    public static final class UserNotFoundException extends RuntimeException {}
+    public static final class NameExistsException extends RuntimeException {}
 }

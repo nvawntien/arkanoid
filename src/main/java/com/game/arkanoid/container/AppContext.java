@@ -12,11 +12,6 @@ public final class AppContext {
     private final DatabaseService database = new DatabaseService();
     private User currentUser;
 
-    private AppContext() {
-        // Ensure schema is ready before first login attempt
-        database.initializeSchema().join();
-    }
-
     public static synchronized AppContext getInstance() {
         if (instance == null) instance = new AppContext();
         return instance;
