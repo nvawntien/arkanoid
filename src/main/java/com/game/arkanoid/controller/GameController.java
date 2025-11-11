@@ -503,7 +503,13 @@ public final class GameController {
     private void updateHud() {
         if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
         if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
-       // if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
+        // Keep high score updated locally once surpassed by current run
+        if (gameState.score > gameState.highScore) {
+            gameState.highScore = gameState.score;
+        }
+        if (highScoreLabel != null) {
+            highScoreLabel.setText(Integer.toString(gameState.highScore));
+        }
     }
 
     public int getScore() {
@@ -511,20 +517,20 @@ public final class GameController {
     }
 
     private void loadAndDisplayHighScore() {
-    int bestScore = 0; 
-    try {
-        User u = AppContext.getInstance().getCurrentUser();
-        if (u != null) {
-            bestScore = u.getBestScore();
-        }
-    } catch (Exception e) {
-        System.err.println("Can't load high score: " + e.getMessage());
+        // Query top 1 ranking once; from then on, update locally when surpassed
+        AppContext.getInstance().db().getRankings(1).whenComplete((list, err) -> {
+            Platform.runLater(() -> {
+                int bestScore = 0;
+                if (err == null && list != null && !list.isEmpty()) {
+                    try { bestScore = Math.max(0, list.get(0).getBestScore()); } catch (Exception ignore) {}
+                }
+                gameState.highScore = bestScore;
+                if (highScoreLabel != null) {
+                    highScoreLabel.setText(Integer.toString(gameState.highScore));
+                }
+            });
+        });
     }
-
-    if (highScoreLabel != null) {
-        highScoreLabel.setText(""+ bestScore);
-    }
-}
 
     private void setupPauseOverlay() {
         try {
