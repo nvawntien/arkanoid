@@ -37,6 +37,7 @@ public final class GameStateSnapshot {
     public final List<BrickState> bricks = new ArrayList<>();
     public final List<PowerUpState> fallingPowerUps = new ArrayList<>();
     public final List<BallsState> balls = new ArrayList<>();
+    public final List<EnemyState> enemies = new ArrayList<>();
 
     public static final class BrickState {
         public double x;
@@ -75,6 +76,19 @@ public final class GameStateSnapshot {
         }
     }
 
+    public static final class EnemyState {
+        public String type; // EnemyType name
+        public double x;
+        public double y;
+        public double dx;
+        public double dy;
+
+        public EnemyState() {}
+        public EnemyState(String type, double x, double y, double dx, double dy) {
+            this.type = type; this.x = x; this.y = y; this.dx = dx; this.dy = dy;
+        }
+    }
+
     /** Build a snapshot from the current in-memory GameState. */
     public static GameStateSnapshot from(GameState s) {
         GameStateSnapshot snap = new GameStateSnapshot();
@@ -107,6 +121,12 @@ public final class GameStateSnapshot {
         for (Ball b : s.balls) {
             snap.balls.add(new BallsState(
                     b.getCenterX(), b.getCenterY(), b.getDx(), b.getDy(), b.isMoving(), b.getRadius()
+            ));
+        }
+        // Enemies
+        for (Enemy e : s.enemies) {
+            snap.enemies.add(new EnemyState(
+                e.getType().name(), e.getX(), e.getY(), e.getVx(), e.getVy()
             ));
         }
         
@@ -203,6 +223,23 @@ public final class GameStateSnapshot {
         } else {
             // Fallback: ensure main ball present in list
             s.balls.add(s.ball);
+        }
+
+        // Enemies
+        s.enemies.clear();
+        for (EnemyState es : enemies) {
+            EnemyType type;
+            try { type = EnemyType.valueOf(es.type); } catch (Exception ex) { type = EnemyType.CONE; }
+            Enemy enemy = new Enemy(
+                    type,
+                    es.x,
+                    es.y,
+                    Constants.ENEMY_WIDTH,
+                    Constants.ENEMY_HEIGHT,
+                    es.dx,
+                    es.dy
+            );
+            s.enemies.add(enemy);
         }
         s.running = false;  // countdown before resume will start running
         s.paused = true;
