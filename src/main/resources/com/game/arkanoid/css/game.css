@@ -284,6 +284,12 @@
     -fx-font-size: 16px;
 }
 
+/* Center header text */
+.ranking-table .column-header .label {
+    -fx-alignment: CENTER;
+    -fx-text-alignment: center;
+}
+
 /* Dòng dữ liệu trong suốt */
 .ranking-table .table-row-cell {
     -fx-background-color: transparent;
