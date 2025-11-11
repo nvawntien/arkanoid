@@ -3,6 +3,7 @@ package com.game.arkanoid.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import com.game.arkanoid.container.Container;
 
 public final class GameOverController {
     private final SceneController navigator;
@@ -23,6 +24,8 @@ public final class GameOverController {
     }
 
     public void onPlayAgain(ActionEvent e) {
+        // Reset game container to start a fresh session
+        Container.reset();
         navigator.showGame();
     }
 
