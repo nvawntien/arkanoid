@@ -98,7 +98,32 @@ public final class EnemyService {
         }
 
         if (enemy.getType() != EnemyType.CUBE) {
-            ball.setVelocity(ball.getDx(), -ball.getDy());
+            double ballLeft = ball.getX() - ball.getRadius();
+            double ballRight = ball.getX() + ball.getRadius();
+            double ballTop = ball.getY() - ball.getRadius();
+            double ballBottom = ball.getY() + ball.getRadius();
+
+            double enemyLeft = enemy.getX();
+            double enemyRight = enemy.getX() + enemy.getWidth();
+            double enemyTop = enemy.getY();
+            double enemyBottom = enemy.getY() + enemy.getHeight();
+
+            double overlapLeft = ballRight - enemyLeft;
+            double overlapRight = enemyRight - ballLeft;
+            double overlapTop = ballBottom - enemyTop;
+            double overlapBottom = enemyBottom - ballTop;
+
+            // Tìm chiều nhỏ nhất
+            double minOverlapX = Math.min(overlapLeft, overlapRight);
+            double minOverlapY = Math.min(overlapTop, overlapBottom);
+
+            if (minOverlapX < minOverlapY) {
+                // Va chạm theo trục X → đảo dx
+                ball.setVelocity(-ball.getDx(), ball.getDy());
+            } else {
+                // Va chạm theo trục Y → đảo dy
+                ball.setVelocity(ball.getDx(), -ball.getDy());
+            }
         }
     }
 
