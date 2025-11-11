@@ -160,7 +160,15 @@ public final class GameController {
                     return;
                 }
                 if (gameState.gameCompleted) {
-                    stopLoopAndNavigate(SceneId.MENU, navigator.transitions().menuTransition());
+                    // persist bests and clear in-progress, then show Win scene
+                    User u = AppContext.getInstance().getCurrentUser();
+                    if (u != null) {
+                        int bestRound = Math.max(u.getBestRound(), gameState.level);
+                        int bestScore = Math.max(u.getBestScore(), gameState.score);
+                        AppContext.getInstance().db().updateBest(u.getId(), bestRound, bestScore);
+                        AppContext.getInstance().db().clearInProgress(u.getId());
+                    }
+                    stopLoopAndNavigate(SceneId.WIN, navigator.transitions().winTransition());
                 }
             }
         };
@@ -282,7 +290,15 @@ public final class GameController {
 
                 gameService.loadNextLevel(gameState);
                 if (gameState.gameCompleted) {
-                    stopLoopAndNavigate(SceneId.MENU, navigator.transitions().menuTransition());
+                    // persist bests and clear in-progress, then show Win view
+                    User u = AppContext.getInstance().getCurrentUser();
+                    if (u != null) {
+                        int bestRound = Math.max(u.getBestRound(), gameState.level);
+                        int bestScore = Math.max(u.getBestScore(), gameState.score);
+                        AppContext.getInstance().db().updateBest(u.getId(), bestRound, bestScore);
+                        AppContext.getInstance().db().clearInProgress(u.getId());
+                    }
+                    stopLoopAndNavigate(SceneId.WIN, navigator.transitions().winTransition());
                     return;
                 }
 
@@ -292,9 +308,6 @@ public final class GameController {
             pause.play();
         });
     }
-
-
-
 
     private void trackLevelTransition() {
         int currentLevel = gameState.level;
