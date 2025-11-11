@@ -2,18 +2,28 @@ package com.game.arkanoid.controller;
 
 import com.game.arkanoid.container.AppContext;
 import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.game.CloseDoorTopLeftEvent;
+import com.game.arkanoid.events.game.CloseDoorTopRightEvent;
+import com.game.arkanoid.events.game.DoorOpenedEvent;
 import com.game.arkanoid.events.game.LevelClearedEvent;
+import com.game.arkanoid.events.game.OpenDoorTopLeftEvent;
+import com.game.arkanoid.events.game.OpenDoorTopRightEvent;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.models.User;
+import com.game.arkanoid.models.DoorType;
 import com.game.arkanoid.services.GameService;
+import com.game.arkanoid.services.EnemyService;
 import com.game.arkanoid.view.renderer.BallsRenderer;
 import com.game.arkanoid.view.renderer.BulletRenderer;
+import com.game.arkanoid.view.renderer.DoorTopRenderer;
 import com.game.arkanoid.view.renderer.BricksRenderer;
 import com.game.arkanoid.view.renderer.PaddleRenderer;
 import com.game.arkanoid.view.renderer.PowerUpRenderer;
 import com.game.arkanoid.view.renderer.LifeRenderer;
+import com.game.arkanoid.view.renderer.EnemyRenderer;
+import com.game.arkanoid.utils.Constants;
 
 import java.util.List;
 
@@ -26,6 +36,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -37,6 +48,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.image.ImageView;
 import javafx.util.Duration;
 
 /**
@@ -55,6 +67,7 @@ public final class GameController {
     @FXML private Label bannerLabel;
     @FXML private Label scoreLabel;
     @FXML private Label highScoreLabel;
+    @FXML private ImageView edge_top;
 
     // --- Core Dependencies ---
     private final GameService gameService;
@@ -70,12 +83,16 @@ public final class GameController {
     private PowerUpRenderer powerUpRenderer;
     private BulletRenderer bulletRenderer;
     private LifeRenderer lifeRenderer;
+    private EnemyRenderer enemyRenderer;
+    private DoorTopRenderer doorTopRenderer;
 
     // --- State Tracking ---
     private AnimationTimer loop;
     private SequentialTransition levelIntroSequence;
     private Parent pauseOverlay;
     private int lastLevelObserved = Integer.MIN_VALUE;
+    private Timeline spawnTimer;
+    private DoorType doorType;
 
     // Constructor ------------------------------------------------------------
     public GameController(GameState gameState, GameService gameService, SceneController navigator) {
@@ -92,7 +109,7 @@ public final class GameController {
         loadAndDisplayHighScore();
         updateHud();
         registerEventListeners();
-
+        startEnemySpawnTimer();
         startGameLoop();
         //GameEventBus.getInstance().publish(new GameBGMSoundEvent());
         lastLevelObserved = gameState.level;
@@ -123,6 +140,8 @@ public final class GameController {
                 bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
                 lifeRenderer.render(gameState.lives);
+                enemyRenderer.render(gameState.enemies);
+
                 // Update hud
                 updateHud();
                 trackLevelTransition();
@@ -146,6 +165,17 @@ public final class GameController {
             }
         };
         loop.start();
+    }
+
+    private void startEnemySpawnTimer() {
+        spawnTimer = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
+            if (gameState.paused || gameState.levelTransitionPending) return;
+            System.out.println("Enemy spawn tick at " + System.currentTimeMillis());
+            boolean left = Math.random() < 0.5;
+            GameEventBus.getInstance().publish(left ? new OpenDoorTopLeftEvent() : new OpenDoorTopRightEvent());
+        }));
+        spawnTimer.setCycleCount(Timeline.INDEFINITE);
+        spawnTimer.play();
     }
 
     private InputState readInput() {
@@ -213,6 +243,15 @@ public final class GameController {
         subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpActivatedEvent.class, paddleRenderer::onPowerUpActivated));
 
         subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpExpiredEvent.class, paddleRenderer::onPowerUpExpired));
+        subscriptions.add(GameEventBus.getInstance().subscribe(DoorOpenedEvent.class, ev -> {
+            if (ev.left()) {    
+                gameService.getEnemyService().spawnEnemy(gameState, Constants.DOOR_TOP_X_LEFT, Constants.DOOR_TOP_Y);
+                GameEventBus.getInstance().publish(new CloseDoorTopLeftEvent());
+            } else {
+                gameService.getEnemyService().spawnEnemy(gameState, Constants.DOOR_TOP_X_RIGHT, Constants.DOOR_TOP_Y);
+                GameEventBus.getInstance().publish(new CloseDoorTopRightEvent());
+            }
+        }));
     }
 // ...existing code...  
 
@@ -444,6 +483,8 @@ public final class GameController {
         powerUpRenderer = new PowerUpRenderer(gamePane);
         bulletRenderer = new BulletRenderer(gamePane);
         lifeRenderer = new LifeRenderer(lifeBox);
+        doorTopRenderer = new DoorTopRenderer(gamePane, edge_top);
+        enemyRenderer = new EnemyRenderer(gamePane);
 
         gamePane.setFocusTraversable(true);
         Platform.runLater(gamePane::requestFocus);

@@ -40,11 +40,12 @@ public final class Container {
         PaddleService paddleSvc = new PaddleService();
         SoundManager sound = SoundManager.getInstance();
         PowerUpService powerUpSvc = new PowerUpService();
+        EnemyService enemySvc = new EnemyService();
         BulletService bulletSvc = new BulletService(bricksSvc);
         RoundService roundSvc = new RoundService(bricksSvc, ballSvc, paddleSvc);
         roundSvc.loadLevel(this.state, 1);
 
-        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, bulletSvc, roundSvc);
+        this.game = new GameService(ballSvc, paddleSvc, bricksSvc, powerUpSvc, bulletSvc, roundSvc, enemySvc);
         this.game.bindState(this.state);
     }
 
