@@ -193,7 +193,7 @@ Visual representation of the core architecture and class relationships:
   - App services context (DB + session): `container/AppContext.java`
   - Game container (state + services wiring): `container/Container.java`
 
-## Additional Design Choices
+## 💡 Additional Design Choices
 
 - Rendering: pluggable renderer interface per model type.
   - Interface: `view/renderer/Renderer.java`
