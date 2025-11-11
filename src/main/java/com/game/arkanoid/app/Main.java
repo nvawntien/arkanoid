@@ -13,7 +13,6 @@ public class Main extends Application {
         stage.setResizable(false);
         navigator = new SceneController(stage);
         stage.setOnCloseRequest(e -> {
-            // Best-effort: save in-progress before closing
             try { navigator.saveInProgressIfAny(); } catch (Exception ignored) {}
         });
         navigator.showLogin();
