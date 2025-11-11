@@ -95,15 +95,10 @@ public final class MenuController {
         });
     }
 
-    // ===== Các hành động của menu =====
     @FXML private void onStartGame(ActionEvent e) {
         eventBus.publish(new StopBGMSoundEvent());
         Container.reset();
-        
-        // --- THAY ĐỔI DUY NHẤT ---
-        // Thay vì bắt đầu game, chuyển đến màn hình chọn level
-        navigator.showSelectLevel();
-        // --- KẾT THÚC THAY ĐỔI ---
+        navigator.showGame();
     }
 
     @FXML private void onOpenSettings(ActionEvent e) {
@@ -117,7 +112,6 @@ public final class MenuController {
     }
 
     @FXML private void onContinueGame(ActionEvent e) {
-        
         User current = AppContext.getInstance().getCurrentUser();
         if (current == null) return;
         continueButton.setDisable(true);
@@ -135,7 +129,6 @@ public final class MenuController {
         });
     }
 
-    // Cập nhật trạng thái khả dụng của nút Continue
     private void updateContinueAvailability() {
         if (continueButton == null) return;
         continueButton.setDisable(true);

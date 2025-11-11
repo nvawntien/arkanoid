@@ -3,15 +3,14 @@ package com.game.arkanoid.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import com.game.arkanoid.container.Container;
 
-public final class GameOverController {
+public final class WinController {
     private final SceneController navigator;
     private final int finalScore;
 
     @FXML private Label scoreLabel;
 
-    public GameOverController(SceneController navigator, int finalScore) {
+    public WinController(SceneController navigator, int finalScore) {
         this.navigator = navigator;
         this.finalScore = finalScore;
     }
@@ -23,13 +22,12 @@ public final class GameOverController {
         }
     }
 
-    public void onPlayAgain(ActionEvent e) {
-        // Reset game container to start a fresh session
-        Container.reset();
-        navigator.showGame();
-    }
-
     public void onMainMenu(ActionEvent e) {
         navigator.showMenu();
     }
+
+    public void onShowRankings(ActionEvent e) {
+        navigator.showRankings();
+    }
 }
+

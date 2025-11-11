@@ -22,6 +22,10 @@ public final class TransitionManager {
         return factory.forGameOverScene();
     }
 
+    public TransitionStrategy winTransition() {
+        return factory.forWinScene();
+    }
+
     public TransitionStrategy settingsTransition() {
         return factory.forSettingsScene();
     }
