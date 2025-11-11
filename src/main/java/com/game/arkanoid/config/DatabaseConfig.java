@@ -8,12 +8,7 @@ import java.util.Objects;
 
 /**
  * Simplified DatabaseConfig
- * - Reads full JDBC URL from .env (including username, password, sslmode)
- * - Example URL:
- *   jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
- *   ?user=postgres.vmbfytwqkjvhtgcbctvc
- *   &password=YOUR_SUPABASE_PASSWORD
- *   &sslmode=require
+ * - Reads full JDBC URL from .env.
  */
 public final class DatabaseConfig {
 

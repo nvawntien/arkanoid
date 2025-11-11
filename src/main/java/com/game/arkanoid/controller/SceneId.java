@@ -7,6 +7,6 @@ public enum SceneId {
     SETTINGS,
     GAME,
     GAME_OVER,
+    WIN,
     RANKINGS,
-    SELECT_LEVEL
 }

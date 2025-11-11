@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="800.0" prefWidth="600.0" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.WinController">
+    <children>
+        <Pane prefHeight="800.0" prefWidth="600.0" styleClass="win-bg">
+            <children>
+                <Label fx:id="scoreLabel" alignment="center" layoutX="307.0" layoutY="565.0" prefHeight="47.0" prefWidth="120.0" text="0000">
+                    <font>
+                        <Font size="28.0" />
+                    </font>
+                </Label>
+                <Button fx:id="continueButton2" layoutX="308.0" layoutY="674.0" onAction="#onShowRankings" prefHeight="50.0" prefWidth="159.0" styleClass="menu-button" />
+                <Button fx:id="mainmenuButton2" layoutX="116.0" layoutY="676.0" onAction="#onMainMenu" prefHeight="47.0" prefWidth="159.0" styleClass="menu-button" />
+            <ImageView fitHeight="171.0" fitWidth="397.0" layoutX="101.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/smile.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="124.0" fitWidth="334.0" layoutX="133.0" layoutY="471.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/youwin.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="127.0" layoutY="564.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/yourscore3.png" />
+               </image>
+            </ImageView>
+            </children>
+        </Pane>
+    </children>
+</AnchorPane>

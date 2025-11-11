@@ -46,6 +46,7 @@ public final class SceneController {
             case SETTINGS -> showSettings(transition);
             case GAME -> showGame(transition);
             case GAME_OVER -> showGameOver(transition);
+            case WIN -> showWin(transition);
             case RANKINGS -> showRankings(transition);
             default -> throw new IllegalArgumentException("Unhandled scene: " + sceneId);
         }
@@ -120,36 +121,6 @@ public final class SceneController {
             });
         });
         setScene(SceneId.RANKINGS, root, transition);
-    }
-
-     /**
-     * Hiển thị màn hình chọn level với transition mặc định.
-     */
-    public void showSelectLevel() {
-        // Có thể dùng transition của menu hoặc tạo transition mới
-        showSelectLevel(transitionManager.menuTransition()); 
-    }
-
-    /**
-     * Hàm private để load FXML và thiết lập controller cho màn hình chọn level.
-     * @param transition transition để chạy
-     */
-    private void showSelectLevel(TransitionStrategy transition) {
-        stopActiveGame();
-        
-        // Đảm bảo đường dẫn này khớp với vị trí file FXML của bạn
-        // Dựa theo file FXML từ lần trước, tên file là "SelecLevel.fxml"
-        Parent root = load("/com/game/arkanoid/fxml/SelectLevel.fxml", loader -> {
-            loader.setControllerFactory(cls -> {
-                if (cls == SelectLevelController.class) {
-                    // Truyền "this" (SceneController) vào hàm tạo
-                    return new SelectLevelController(this);
-                }
-                throw buildUnknownController(cls);
-            });
-        });
-        
-        setScene(SceneId.SELECT_LEVEL, root, transition);
     }
 
     /** Show the login screen. */
@@ -233,14 +204,14 @@ public final class SceneController {
     }
 
     private void showGameOver(TransitionStrategy transition) {
-        final int finalScore; // phải là final hoặc effectively final
+        final int finalScore; 
 
         if (activeGameController != null) {
             finalScore = activeGameController.getScore();
             activeGameController.stop();
             activeGameController = null;
         } else {
-            finalScore = 0; // thêm dòng này để đảm bảo luôn được gán
+            finalScore = 0; 
         }
 
         Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
@@ -253,6 +224,33 @@ public final class SceneController {
         });
 
         setScene(SceneId.GAME_OVER, root, transition);
+    }
+
+    /** Show the win scene with default transition. */
+    public void showWin() {
+        showWin(transitionManager.winTransition());
+    }
+
+    private void showWin(TransitionStrategy transition) {
+        final int finalScore;
+        if (activeGameController != null) {
+            finalScore = activeGameController.getScore();
+            activeGameController.stop();
+            activeGameController = null;
+        } else {
+            finalScore = 0;
+        }
+
+        Parent root = load("/com/game/arkanoid/fxml/WinView.fxml", loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == WinController.class) {
+                    return new WinController(this, finalScore);
+                }
+                throw buildUnknownController(cls);
+            });
+        });
+
+        setScene(SceneId.WIN, root, transition);
     }
 
     /** Continue from paused state (placeholder). */

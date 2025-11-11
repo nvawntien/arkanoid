@@ -19,6 +19,10 @@ public final class TransitionFactory {
         return new BlurFadeStrategy(Duration.millis(420), 18.0);
     }
 
+    public TransitionStrategy forWinScene() {
+        return new BlurFadeStrategy(Duration.millis(420), 18.0);
+    }
+
     public TransitionStrategy forSettingsScene() {
         return new FadeTransitionStrategy(Duration.millis(220), 0.0, 1.0);
     }

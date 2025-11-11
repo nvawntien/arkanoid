@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="800.0" prefWidth="600.0" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.SignupController">
+<AnchorPane prefHeight="800.0" prefWidth="600.0" styleClass="login-bg" stylesheets="@../css/game.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.SignupController">
     <children>
-        <VBox alignment="CENTER" spacing="12" prefWidth="600.0" prefHeight="800.0">
-            <children>
-                <Label text="Create Account" styleClass="menu-title" />
-                <TextField fx:id="usernameField" promptText="Username" maxWidth="260" />
-                <PasswordField fx:id="passwordField" promptText="Password" maxWidth="260" />
-                <Button fx:id="createButton" text="Create Account" minWidth="160" />
-                <Label fx:id="messageLabel" textFill="red" />
-                <Hyperlink fx:id="backToLoginLink" text="Back to Login" />
-            </children>
-            <padding>
-                <Insets top="220" />
-            </padding>
-        </VBox>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="200.0" layoutY="300.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/sigup.png" />
+         </image>
+      </ImageView>
+          <TextField fx:id="usernameField" layoutX="208.0" layoutY="447.0" maxWidth="260" prefHeight="26.0" prefWidth="183.0" promptText="Username" />
+          <PasswordField fx:id="passwordField" layoutX="207.0" layoutY="484.0" maxWidth="260" prefHeight="26.0" prefWidth="183.0" promptText="Password" />
+          <Button fx:id="createButton" layoutX="220.0" layoutY="546.0" minWidth="160" styleClass="menu-button" />
+          <Hyperlink fx:id="backToLoginLink" layoutX="251.0" layoutY="590.0" prefHeight="28.0" prefWidth="97.0" text="Back to Login" textFill="#ff0d00">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Hyperlink>
+          <Label fx:id="messageLabel" layoutX="299.0" layoutY="581.0" textFill="red" />
     </children>
 </AnchorPane>
-
