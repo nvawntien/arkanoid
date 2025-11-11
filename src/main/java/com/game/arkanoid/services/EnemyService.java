@@ -85,7 +85,7 @@ public final class EnemyService {
             case CONE -> state.decrementLives();
             case CUBE -> { /* Chỉ nổ, không mất ball */ }
             case MOLECULE -> fastAllBalls(state);
-            case PYRAMID -> state.decrementScore(50); // ví dụ giảm 50 điểm
+            case PYRAMID -> state.decrementScore(50); 
         }
     }
 
