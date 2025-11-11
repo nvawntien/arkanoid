@@ -159,9 +159,9 @@ public final class GameStateSnapshot {
         if (!bricks.isEmpty()) {
             s.bricks.clear();
             for (BrickState bs : bricks) {
-                int health = Math.max(0, bs.health);
-                Brick b = new Brick(bs.x, bs.y, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, Math.max(1, health));
-                if (health <= 0) b.setHealth(0);
+                int health = bs.health;
+                // Nếu health == 9 → silver brick (bất tử), không giảm
+                Brick b = new Brick(bs.x, bs.y, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, health);
                 s.bricks.add(b);
             }
         }

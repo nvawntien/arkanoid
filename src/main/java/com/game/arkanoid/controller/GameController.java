@@ -106,6 +106,7 @@ public final class GameController {
         setupRenderers();
         setupPauseOverlay();
         setupInputHandlers();
+        loadAndDisplayHighScore();
         updateHud();
         registerEventListeners();
         startEnemySpawnTimer();
@@ -200,6 +201,12 @@ public final class GameController {
         gamePane.setOnKeyReleased(event -> activeKeys.remove(event.getCode()));
     }
 
+    @FXML
+    private void handlePauseButton() {
+        // Đơn giản là gọi lại hàm togglePause đã có sẵn
+        togglePause();
+    }
+    
     private void handleGlobalKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ESCAPE) {
             togglePause();
@@ -488,8 +495,30 @@ public final class GameController {
     private void updateHud() {
         if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
         if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
-        if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
+       // if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
     }
+
+    public int getScore() {
+        return gameState.score;
+    }
+
+    private void loadAndDisplayHighScore() {
+    int bestScore = 0; // Điểm cao nhất mặc định là 0
+    try {
+        User u = AppContext.getInstance().getCurrentUser();
+        if (u != null) {
+            bestScore = u.getBestScore();
+        }
+    } catch (Exception e) {
+        System.err.println("Không thể tải High Score: " + e.getMessage());
+        // Không sao, game sẽ hiển thị 0
+    }
+
+    if (highScoreLabel != null) {
+        // Dùng String.format để hiển thị đẹp hơn
+        highScoreLabel.setText(""+ bestScore);
+    }
+}
 
     private void setupPauseOverlay() {
         try {

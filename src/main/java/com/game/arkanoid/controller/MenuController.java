@@ -86,7 +86,7 @@ public final class MenuController {
                 
                 animator.moveRight();
             } else if (event.getCode() == KeyCode.LEFT) {
-               
+                
                 animator.moveLeft();
             } else if (event.getCode() == KeyCode.ENTER) {
                 Button selected = animator.getCenterButton();
@@ -99,7 +99,11 @@ public final class MenuController {
     @FXML private void onStartGame(ActionEvent e) {
         eventBus.publish(new StopBGMSoundEvent());
         Container.reset();
-        navigator.showGame();
+        
+        // --- THAY ĐỔI DUY NHẤT ---
+        // Thay vì bắt đầu game, chuyển đến màn hình chọn level
+        navigator.showSelectLevel();
+        // --- KẾT THÚC THAY ĐỔI ---
     }
 
     @FXML private void onOpenSettings(ActionEvent e) {
@@ -113,7 +117,7 @@ public final class MenuController {
     }
 
     @FXML private void onContinueGame(ActionEvent e) {
-       
+        
         User current = AppContext.getInstance().getCurrentUser();
         if (current == null) return;
         continueButton.setDisable(true);

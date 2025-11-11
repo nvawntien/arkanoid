@@ -42,6 +42,9 @@ public final class SceneController {
             case GAME -> showGame(transition);
             case GAME_OVER -> showGameOver(transition);
             case RANKINGS -> showRankings(transition);
+            // --- HÀM MỚI ĐÃ THÊM ---
+            case SELECT_LEVEL -> showSelectLevel(transition);
+            // --- KẾT THÚC HÀM MỚI ---
             default -> throw new IllegalArgumentException("Unhandled scene: " + sceneId);
         }
     }
@@ -136,6 +139,40 @@ public final class SceneController {
         setScene(SceneId.RANKINGS, root, transition);
     }
 
+    // --- CÁC HÀM MỚI ĐỂ KHỞI TẠO SELECT_LEVEL ---
+
+    /**
+     * Hiển thị màn hình chọn level với transition mặc định.
+     */
+    public void showSelectLevel() {
+        // Có thể dùng transition của menu hoặc tạo transition mới
+        showSelectLevel(transitionManager.menuTransition()); 
+    }
+
+    /**
+     * Hàm private để load FXML và thiết lập controller cho màn hình chọn level.
+     * @param transition transition để chạy
+     */
+    private void showSelectLevel(TransitionStrategy transition) {
+        stopActiveGame();
+        
+        // Đảm bảo đường dẫn này khớp với vị trí file FXML của bạn
+        // Dựa theo file FXML từ lần trước, tên file là "SelecLevel.fxml"
+        Parent root = load("/com/game/arkanoid/fxml/SelectLevel.fxml", loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == SelectLevelController.class) {
+                    // Truyền "this" (SceneController) vào hàm tạo
+                    return new SelectLevelController(this);
+                }
+                throw buildUnknownController(cls);
+            });
+        });
+        
+        setScene(SceneId.SELECT_LEVEL, root, transition);
+    }
+    // --- KẾT THÚC KHỐI CODE MỚI ---
+
+
     /** Show the game over scene with default transition. */
     public void showGameOver() {
         showGameOver(transitionManager.gameOverTransition());
@@ -145,18 +182,27 @@ public final class SceneController {
     }
     
     private void showGameOver(TransitionStrategy transition) {
-        stopActiveGame();
+        final int finalScore; // phải là final hoặc effectively final
+
+        if (activeGameController != null) {
+            finalScore = activeGameController.getScore();
+            activeGameController.stop();
+            activeGameController = null;
+        } else {
+            finalScore = 0; // thêm dòng này để đảm bảo luôn được gán
+        }
+
         Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
             loader.setControllerFactory(cls -> {
                 if (cls == GameOverController.class) {
-                    return new GameOverController(this);
+                    return new GameOverController(this, finalScore);
                 }
                 throw buildUnknownController(cls);
             });
         });
+
         setScene(SceneId.GAME_OVER, root, transition);
     }
-    
 
     /** Exit the application. */
     public void exit() {

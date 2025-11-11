@@ -39,6 +39,7 @@ public final class RoundService {
         state.bricks.addAll(bricks);
         state.level = idx;
         state.balls.clear();
+        state.enemies.clear();
         state.powerUps.clear();
         state.activePowerUps.clear();
         state.levelTransitionPending = false;
