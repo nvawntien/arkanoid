@@ -203,7 +203,6 @@ public final class GameController {
 
     @FXML
     private void handlePauseButton() {
-        // Đơn giản là gọi lại hàm togglePause đã có sẵn
         togglePause();
     }
     
@@ -446,11 +445,7 @@ public final class GameController {
         lastLevelObserved = gameState.level;
         lifeRenderer.reset();
         startLevelIntro();
-
-        // region SOUND
-        //soundService.playSfx("menu_click");
-        // endregion
-
+        //playsound
         Platform.runLater(gamePane::requestFocus);
     }
 
@@ -503,19 +498,17 @@ public final class GameController {
     }
 
     private void loadAndDisplayHighScore() {
-    int bestScore = 0; // Điểm cao nhất mặc định là 0
+    int bestScore = 0; 
     try {
         User u = AppContext.getInstance().getCurrentUser();
         if (u != null) {
             bestScore = u.getBestScore();
         }
     } catch (Exception e) {
-        System.err.println("Không thể tải High Score: " + e.getMessage());
-        // Không sao, game sẽ hiển thị 0
+        System.err.println("Can't load high score: " + e.getMessage());
     }
 
     if (highScoreLabel != null) {
-        // Dùng String.format để hiển thị đẹp hơn
         highScoreLabel.setText(""+ bestScore);
     }
 }
@@ -614,5 +607,3 @@ public final class GameController {
     }
     // endregion
 }
-
-
