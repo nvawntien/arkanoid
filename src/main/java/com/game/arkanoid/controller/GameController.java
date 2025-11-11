@@ -501,8 +501,15 @@ public final class GameController {
 
 
     private void updateHud() {
-        if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
-        if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
+        User currentUser = AppContext.getInstance().getCurrentUser();
+        String username = (currentUser != null) ? currentUser.getName() : "PLAYER";
+
+        if (livesLabel != null) 
+            livesLabel.setText(username + " " + Math.max(0, gameState.lives));
+        
+        if (scoreLabel != null) 
+            scoreLabel.setText(Integer.toString(gameState.score));
+        
         // Keep high score updated locally once surpassed by current run
         if (gameState.score > gameState.highScore) {
             gameState.highScore = gameState.score;
