@@ -17,6 +17,7 @@ public final class GameState {
     public final List<Ball> balls = new ArrayList<>();
     public final List<Bullet> bullets = new ArrayList<>();
     public final List<PowerUp> powerUps = new ArrayList<>();
+    public final List<Enemy> enemies = new ArrayList<>();
     public final Map<PowerUpType, Double> activePowerUps = new EnumMap<>(PowerUpType.class);
 
     public int score = Constants.DEFAULT_SCORE;
@@ -56,6 +57,10 @@ public final class GameState {
         timeScale = 1.0;
         bullets.clear();
         laserCooldown = 0.0;
+    }
+
+    public void decrementScore(int amount) {
+        score = Math.max(0, score - amount);
     }
 
     public void decrementLives() {
