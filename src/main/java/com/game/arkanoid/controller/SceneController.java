@@ -46,6 +46,7 @@ public final class SceneController {
             case SETTINGS -> showSettings(transition);
             case GAME -> showGame(transition);
             case GAME_OVER -> showGameOver(transition);
+            case WIN -> showWin(transition);
             case RANKINGS -> showRankings(transition);
             default -> throw new IllegalArgumentException("Unhandled scene: " + sceneId);
         }
@@ -223,6 +224,33 @@ public final class SceneController {
         });
 
         setScene(SceneId.GAME_OVER, root, transition);
+    }
+
+    /** Show the win scene with default transition. */
+    public void showWin() {
+        showWin(transitionManager.winTransition());
+    }
+
+    private void showWin(TransitionStrategy transition) {
+        final int finalScore;
+        if (activeGameController != null) {
+            finalScore = activeGameController.getScore();
+            activeGameController.stop();
+            activeGameController = null;
+        } else {
+            finalScore = 0;
+        }
+
+        Parent root = load("/com/game/arkanoid/fxml/WinView.fxml", loader -> {
+            loader.setControllerFactory(cls -> {
+                if (cls == WinController.class) {
+                    return new WinController(this, finalScore);
+                }
+                throw buildUnknownController(cls);
+            });
+        });
+
+        setScene(SceneId.WIN, root, transition);
     }
 
     /** Continue from paused state (placeholder). */
