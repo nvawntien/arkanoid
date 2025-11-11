@@ -45,6 +45,18 @@ public class Constants {
     public static final double POWER_UP_LASER_FACTOR = 1.0;
     public static final double POWER_UP_SLOW_BALL_SCALE = 0.6;
 
+    // enemy
+    public static final double ENEMY_WIDTH = 30.0;
+    public static final double ENEMY_HEIGHT = 30.0;
+    public static final double ENEMY_FALL_SPEED = 3.0;
+    public static final double DOOR_TOP_Y = 140.0;
+    public static final double DOOR_TOP_X_LEFT = 130.0;
+    public static final double DOOR_TOP_X_RIGHT = 445.0;
+    public static final double ZIGZAG_INTERVAL = 800; 
+    public static final int MAX_ENEMIES = 5;
+    public static final double ENEMY_SPEED_Y = 0.5;
+    public static final double ENEMY_SPEED_X = 0.5;
+    
     // Laser paddle / bullets
     public static final double BULLET_WIDTH = 8.0;
     public static final double BULLET_HEIGHT = 24.0;
