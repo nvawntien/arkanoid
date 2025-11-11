@@ -9,28 +9,25 @@ import java.util.Optional;
 public final class GameStateRepository {
 
     public void upsertInProgress(int userId, GameStateSnapshot snap) throws SQLException {
-        String select = "SELECT id FROM game_states WHERE user_id = ? AND in_progress = TRUE ORDER BY updated_at DESC LIMIT 1";
         try (Connection c = DatabaseConfig.getConnection()) {
-            Integer existingId = null;
-            try (PreparedStatement ps = c.prepareStatement(select)) {
-                ps.setInt(1, userId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) existingId = rs.getInt(1);
-                }
+            // Try update-by-user first (single-row-per-user policy)
+            String updateByUser = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/game_state/update_state_by_user.sql");
+            try (PreparedStatement ps = c.prepareStatement(updateByUser)) {
+                int idx = bindCore(ps, snap); // sets 1..6
+                ps.setString(idx++, Json.encodeBricks(snap));
+                ps.setString(idx++, Json.encodePowerUps(snap));
+                ps.setString(idx++, Json.encodeBalls(snap));
+                ps.setInt(idx, userId);
+                int updated = ps.executeUpdate();
+                if (updated > 0) return;
             }
-
-            if (existingId == null) {
-                insert(c, userId, snap);
-            } else {
-                update(c, existingId, snap);
-            }
+            // No row existed → insert
+            insert(c, userId, snap);
         }
     }
 
     public Optional<GameStateSnapshot> findLatestInProgress(int userId) throws SQLException {
-        String sql = "SELECT current_level, score, lives, paddle_x, ball_x, ball_y, bricks::text, powerups::text, " +
-                "ball_dx, ball_dy, ball_moving, ball_downward, ball_stuck, ball_stuck_offset_x, paddle_width, time_scale, laser_cooldown, COALESCE(effects::text, '[]') AS effects " +
-                "FROM game_states WHERE user_id=? AND in_progress=TRUE ORDER BY updated_at DESC LIMIT 1";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/game_state/select_latest_state.sql");
         try (Connection c = DatabaseConfig.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -41,24 +38,24 @@ public final class GameStateRepository {
                     s.score = rs.getInt("score");
                     s.lives = rs.getInt("lives");
                     s.paddleX = rs.getDouble("paddle_x");
+                    s.paddleWidth = rs.getDouble("paddle_width");
                     s.ballX = rs.getDouble("ball_x");
                     s.ballY = rs.getDouble("ball_y");
-                    // bricks/powerups decoded via simple JSON parser below
-                    String bricksJson = rs.getString(7);
-                    String powerupsJson = rs.getString(8);
-                    // direct columns (prefer over JSON if present)
-                    s.ballDx = rs.getDouble(9);
-                    s.ballDy = rs.getDouble(10);
-                    s.ballMoving = rs.getBoolean(11);
-                    s.ballDownward = rs.getBoolean(12);
-                    s.ballStuck = rs.getBoolean(13);
-                    s.ballStuckOffsetX = rs.getDouble(14);
-                    s.paddleWidth = rs.getDouble(15);
-                    s.timeScale = rs.getDouble(16);
-                    s.laserCooldown = rs.getDouble(17);
-                    String effectsJson = rs.getString(18);
+                    s.ballDx = rs.getDouble("ball_dx");
+                    s.ballDy = rs.getDouble("ball_dy");
+                    s.ballMoving = rs.getBoolean("ball_moving");
+                    s.ballDownward = rs.getBoolean("ball_downward");
+                    s.ballStuck = rs.getBoolean("ball_stuck");
+                    s.ballStuckOffsetX = rs.getDouble("ball_stuck_offset_x");
+                    s.timeScale = rs.getDouble("time_scale");
+                    s.laserCooldown = rs.getDouble("laser_cooldown");
+                    String bricksJson = rs.getString("bricks");
+                    String powerupsJson = rs.getString("powerups");
+                    String ballsJson = rs.getString("balls");
+                    String effectsJson = rs.getString("effects");
                     Json.decodeBricks(bricksJson, s);
                     Json.decodePowerUps(powerupsJson, s);
+                    Json.decodeBalls(ballsJson, s);
                     Json.decodeEffects(effectsJson, s);
                     return Optional.of(s);
                 }
@@ -77,9 +74,7 @@ public final class GameStateRepository {
     }
 
     private void insert(Connection c, int userId, GameStateSnapshot s) throws SQLException {
-        String sql = "INSERT INTO game_states (user_id, current_level, score, lives, paddle_x, ball_x, ball_y, bricks, powerups, in_progress, updated_at, " +
-                "ball_dx, ball_dy, ball_moving, ball_downward, ball_stuck, ball_stuck_offset_x, paddle_width, time_scale, laser_cooldown, effects) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, TRUE, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::jsonb)";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/game_state/insert_state.sql");
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             bind(ps, userId, s);
             ps.executeUpdate();
@@ -87,24 +82,11 @@ public final class GameStateRepository {
     }
 
     private void update(Connection c, int id, GameStateSnapshot s) throws SQLException {
-        String sql = "UPDATE game_states SET current_level=?, score=?, lives=?, paddle_x=?, ball_x=?, ball_y=?, bricks=?::jsonb, powerups=?::jsonb, " +
-                "ball_dx=?, ball_dy=?, ball_moving=?, ball_downward=?, ball_stuck=?, ball_stuck_offset_x=?, paddle_width=?, time_scale=?, laser_cooldown=?, effects=?::jsonb, " +
-                "in_progress=TRUE, updated_at=CURRENT_TIMESTAMP WHERE id=?";
+        String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/game_state/update_state.sql");
         try (PreparedStatement ps = c.prepareStatement(sql)) {
             int idx = bindCore(ps, s);
             ps.setString(idx++, Json.encodeBricks(s));
             ps.setString(idx++, Json.encodePowerUps(s));
-            // extended columns
-            ps.setDouble(idx++, s.ballDx);
-            ps.setDouble(idx++, s.ballDy);
-            ps.setBoolean(idx++, s.ballMoving);
-            ps.setBoolean(idx++, s.ballDownward);
-            ps.setBoolean(idx++, s.ballStuck);
-            ps.setDouble(idx++, s.ballStuckOffsetX);
-            ps.setDouble(idx++, s.paddleWidth);
-            ps.setDouble(idx++, s.timeScale);
-            ps.setDouble(idx++, s.laserCooldown);
-            ps.setString(idx++, Json.encodeEffects(s));
             ps.setInt(idx, id);
             ps.executeUpdate();
         }
@@ -115,17 +97,7 @@ public final class GameStateRepository {
         int idx = bindCore(ps, s, 2);
         ps.setString(idx++, Json.encodeBricks(s));
         ps.setString(idx++, Json.encodePowerUps(s));
-        // extended columns
-        ps.setDouble(idx++, s.ballDx);
-        ps.setDouble(idx++, s.ballDy);
-        ps.setBoolean(idx++, s.ballMoving);
-        ps.setBoolean(idx++, s.ballDownward);
-        ps.setBoolean(idx++, s.ballStuck);
-        ps.setDouble(idx++, s.ballStuckOffsetX);
-        ps.setDouble(idx++, s.paddleWidth);
-        ps.setDouble(idx++, s.timeScale);
-        ps.setDouble(idx++, s.laserCooldown);
-        ps.setString(idx, Json.encodeEffects(s));
+        ps.setString(idx, Json.encodeBalls(s));
     }
 
     private int bindCore(PreparedStatement ps, GameStateSnapshot s) throws SQLException { return bindCore(ps, s, 1); }
@@ -174,7 +146,39 @@ public final class GameStateRepository {
                   .append('}');
             }
             sb.append(']');
-            // extra balls
+            // unified balls list
+            sb.append(',').append("\"balls\":");
+            sb.append('[');
+            for (int i = 0; i < s.balls.size(); i++) {
+                GameStateSnapshot.BallsState bs = s.balls.get(i);
+                if (i > 0) sb.append(',');
+                sb.append('{')
+                  .append("\"x\":").append(trim(bs.x)).append(',')
+                  .append("\"y\":").append(trim(bs.y)).append(',')
+                  .append("\"dx\":").append(trim(bs.dx)).append(',')
+                  .append("\"dy\":").append(trim(bs.dy)).append(',')
+                  .append("\"moving\":").append(bs.moving).append(',')
+                  .append("\"r\":").append(trim(bs.radius))
+                  .append('}');
+            }
+            sb.append(']');
+            // balls (unified list) — preferred
+            sb.append(',').append("\"balls\":");
+            sb.append('[');
+            for (int i = 0; i < s.balls.size(); i++) {
+                GameStateSnapshot.BallsState bs = s.balls.get(i);
+                if (i > 0) sb.append(',');
+                sb.append('{')
+                  .append("\"x\":").append(trim(bs.x)).append(',')
+                  .append("\"y\":").append(trim(bs.y)).append(',')
+                  .append("\"dx\":").append(trim(bs.dx)).append(',')
+                  .append("\"dy\":").append(trim(bs.dy)).append(',')
+                  .append("\"moving\":").append(bs.moving).append(',')
+                  .append("\"r\":").append(trim(bs.radius))
+                  .append('}');
+            }
+            sb.append(']');
+            // extras (backward compatibility)
             sb.append(',').append("\"extras\":");
             sb.append('[');
             for (int i = 0; i < s.balls.size(); i++) {
@@ -218,6 +222,25 @@ public final class GameStateRepository {
             return sb.toString();
         }
 
+        static String encodeBalls(GameStateSnapshot s) {
+            StringBuilder sb = new StringBuilder();
+            sb.append('[');
+            for (int i = 0; i < s.balls.size(); i++) {
+                GameStateSnapshot.BallsState b = s.balls.get(i);
+                if (i > 0) sb.append(',');
+                sb.append('{')
+                        .append("\"x\":").append(trim(b.x)).append(',')
+                        .append("\"y\":").append(trim(b.y)).append(',')
+                        .append("\"dx\":").append(trim(b.dx)).append(',')
+                        .append("\"dy\":").append(trim(b.dy)).append(',')
+                        .append("\"moving\":").append(b.moving).append(',')
+                        .append("\"r\":").append(trim(b.radius))
+                        .append('}');
+            }
+            sb.append(']');
+            return sb.toString();
+        }
+
         static void decodeBricks(String json, GameStateSnapshot out) {
             if (json == null || json.isBlank()) return;
             // Very small permissive parser for array of {x,y,health}
@@ -254,10 +277,10 @@ public final class GameStateRepository {
                 boolean collected = readBoolean(obj, "\"collected\"");
                 out.fallingPowerUps.add(new GameStateSnapshot.PowerUpState(type, x, y, collected));
             }
-            // extras
-            int exIdx = s.indexOf("\"extras\"");
-            if (exIdx >= 0) {
-                int sx = s.indexOf('[', exIdx);
+            // prefer balls[]; fallback to extras[] for backward compatibility
+            int blIdx = s.indexOf("\"balls\"");
+            if (blIdx >= 0) {
+                int sx = s.indexOf('[', blIdx);
                 int ex = s.indexOf(']', sx);
                 if (sx > 0 && ex > sx) {
                     String arr2 = s.substring(sx + 1, ex);
@@ -272,6 +295,29 @@ public final class GameStateRepository {
                             boolean moving = readBoolean(obj, "\"moving\"");
                             double r = readDouble(obj, "\"r\"");
                             out.balls.add(new GameStateSnapshot.BallsState(x, y, dx, dy, moving, r));
+                        }
+                    }
+                }
+            } else {
+                // fallback: extras[] (old saves)
+                int exIdx = s.indexOf("\"extras\"");
+                if (exIdx >= 0) {
+                    int sx2 = s.indexOf('[', exIdx);
+                    int ex2 = s.indexOf(']', sx2);
+                    if (sx2 > 0 && ex2 > sx2) {
+                        String arr2 = s.substring(sx2 + 1, ex2);
+                        if (!arr2.isBlank()) {
+                            String[] objs2 = arr2.split("\\},\\s*\\{");
+                            for (String raw2 : objs2) {
+                                String obj = raw2.replace('{', ' ').replace('}', ' ').trim();
+                                double x = readDouble(obj, "\"x\"");
+                                double y = readDouble(obj, "\"y\"");
+                                double dx = readDouble(obj, "\"dx\"");
+                                double dy = readDouble(obj, "\"dy\"");
+                                boolean moving = readBoolean(obj, "\"moving\"");
+                                double r = readDouble(obj, "\"r\"");
+                                out.balls.add(new GameStateSnapshot.BallsState(x, y, dx, dy, moving, r));
+                            }
                         }
                     }
                 }
@@ -342,6 +388,25 @@ public final class GameStateRepository {
                 String type = readString(obj, "\"type\"");
                 double rem = readDouble(obj, "\"rem\"");
                 out.activeEffects.add(new GameStateSnapshot.ActiveEffect(type, rem));
+            }
+        }
+
+        static void decodeBalls(String json, GameStateSnapshot out) {
+            if (json == null || json.isBlank()) return;
+            String s = json.trim();
+            if (!s.startsWith("[")) return;
+            String body = s.substring(1, s.lastIndexOf(']'));
+            if (body.isBlank()) return;
+            String[] objs = body.split("\\},\\s*\\{");
+            for (String raw : objs) {
+                String obj = raw.replace('{', ' ').replace('}', ' ').trim();
+                double x = readDouble(obj, "\"x\"");
+                double y = readDouble(obj, "\"y\"");
+                double dx = readDouble(obj, "\"dx\"");
+                double dy = readDouble(obj, "\"dy\"");
+                boolean moving = readBoolean(obj, "\"moving\"");
+                double r = readDouble(obj, "\"r\"");
+                out.balls.add(new GameStateSnapshot.BallsState(x, y, dx, dy, moving, r));
             }
         }
 
