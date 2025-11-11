@@ -2,6 +2,7 @@ package com.game.arkanoid.controller;
 
 public enum SceneId {
     LOGIN,
+    SIGNUP,
     MENU,
     SETTINGS,
     GAME,
