@@ -1,376 +1,247 @@
-@startuml
-skinparam classAttributeIconSize 0
-hide empty members
+classDiagram
 class Main {
-  +SceneController navigator
+  -navigator : SceneController
   +start(Stage stage) : void
   +main(String[] args) : void
 }
 class DatabaseConfig {
-  +Connection connection
-  +Dotenv dotenv
-  +String url
-  +return connection
-  +String val
-  +return val
-  +DatabaseConfig() : private
-  +getConnection() : Connection
+  -connection : Connection
+  -url : String
+  -connection : return
+  -val : String
+  -val : return
   +close() : void
-  +getEnv(String key) : String
+  -getEnv(String key) : String
 }
-class GameSettings {
-}
-enum Difficulty {
-  +double ballSpeedMultiplier
-  +double paddleWidthMultiplier
-  +return ballSpeedMultiplier
-  +return paddleWidthMultiplier
-  +boolean soundEnabled
-  +double masterVolume
-  +double musicVolume
-  +double sfxVolume
-  +Difficulty difficulty
-  +int highScore
-  +return soundEnabled
-  +return masterVolume
-  +return musicVolume
-  +return sfxVolume
-  +return difficulty
+class GameSettings 
+
+class Difficulty {
+  -ballSpeedMultiplier : return
+  -paddleWidthMultiplier : return
+  -soundEnabled : boolean
+  -masterVolume : double
+  -musicVolume : double
+  -sfxVolume : double
+  -difficulty : Difficulty
+  -highScore : int
+  -soundEnabled : return
+  -masterVolume : return
+  -musicVolume : return
+  -sfxVolume : return
+  -difficulty : return
   +ballSpeedMultiplier() : double
   +paddleWidthMultiplier() : double
-  +GameSettings() : private
-  +isSoundEnabled() : boolean
-  +setSoundEnabled(boolean enabled) : void
-  +getMasterVolume() : double
-  +setMasterVolume(double value) : void
-  +getMusicVolume() : double
-  +setMusicVolume(double value) : void
-  +getSfxVolume() : double
-  +setSfxVolume(double value) : void
-  +getDifficulty() : Difficulty
-  +setDifficulty(Difficulty newDifficulty) : void
-  +getBallSpeedMultiplier() : double
-  +getPaddleWidthMultiplier() : double
-  +getHighScore() : int
-  +setHighScore(int score) : void
-  +clamp01(double value) : double
+  #GameSettings() : private
+  -clamp01(double value) : double
 }
 class AppContext {
-  +AppContext instance
-  +DatabaseService database
-  +User currentUser
-  +return instance
-  +getInstance() : AppContext
+  -instance : AppContext
+  -currentUser : User
+  -instance : return
   +db() : DatabaseService
-  +getCurrentUser() : User
-  +setCurrentUser(User user) : void
 }
 class Container {
-  +Container instance
-  +GameState state
-  +GameService game
-  +double paddleWidth
-  +Paddle paddle
-  +Ball ball
-  +BricksService bricksSvc
-  +BallService ballSvc
-  +PaddleService paddleSvc
-  +SoundManager sound
-  +PowerUpService powerUpSvc
-  +EnemyService enemySvc
-  +BulletService bulletSvc
-  +RoundService roundSvc
-  +return instance
-  +Container() : private
-  +getInstance() : Container
-  +reset() : void
-  +getGameState() : GameState
-  +getGameService() : GameService
+  -instance : Container
+  -paddleWidth : double
+  -bricksSvc : BricksService
+  -ballSvc : BallService
+  -paddleSvc : PaddleService
+  -sound : SoundManager
+  -powerUpSvc : PowerUpService
+  -enemySvc : EnemyService
+  -bulletSvc : BulletService
+  -roundSvc : RoundService
 }
 class GameController {
-  +GameService gameService
-  +GameState gameState
-  +SceneController navigator
-  +Set<KeyCode> activeKeys
-  +Subscription> subscriptions
-  +BallsRenderer ballsRenderer
-  +PaddleRenderer paddleRenderer
-  +BricksRenderer bricksRenderer
-  +PowerUpRenderer powerUpRenderer
-  +BulletRenderer bulletRenderer
-  +LifeRenderer lifeRenderer
-  +EnemyRenderer enemyRenderer
-  +DoorTopRenderer doorTopRenderer
-  +AnimationTimer loop
-  +SequentialTransition levelIntroSequence
-  +Parent pauseOverlay
-  +int lastLevelObserved
-  +Timeline spawnTimer
-  +DoorType doorType
-  +long last
-  +double dt
-  +InputState in
-  +User u
-  +int bestRound
-  +int bestScore
-  +User u
-  +int bestRound
-  +int bestScore
-  +boolean left
-  +InputState in
-  +return in
-  +KeyCode code
-  +PauseTransition pause
-  +int nextLevel
-  +User u
-  +int bestRound
-  +int bestScore
-  +int currentLevel
-  +PauseTransition showLevel
-  +PauseTransition countdown3
-  +GameController(GameState gameState, GameService gameService, SceneController navigator) : public
+  -ballsRenderer : BallsRenderer
+  -paddleRenderer : PaddleRenderer
+  -bricksRenderer : BricksRenderer
+  -powerUpRenderer : PowerUpRenderer
+  -bulletRenderer : BulletRenderer
+  -lifeRenderer : LifeRenderer
+  -enemyRenderer : EnemyRenderer
+  -doorTopRenderer : DoorTopRenderer
+  -loop : AnimationTimer
+  -levelIntroSequence : SequentialTransition
+  -pauseOverlay : Parent
+  -lastLevelObserved : int
+  -spawnTimer : Timeline
+  -doorType : DoorType
+  -last : long
+  -dt : double
+  -in : InputState
+  -u : User
+  -bestRound : int
+  -bestScore : int
+  -left : boolean
+  -in : return
+  -code : KeyCode
+  -pause : PauseTransition
+  -nextLevel : int
+  -currentLevel : int
+  -showLevel : PauseTransition
+  -countdown3 : PauseTransition
+  -countdown2 : PauseTransition
+  -countdown1 : PauseTransition
+  -pt : PauseTransition
+  -isCountdown : boolean
+  -isCleared : boolean
+  -pt : return
+  -ft : FadeTransition
+  -three : PauseTransition
+  -two : PauseTransition
+  -one : PauseTransition
+  -seq : SequentialTransition
+  -snap : GameStateSnapshot
+  -username : String
+  -loader : FXMLLoader
   +initialize() : void
-  +startGameLoop() : void
+  -startGameLoop() : void
   +handle(long now) : void
-  +startEnemySpawnTimer() : void
-  +readInput() : InputState
-  +setupInputHandlers() : void
-  +handlePauseButton() : void
-  +handleGlobalKeyPressed(KeyEvent event) : void
-  +handleGameKeyPressed(KeyEvent event) : void
-  +registerEventListeners() : void
-  +onLevelCleared(LevelClearedEvent event) : void
-  +trackLevelTransition() : void
-  +startLevelIntro() : void
-  +createBannerStep(String text, double seconds) : PauseTransition
-  +togglePause() : void
-  +showPauseMenu() : else
-  +isPauseVisible() : boolean
-  +showPauseMenu() : void
-  +hidePauseMenu() : void
-  +resumeGame() : void
-  +restartLevel() : void
-  +exitToMenu() : void
-  +setupRenderers() : void
-  +updateHud() : void
-  +getScore() : int
-  +loadAndDisplayHighScore() : void
-  +setupPauseOverlay() : void
-  +stopLoopAndNavigate(SceneId target, TransitionStrategy transition) : void
+  -startEnemySpawnTimer() : void
+  -readInput() : InputState
+  -setupInputHandlers() : void
+  -handlePauseButton() : void
+  -handleGlobalKeyPressed(KeyEvent event) : void
+  -handleGameKeyPressed(KeyEvent event) : void
+  -registerEventListeners() : void
+  -onLevelCleared(LevelClearedEvent event) : void
+  -trackLevelTransition() : void
+  -startLevelIntro() : void
+  -createBannerStep(String text, double seconds) : PauseTransition
+  -togglePause() : void
+  #showPauseMenu() : else
+  -showPauseMenu() : void
+  -hidePauseMenu() : void
+  -resumeGame() : void
+  -restartLevel() : void
+  -exitToMenu() : void
+  -setupRenderers() : void
+  -updateHud() : void
+  -loadAndDisplayHighScore() : void
+  -setupPauseOverlay() : void
+  -stopLoopAndNavigate(SceneId target, TransitionStrategy transition) : void
   +stop() : void
   +applySnapshot(GameStateSnapshot snapshot) : void
   +resumeWithCountdown() : void
-  +isResumable() : boolean
   +captureSnapshot() : GameStateSnapshot
 }
 class GameOverController {
-  +SceneController navigator
-  +int finalScore
-  +GameOverController(SceneController navigator, int finalScore) : public
-  +initialize() : void
+  -initialize() : void
   +onPlayAgain(ActionEvent e) : void
   +onMainMenu(ActionEvent e) : void
 }
 class LoginController {
-  +SceneController navigator
-  +boolean show
-  +String username
-  +String password
-  +String uname
-  +Throwable cause
-  +LoginController(SceneController navigator) : public
-  +initialize() : void
-  +onLogin() : void
-  +setBusy(boolean busy) : void
-  +showMessage(String text) : void
+  -show : boolean
+  -password : String
+  -uname : String
+  -cause : Throwable
+  -onLogin() : void
+  -showMessage(String text) : void
 }
 class MenuController {
-  +SceneController navigator
-  +SoundManager sound
-  +GameEventBus eventBus
-  +MenuAnimator animator
-  +List<Button> allButtons
-  +List<Button> ordered
-  +int tries
-  +Button selected
-  +User current
-  +GameStateSnapshot snap
-  +User user
-  +MenuController(SceneController navigator) : public
-  +initialize() : void
-  +setupKeyHandler(Scene scene) : void
-  +updateContinueAvailability() : void
+  -animator : MenuAnimator
+  -ordered : List<Button>
+  -tries : int
+  -selected : Button
+  -current : User
+  -user : User
+  -setupKeyHandler(Scene scene) : void
+  -updateContinueAvailability() : void
 }
 class PauseController {
-  +Runnable resumeHandler
-  +Runnable restartHandler
-  +Runnable exitHandler
-  +PauseController(Runnable resumeHandler, Runnable restartHandler, Runnable exitHandler) : public
-  +onResume() : void
-  +onRestart() : void
-  +onExitToMenu() : void
+  -onResume() : void
+  -onRestart() : void
+  -onExitToMenu() : void
 }
 class RankingsController {
-  +SceneController navigator
-  +ObservableList<RankingRow> rows
-  +int rank
-  +return rows
-  +int rank
-  +String name
-  +int score
-  +int round
-  +RankingsController(SceneController navigator) : public
-  +initialize() : void
-  +toRows(List<RankingEntry> entries) : ObservableList<RankingRow>
-  +RankingRow(int rank, String name, int score, int round) : public
-  +getRank() : int
-  +getName() : String
-  +getScore() : int
-  +getRound() : int
+  -rows : ObservableList<RankingRow>
+  -rank : int
+  -rows : return
+  -toRows(List<RankingEntry> entries) : ObservableList<RankingRow>
+  #RankingRow(int rank, String name, int score, int round) : public
 }
 class SceneController {
-  +Stage stage
-  +TransitionManager transitionManager
-  +GameController activeGameController
-  +return transitionManager
-  +Scene scene
-  +Parent root
-  +Parent root
-  +Parent root
-  +Parent root
-  +Parent root
-  +Container container
-  +Parent root
-  +Container container
-  +String path
-  +Parent root
-  +int finalScore
-  +Parent root
-  +int finalScore
-  +Parent root
-  +int round
-  +Container container
-  +String path
-  +Parent root
-  +AppContext app
-  +User u
-  +GameStateSnapshot snap
-  +FXMLLoader loader
-  +Parent parent
-  +Object controller
-  +return parent
-  +SceneController(Stage stage) : public
+  -activeGameController : GameController
+  -transitionManager : return
+  -scene : Scene
+  -container : Container
+  -path : String
+  -round : int
+  -app : com.game.arkanoid.container.AppContext
+  -u : com.game.arkanoid.models.User
+  -snap : com.game.arkanoid.models.GameStateSnapshot
+  -parent : Parent
+  -controller : Object
+  -parent : return
   +transitions() : TransitionManager
   +navigateTo(SceneId sceneId, TransitionStrategy transition) : void
-  +setScene(SceneId sceneId, Parent root, TransitionStrategy transition) : void
-  +stopActiveGame() : void
+  -setScene(SceneId sceneId, Parent root, TransitionStrategy transition) : void
+  -stopActiveGame() : void
   +showMenu() : void
-  +showMenu(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showMenu(TransitionStrategy transition) : void
+  #buildUnknownController(cls) : throw
   +showSettings() : void
-  +showSettings(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showSettings(TransitionStrategy transition) : void
   +showRankings() : void
-  +showRankings(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showRankings(TransitionStrategy transition) : void
   +showLogin() : void
-  +showLogin(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showLogin(TransitionStrategy transition) : void
   +showSignup() : void
-  +showSignup(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showSignup(TransitionStrategy transition) : void
   +showGame() : void
-  +showGame(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showGame(TransitionStrategy transition) : void
   +showGameRound(int round) : void
-  +buildUnknownController(cls) : throw
   +showGameOver() : void
-  +showGameOver(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showGameOver(TransitionStrategy transition) : void
   +showWin() : void
-  +showWin(TransitionStrategy transition) : void
-  +buildUnknownController(cls) : throw
+  -showWin(TransitionStrategy transition) : void
   +continueGame() : void
   +startGameFromSnapshot(com.game.arkanoid.models.GameStateSnapshot snapshot) : void
-  +buildUnknownController(cls) : throw
   +saveInProgressIfAny() : void
   +exit() : void
-  +load(String resource, Consumer<FXMLLoader> configurer) : Parent
-  +buildUnknownController(Class<?> cls) : RuntimeException
+  -load(String resource, Consumer<FXMLLoader> configurer) : Parent
+  -buildUnknownController(Class<?> cls) : RuntimeException
 }
-enum SceneId {
-}
+class SceneId 
+
 class SettingsController {
-  +ComboBox<Difficulty> difficultyCombo
-  +SceneController navigator
-  +SoundManager sound
-  +Slider masterSlider
-  +Slider musicSlider
-  +Slider sfxSlider
-  +double previousMasterVolume
-  +Difficulty selected
-  +SettingsController(SceneController navigator) : public
-  +initialize() : void
-  +onDifficultyChanged(ActionEvent event) : void
-  +onBack(ActionEvent event) : void
+
+  -difficultyCombo : ComboBox<Difficulty>
+  -masterSlider : Slider
+  -musicSlider : Slider
+  -sfxSlider : Slider
+  -previousMasterVolume : double
+  -selected : Difficulty
+  -onDifficultyChanged(ActionEvent event) : void
+  -onBack(ActionEvent event) : void
 }
 class SignupController {
-  +SceneController navigator
-  +String username
-  +String password
-  +Throwable cause
-  +int count
-  +SignupController(SceneController navigator) : public
-  +initialize() : void
-  +onCreate() : void
-  +Thread(() : new
-  +setBusy(boolean busy) : void
-  +showMessage(String text) : void
+  -count : int
+  -onCreate() : void
+  #Thread(() : new
 }
 class WinController {
-  +SceneController navigator
-  +int finalScore
-  +WinController(SceneController navigator, int finalScore) : public
-  +initialize() : void
-  +onMainMenu(ActionEvent e) : void
   +onShowRankings(ActionEvent e) : void
 }
 class GameEventBus {
-  +GameEventBus INSTANCE
-  +return INSTANCE
-  +Consumer<Object> handler
-  +GameEventBus() : private
-  +getInstance() : GameEventBus
+  -INSTANCE : return
+  -handler : Consumer<Object>
   +publish(Object event) : void
 }
-class Subscription {
-  +boolean closed
-  +Subscription(Class<?> type, Consumer<?> handler) : private
-  +close() : void
-}
+class Subscription 
 class Ball {
-  +double radius
-  +boolean isMoving
-  +boolean isStuck
-  +double stuckOffsetX
-  +return isStuck
-  +return stuckOffsetX
-  +return x
-  +return y
-  +return radius
-  +return isMoving
-  +isStuck() : boolean
-  +setStuck(boolean isStuck) : void
-  +getStuckOffsetX() : double
-  +setStuckOffsetX(double stuckOffsetX) : void
-  +Ball(double centerX, double centerY, double radius) : public
-  +getCenterX() : double
-  +getCenterY() : double
+  -radius : double
+  -isMoving : boolean
+  -isStuck : boolean
+  -stuckOffsetX : double
+  -isStuck : return
+  -stuckOffsetX : return
+  -x : return
+  -y : return
+  -radius : return
+  -isMoving : return
   +setCenter(double cx, double cy) : void
-  +getRadius() : double
-  +setRadius(double radius) : void
-  +isMoving() : boolean
-  +setMoving(boolean moving) : void
   +update(double dt) : void
   +left() : double
   +right() : double
@@ -378,85 +249,39 @@ class Ball {
   +bottom() : double
 }
 class Brick {
-  +int health
-  +return health
-  +return health
-  +Brick(double x, double y, double width, double height, int initialHealth) : public
-  +update(double dt) : void
-  +getHealth() : int
-  +setHealth(int health) : void
-  +isDestroyed() : boolean
-  +isIndestructible() : boolean
+  -health : int
+  -health : return
 }
-class Bullet {
-  +return y
-  +return x
-  +Bullet(double x, double y, double width, double height, double speed) : public
-  +update(double dt) : void
-  +bottom() : double
-  +top() : double
-  +left() : double
-  +right() : double
-}
-enum DoorType {
-}
+class Bullet 
+class DoorType
 class Enemy {
-  +EnemyType type
-  +double zigzagTimer
-  +return zigzagTimer
-  +return type
-  +return dx
-  +return dy
-  +getZigzagTimer() : double
-  +setZigzagTimer(double zigzagTimer) : void
-  +getType() : EnemyType
-  +Enemy(EnemyType type, double x, double y, double width, double height, double speedX, double speedY) : public
-  +update(double dt) : void
-  +getVx() : double
-  +setVx(double dx) : void
-  +setVy(double dy) : void
-  +getVy() : double
+  -zigzagTimer : double
+  -zigzagTimer : return
+  -type : return
+  -dx : return
+  -dy : return
 }
-enum EnemyType {
-}
+class EnemyType 
 class GameObject {
-  +return x
-  +return y
-  +return width
-  +return height
-  +GameObject(double x, double y, double w, double h) : protected
-  +update(double dt) : void
-  +getX() : double
-  +getY() : double
-  +getWidth() : double
-  +getHeight() : double
-  +setX(double x) : void
-  +setY(double y) : void
+  -width : return
+  -height : return
   +setPosition(double x, double y) : void
   +setSize(double w, double h) : void
 }
 class GameState {
-  +Ball ball
-  +Paddle paddle
-  +List<Brick> bricks
-  +List<Ball> balls
-  +List<Bullet> bullets
-  +List<PowerUp> powerUps
-  +List<Enemy> enemies
-  +int score
-  +int highScore
-  +int lives
-  +int level
-  +boolean gameCompleted
-  +boolean gameOver
-  +boolean running
-  +boolean paused
-  +boolean levelTransitionPending
-  +double timeScale
-  +double basePaddleWidth
-  +double basePaddleSpeed
-  +double laserCooldown
-  +GameState(Ball ball, Paddle paddle) : public
+  +score : int
+  +highScore : int
+  +lives : int
+  +level : int
+  +gameCompleted : boolean
+  +gameOver : boolean
+  +running : boolean
+  +paused : boolean
+  +levelTransitionPending : boolean
+  +timeScale : double
+  +basePaddleWidth : double
+  +basePaddleSpeed : double
+  +laserCooldown : double
   +resetForLife() : void
   +resetForLevel() : void
   +decrementScore(int amount) : void
@@ -464,272 +289,192 @@ class GameState {
   +incrementLives() : void
 }
 class GameStateSnapshot {
-  +int currentLevel
-  +int score
-  +int lives
-  +double paddleX
-  +double ballX
-  +double ballY
-  +double ballDx
-  +double ballDy
-  +boolean ballMoving
-  +boolean ballDownward
-  +boolean ballStuck
-  +double ballStuckOffsetX
-  +double paddleWidth
-  +double timeScale
-  +double laserCooldown
-  +List<ActiveEffect> activeEffects
-  +String type
-  +double remaining
-  +List<BrickState> bricks
-  +List<PowerUpState> fallingPowerUps
-  +List<BallsState> balls
-  +List<EnemyState> enemies
-  +double x
-  +double y
-  +int health
-  +String type
-  +double x
-  +double y
-  +boolean collected
-  +double x
-  +double y
-  +double dx
-  +double dy
-  +boolean moving
-  +double radius
-  +String type
-  +double x
-  +double y
-  +double dx
-  +double dy
-  +ActiveEffect() : public
-  +ActiveEffect(String type, double remaining) : public
-  +BrickState() : public
-  +BrickState(double x, double y, int health) : public
-  +PowerUpState() : public
-  +PowerUpState(String type, double x, double y, boolean collected) : public
-  +BallsState() : public
-  +BallsState(double x, double y, double dx, double dy, boolean moving, double radius) : public
-  +EnemyState() : public
-  +EnemyState(String type, double x, double y, double dx, double dy) : public
+  +currentLevel : int
+  +paddleX : double
+  +ballX : double
+  +ballY : double
+  +ballDx : double
+  +ballDy : double
+  +ballMoving : boolean
+  +ballDownward : boolean
+  +ballStuck : boolean
+  +ballStuckOffsetX : double
+  +paddleWidth : double
+  +type : String
+  +remaining : double
+  +x : double
+  +y : double
+  +health : int
+  +collected : boolean
+  +dx : double
+  +dy : double
+  +moving : boolean
+  +radius : double
+  -hp : int
+  -snap : return
+  -vx : double
+  -vy : double
+  -moving : boolean
+  -speed : double
+  -t : double
+  -type : PowerUpType
+  -base : double
+  -b : Brick
+  -b0 : BallsState
+  -eb : BallsState
+  -r : double
+  -b : Ball
+  -type : EnemyType
+  #ActiveEffect() : public
+  #ActiveEffect(String type, double remaining) : public
+  #BrickState() : public
+  #BrickState(double x, double y, int health) : public
+  #PowerUpState() : public
+  #PowerUpState(String type, double x, double y, boolean collected) : public
+  #BallsState() : public
+  #BallsState(double x, double y, double dx, double dy, boolean moving, double radius) : public
+  #EnemyState() : public
+  #EnemyState(String type, double x, double y, double dx, double dy) : public
   +from(GameState s) : GameStateSnapshot
   +applyTo(GameState s) : void
 }
 class InputState {
-  +boolean left
-  +boolean right
-  +boolean launch
-  +boolean fire
-  +boolean pause
+  +left : boolean
+  +right : boolean
+  +launch : boolean
+  +fire : boolean
+  +pause : boolean
 }
 class MovableObject {
-  +return dx
-  +MovableObject(double x, double y, double w, double h) : protected
-  +move(double dt) : void
-  +update(double dt) : void
-  +getDx() : double
-  +getDy() : double
+  #move(double dt) : void
   +setVelocity(double dx, double dy) : void
 }
 class Paddle {
-  +double speed
-  +double minWidth
-  +double maxWidth
-  +return speed
-  +return minWidth
-  +return maxWidth
-  +Paddle(double x, double y, double width, double height, double speed) : public
-  +update(double dt) : void
-  +getSpeed() : double
-  +setSpeed(double speed) : void
-  +getMinWidth() : double
-  +getMaxWidth() : double
+  -minWidth : double
+  -maxWidth : double
+  -speed : return
+  -minWidth : return
+  -maxWidth : return
   +setWidthBounds(double minW, double maxW) : void
-  +setWidthClamped(double newWidth) : void
 }
 class PowerUp {
-  +PowerUpType type
-  +boolean collected
-  +return type
-  +return collected
-  +PowerUp(PowerUpType type, double x, double y, double width, double height, double fallSpeed) : public
-  +getType() : PowerUpType
-  +isCollected() : boolean
+  -collected : boolean
+  -collected : return
   +markCollected() : void
-  +update(double dt) : void
 }
-enum PowerUpType {
-}
-class RankingEntry {
-  +String name
-  +int bestScore
-  +int bestRound
-  +RankingEntry(String name, int bestScore, int bestRound) : public
-  +getName() : String
-  +getBestScore() : int
-  +getBestRound() : int
-}
-class User {
-  +int id
-  +String name
-  +String passwordHash
-  +int bestScore
-  +int bestRound
-  +LocalDateTime lastLogin
-  +User(int id, String name, String passwordHash, int bestScore, int bestRound, LocalDateTime lastLogin) : public
-  +getId() : int
-  +getName() : String
-  +getPasswordHash() : String
-  +getBestScore() : int
-  +getBestRound() : int
-  +getLastLogin() : LocalDateTime
-}
+class PowerUpType
+class RankingEntry
+class User 
 class GameStateRepository {
-  +String updateByUser
-  +int idx
-  +int updated
-  +String sql
-  +PreparedStatement ps
-  +GameStateSnapshot s
-  +String bricksJson
-  +String powerupsJson
-  +String enemiesJson
-  +String ballsJson
-  +String effectsJson
-  +String sql
-  +PreparedStatement ps
-  +String sql
-  +String sql
-  +int idx
-  +int idx
-  +int i
-  +return i
-  +StringBuilder sb
-  +BrickState b
-  +String s
-  +String[] objs
-  +String obj
-  +double x
-  +double y
-  +int health
-  +StringBuilder sb
-  +PowerUpState p
-  +String s
-  +String[] objs
-  +String obj
-  +String type
-  +double x
-  +double y
-  +boolean collected
-  +StringBuilder sb
-  +EnemyState e
-  +String s
-  +String[] objs
+  -idx : int
+  -updated : int
+  -s : GameStateSnapshot
+  -bricksJson : String
+  -powerupsJson : String
+  -enemiesJson : String
+  -ballsJson : String
+  -effectsJson : String
+  -sql : String
+  -i : int
+  -i : return
+  -sb : StringBuilder
+  -b : GameStateSnapshot.BrickState
+  -s : String
+  -objs : String[]
+  -obj : String
+  -x : double
+  -y : double
+  -p : GameStateSnapshot.PowerUpState
+  -type : String
+  -e : GameStateSnapshot.EnemyState
+  -dx : double
+  -dy : double
+  -b : GameStateSnapshot.BallsState
+  -ef : GameStateSnapshot.ActiveEffect
+  -rem : double
+  -s : return
+  -j : int
+  -sub : String
   +upsertInProgress(int userId, GameStateSnapshot snap) : void
   +findLatestInProgress(int userId) : Optional<GameStateSnapshot>
   +clearInProgressForUser(int userId) : void
-  +insert(Connection c, int userId, GameStateSnapshot s) : void
-  +update(Connection c, int id, GameStateSnapshot s) : void
-  +bind(PreparedStatement ps, int userId, GameStateSnapshot s) : void
-  +bindCore(PreparedStatement ps, GameStateSnapshot s) : int
-  +bindCore(ps, s, 1) : return
-  +bindCore(PreparedStatement ps, GameStateSnapshot s, int startIdx) : int
-  +encodeBricks(GameStateSnapshot s) : String
-  +decodeBricks(String json, GameStateSnapshot out) : void
-  +encodePowerUps(GameStateSnapshot s) : String
-  +decodePowerUps(String json, GameStateSnapshot out) : void
-  +encodeEnemies(GameStateSnapshot s) : String
-  +decodeEnemies(String json, GameStateSnapshot out) : void
-  +encodeBalls(GameStateSnapshot s) : String
-  +decodeBalls(String json, GameStateSnapshot out) : void
-  +encodeEffects(GameStateSnapshot s) : String
-  +decodeEffects(String json, GameStateSnapshot out) : void
-  +escape(String s) : String
-  +trim(double d) : String
-  +readDouble(String src, String key) : double
-  +readString(String src, String key) : String
-  +readBoolean(String src, String key) : boolean
+  -insert(Connection c, int userId, GameStateSnapshot s) : void
+  -update(Connection c, int id, GameStateSnapshot s) : void
+  -bind(PreparedStatement ps, int userId, GameStateSnapshot s) : void
+  -bindCore(PreparedStatement ps, GameStateSnapshot s) : int
+  #bindCore(ps, s, 1) : return
+  -bindCore(PreparedStatement ps, GameStateSnapshot s, int startIdx) : int
+  #encodeBricks(GameStateSnapshot s) : String
+  #decodeBricks(String json, GameStateSnapshot out) : void
+  #encodePowerUps(GameStateSnapshot s) : String
+  #decodePowerUps(String json, GameStateSnapshot out) : void
+  #encodeEnemies(GameStateSnapshot s) : String
+  #decodeEnemies(String json, GameStateSnapshot out) : void
+  #encodeBalls(GameStateSnapshot s) : String
+  #decodeBalls(String json, GameStateSnapshot out) : void
+  #encodeEffects(GameStateSnapshot s) : String
+  #decodeEffects(String json, GameStateSnapshot out) : void
+  -escape(String s) : String
+  -trim(double d) : String
+  -readDouble(String src, String key) : double
+  -readString(String src, String key) : String
+  -readBoolean(String src, String key) : boolean
 }
 class ScoreRepository {
-  +String sql
-  +List<RankingEntry> list
-  +PreparedStatement ps
-  +return list
+  -list : List<RankingEntry>
+  -list : return
   +fetchRankings(int limit) : List<RankingEntry>
 }
 class UserRepository {
-  +String sql
-  +PreparedStatement ps
-  +String sql
-  +PreparedStatement ps
-  +String sql
-  +PreparedStatement ps
-  +String sql
-  +PreparedStatement ps
-  +return false
-  +String sql
-  +PreparedStatement ps
-  +String sql
-  +PreparedStatement ps
-  +int id
-  +String name
-  +String pass
-  +int bestScore
-  +int bestRound
-  +Timestamp ts
-  +LocalDateTime lastLogin
+  -false : return
+  -id : int
+  -name : String
+  -pass : String
+  -ts : Timestamp
+  -lastLogin : LocalDateTime
   +findByName(String name) : Optional<User>
   +findByNameInsensitive(String name) : Optional<User>
   +updatePasswordHash(int userId, String newHash) : void
   +tryUpdateName(int userId, String newName) : boolean
   +insert(String name, String passwordHash) : User
-  +mapUser(rs) : return
+  #mapUser(rs) : return
   +updateBest(int userId, int bestRound, int bestScore) : void
-  +mapUser(ResultSet rs) : User
+  -mapUser(ResultSet rs) : User
 }
 class BallService {
-  +double speed
-  +double t
-  +double r
-  +boolean check
-  +double oL
-  +double oT
-  +double oR
-  +double oB
-  +double penLeft
-  +double penRight
-  +double penTop
-  +double penBottom
-  +double minPen
-  +double vx
-  +double vy
-  +Paddle paddle
-  +double paddleX
-  +double paddleW
-  +double collisionX
-  +double paddleX
-  +double paddleW
-  +double paddleH
-  +double ballX
-  +double relX
-  +double offset
-  +double cornerRadius
-  +boolean hitLeftCorner
-  +boolean hitRightCorner
-  +double minAngle
-  +double maxAngle
-  +double angle
-  +double paddleDx
-  +double influence
-  +double speed
-  +double oL
-  +double oT
-  +double oR
-  +double oB
-  +double cx
-  +double cy
+  -check : boolean
+  -oL : double
+  -oT : double
+  -oR : double
+  -oB : double
+  -penLeft : double
+  -penRight : double
+  -penTop : double
+  -penBottom : double
+  -minPen : double
+  -paddle : Paddle
+  -paddleX : double
+  -paddleW : double
+  -collisionX : double
+  -paddleH : double
+  -ballX : double
+  -relX : double
+  -offset : double
+  -cornerRadius : double
+  -hitLeftCorner : boolean
+  -hitRightCorner : boolean
+  -minAngle : double
+  -maxAngle : double
+  -angle : double
+  -paddleDx : double
+  -influence : double
+  -cx : double
+  -cy : double
+  -nearestX : double
+  -nearestY : double
+  -ddx : double
+  -ddy : double
+  -target : double
   +launch(Ball ball) : void
   +step(Ball ball, double dt) : void
   +bounceWorld(Ball ball, double worldW, double worldH) : void
@@ -737,182 +482,151 @@ class BallService {
   +resetOnPaddle(Ball ball, Paddle paddle) : void
   +bounceOff(Ball ball, GameObject other) : void
   +checkCollision(Ball ball, GameObject other) : boolean
-  +ensureMinimumSpeed(Ball ball) : void
-  +baseSpeed() : double
+  -ensureMinimumSpeed(Ball ball) : void
+  -baseSpeed() : double
 }
 class BricksService {
-  +int bricksRemaining
-  +List<Brick> createdBricks
-  +int brickHealth
-  +double brickX
-  +double brickY
-  +return createdBricks
-  +List<String> lines
-  +List<Brick> bricks
-  +String line
-  +String[] tokens
-  +int maxCols
-  +String token
-  +int health
-  +double x
-  +double y
-  +return bricks
-  +return true
-  +return false
-  +return bricksRemaining
-  +List<String> out
-  +String line
-  +return out
-  +BricksService() : public
+  -bricksRemaining : int
+  -createdBricks : List<Brick>
+  -brickHealth : int
+  -brickX : double
+  -brickY : double
+  -createdBricks : return
+  -lines : List<String>
+  -bricks : List<Brick>
+  -line : String
+  -tokens : String[]
+  -maxCols : int
+  -token : String
+  -bricks : return
+  -true : return
+  -bricksRemaining : return
+  -out : List<String>
+  -out : return
   +createBricksFromLayout(int[][] layout) : List<Brick>
   +createBricksFromResource(String resourcePath) : List<Brick>
-  +countAlive(List<Brick> bricks) : int
+  -countAlive(List<Brick> bricks) : int
   +handleBrickHit(Brick brick) : boolean
   +allBricksCleared(List<Brick> bricks) : boolean
-  +getBricksRemaining() : int
   +recalculateBricksRemaining(List<Brick> bricks) : void
-  +readResourceLines(String resourcePath) : List<String>
+  -readResourceLines(String resourcePath) : List<String>
 }
 class BulletService {
-  +BricksService bricksService
-  +return false
-  +double width
-  +double height
-  +double y
-  +double leftX
-  +double rightX
-  +return true
-  +List<Impact> impacts
-  +Iterator<Bullet> iterator
-  +Bullet bullet
-  +Brick hit
-  +boolean destroyed
-  +return impacts
-  +return brick
-  +return null
-  +double bL
-  +double bT
-  +double bR
-  +double bB
+  -width : double
+  -height : double
+  -leftX : double
+  -rightX : double
+  -impacts : List<Impact>
+  -iterator : Iterator<Bullet>
+  -bullet : Bullet
+  -hit : Brick
+  -destroyed : boolean
+  -impacts : return
+  -brick : return
+  -null : return
+  -bL : double
+  -bT : double
+  -bR : double
+  -bB : double
   +Impact(Brick brick, boolean destroyed) : record
-  +BulletService(BricksService bricksService) : public
   +tickCooldown(GameState state, double dt) : void
   +tryFire(GameState state, Paddle paddle) : boolean
   +update(GameState state, List<Brick> bricks, double dt, double worldH) : List<Impact>
-  +firstHit(List<Brick> bricks, Bullet bullet) : Brick
-  +intersects(Bullet bullet, Brick brick) : boolean
+  -firstHit(List<Brick> bricks, Bullet bullet) : Brick
+  -intersects(Bullet bullet, Brick brick) : boolean
 }
 class DatabaseService {
-  +ExecutorService ioPool
-  +return t
-  +UserRepository users
-  +ScoreRepository scores
-  +GameStateRepository states
-  +String unameNorm
-  +Optional<User> found
-  +User u
-  +String computed
-  +return u
-  +return null
-  +return null
-  +return null
-  +String unameNorm
-  +String hash
+  -t : Thread
+  -t : return
+  -unameNorm : String
+  -found : Optional<User>
+  -computed : String
+  -u : return
+  -hash : String
   +initializeSchema() : java.util.concurrent.CompletableFuture<Void>
   +login(String username, String password) : CompletableFuture<User>
-  +runAsync(() : return
+  #runAsync(() : return
   +loadInProgressState(int userId) : CompletableFuture<Optional<GameStateSnapshot>>
-  +runAsync(() : return
   +saveInProgress(int userId, GameStateSnapshot snap) : CompletableFuture<Void>
-  +runAsync(() : return
   +clearInProgress(int userId) : CompletableFuture<Void>
-  +runAsync(() : return
   +updateBest(int userId, int bestRound, int bestScore) : CompletableFuture<Void>
-  +runAsync(() : return
   +getRankings(int limit) : CompletableFuture<List<RankingEntry>>
-  +runAsync(() : return
   +signup(String username, String password) : CompletableFuture<User>
-  +runAsync(() : return
   +shutdown() : void
 }
 class EnemyService {
-  +Random random
-  +GameEventBus eventBus
-  +int MAX_ENEMIES
-  +EnemyType[] types
-  +EnemyType type
-  +double initialVx
-  +Enemy enemy
-  +List<Enemy> toRemove
-  +List<Bullet> toRemoveBullets
-  +double leftBound
-  +double rightBound
-  +double topBound
-  +boolean collided
-  +EnemyService() : public
+  -types : EnemyType[]
+  -initialVx : double
+  -enemy : Enemy
+  -toRemove : List<Enemy>
+  -toRemoveBullets : List<Bullet>
+  -ballLeft : double
+  -ballRight : double
+  -ballTop : double
+  -ballBottom : double
+  -enemyLeft : double
+  -enemyRight : double
+  -enemyTop : double
+  -enemyBottom : double
+  -overlapLeft : double
+  -overlapRight : double
+  -overlapTop : double
+  -overlapBottom : double
+  -minOverlapX : double
+  -minOverlapY : double
+  -leftBound : double
+  -rightBound : double
+  -topBound : double
+  -collidedY : boolean
+  -collidedX : boolean
   +spawnEnemy(GameState state, double x, double y) : void
   +update(GameState state, double dt, double worldW, double worldH) : void
-  +applyEnemyEffectOnPaddle(Enemy enemy, GameState state) : void
-  +applyEnemyEffectOnBall(Enemy enemy, GameState state, Ball ball) : void
-  +fastAllBalls(GameState state) : void
-  +handleWallCollision(Enemy enemy, double worldW, double worldH) : void
-  +handleBrickCollision(Enemy enemy, GameState state) : void
-  +spawnExplosion(Enemy enemy) : void
-  +intersects(GameObject a, GameObject b) : boolean
+  -applyEnemyEffectOnPaddle(Enemy enemy, GameState state) : void
+  -applyEnemyEffectOnBall(Enemy enemy, GameState state, Ball ball) : void
+  -fastAllBalls(GameState state) : void
+  -handleWallCollision(Enemy enemy, double worldW, double worldH) : void
+  -handleBrickCollision(Enemy enemy, GameState state) : void
+  -spawnExplosion(Enemy enemy) : void
+  -intersects(GameObject a, GameObject b) : boolean
 }
 class GameService {
-  +BallService ballSvc
-  +PaddleService paddleSvc
-  +BricksService bricksSvc
-  +PowerUpService powerUpSvc
-  +BulletService bulletSvc
-  +EnemyService enemySvc
-  +RoundService roundSvc
-  +GameState boundState
-  +double scaledDt
-  +double paddleX
-  +double paddleW
-  +double desiredX
-  +double minX
-  +double maxX
-  +Iterator<Ball> iterator
-  +Ball ball
-  +Impact> impacts
-  +Brick brick
-  +boolean destroyed
-  +boolean destroyed
-  +PowerUp spawned
-  +PowerUp spawned
-  +int alive
-  +return alive
-  +return enemySvc
-  +GameService(BallService ballSvc,
-            PaddleService paddleSvc,
-            BricksService bricksSvc,
-            PowerUpService powerUpSvc,
-            BulletService bulletSvc,
-            RoundService roundSvc,
-            EnemyService enemySvc) : public
+  -ballSvc : return
+  -paddleSvc : return
+  -bricksSvc : return
+  -powerUpSvc : return
+  -bulletSvc : return
+  -enemySvc : return
+  -roundSvc : return
+  -boundState : return
+  -boundState : GameState
+  -scaledDt : double
+  -desiredX : double
+  -minX : double
+  -maxX : double
+  -iterator : Iterator<Ball>
+  -ball : Ball
+  -impacts : List<BulletService.Impact>
+  -brick : Brick
+  -spawned : PowerUp
+  -alive : int
+  -alive : return
   +update(GameState state, InputState in, double dt, double worldW, double worldH) : void
-  +handleInput(GameState state, InputState in, double dt, double worldW) : void
-  +updateBalls(GameState state, double dt, double worldW, double worldH) : void
-  +updateBullets(GameState state, double dt, double worldH) : void
-  +handlePaddleCollision(Ball ball, GameState state) : void
-  +handleBrickCollisions(Ball ball, GameState state) : void
-  +handleBallFall(GameState state) : void
-  +processDestroyedBrick(GameState state, Brick brick) : void
-  +checkLevelCleared(GameState state) : void
-  +countAliveBricks(GameState state) : int
+  -handleInput(GameState state, InputState in, double dt, double worldW) : void
+  -updateBalls(GameState state, double dt, double worldW, double worldH) : void
+  -updateBullets(GameState state, double dt, double worldH) : void
+  -handlePaddleCollision(Ball ball, GameState state) : void
+  -handleBrickCollisions(Ball ball, GameState state) : void
+  -handleBallFall(GameState state) : void
+  -processDestroyedBrick(GameState state, Brick brick) : void
+  -checkLevelCleared(GameState state) : void
+  -countAliveBricks(GameState state) : int
   +restartLevel(GameState state) : void
   +loadNextLevel(GameState state) : void
   +startNextLevel(GameState state) : void
   +loadLevel(GameState state, int levelIndex) : void
   +bindState(GameState state) : void
-  +getEnemyService() : EnemyService
 }
 class PaddleService {
-  +double maxX
-  +PaddleService() : public
   +moveLeft(Paddle paddle, double dt, double worldW) : void
   +moveRight(Paddle paddle, double dt, double worldW) : void
   +clampWithin(Paddle paddle, double worldW) : void
@@ -921,439 +635,203 @@ class PaddleService {
   +resetPaddlePosition(Paddle paddle) : void
 }
 class PowerUpService {
-  +Random random
-  +GameEventBus eventBus
-  +return null
-  +PowerUpType[] types
-  +PowerUpType type
-  +double spawnX
-  +double spawnY
-  +List<PowerUp> toRemove
-  +double px1
-  +double py1
-  +double px2
-  +double py2
-  +double ox1
-  +double oy1
-  +double ox2
-  +double oy2
-  +double baseSpeed
-  +double[] angles
-  +Ball extra
-  +double angle
-  +double rad
-  +double maxX
-  +Iterator<PowerUpType> iterator
-  +PowerUpType type
-  +double remaining
-  +PowerUpService() : public
+  -types : PowerUpType[]
+  -spawnX : double
+  -spawnY : double
+  -toRemove : List<PowerUp>
+  -px1 : double
+  -py1 : double
+  -px2 : double
+  -py2 : double
+  -ox1 : double
+  -oy1 : double
+  -ox2 : double
+  -oy2 : double
+  -baseSpeed : double
+  -angles : double[]
+  -extra : Ball
+  -rad : double
+  -iterator : Iterator<PowerUpType>
+  -remaining : double
   +spawnPowerUpIfAny(double x, double y, double width) : PowerUp
-  +update(GameState state, double dt, double worldW, double worldH) : void
-  +intersects(PowerUp powerUp, Paddle paddle) : boolean
-  +applyPowerUp(GameState state, PowerUpType type, double worldW) : void
-  +spawnAdditionalBalls(GameState state) : void
-  +clampPaddle(Paddle paddle, double worldW) : void
-  +tickActiveEffects(GameState state, double dt, double worldW) : void
-  +onEffectExpired(GameState state, PowerUpType type, double worldW) : void
+  -intersects(PowerUp powerUp, Paddle paddle) : boolean
+  -applyPowerUp(GameState state, PowerUpType type, double worldW) : void
+  -spawnAdditionalBalls(GameState state) : void
+  -clampPaddle(Paddle paddle, double worldW) : void
+  -tickActiveEffects(GameState state, double dt, double worldW) : void
+  -onEffectExpired(GameState state, PowerUpType type, double worldW) : void
 }
 class RoundService {
-  +BricksService bricksService
-  +BallService ballService
-  +PaddleService paddleService
-  +String[] levelResources
-  +int idx
-  +String resource
-  +List<Brick> bricks
-  +int nextIndex
-  +RoundService(BricksService bricksService, BallService ballService, PaddleService paddleService) : public
-  +loadLevel(GameState state, int levelIndex) : void
-  +loadNextLevel(GameState state) : void
+  -resource : String
+  -nextIndex : int
 }
-class Constants {
-  +double GAME_WIDTH
-  +double GAME_HEIGHT
-  +double BALL_RADIUS
-  +double BALL_SPEED
-  +double MIN_BALL_ANGLE
-  +double MAX_BALL_ANGLE
-  +double BALL_RESTITUTION
-  +double BALL_NUDGE
-  +double BALL_LAUNCH_ANGLE
-  +double PADDLE_WIDTH
-  +double PADDLE_HEIGHT
-  +double PADDLE_SPEED
-  +double MIN_PADDLE_WIDTH
-  +double MAX_PADDLE_WIDTH
-  +double PADDLE_MARGIN_BOTTOM
-  +double BALL_SPAWN_OFFSET
-  +double BRICK_WIDTH
-  +double BRICK_HEIGHT
-  +double BRICK_SPACING
-  +int BRICK_ROWS
-  +int BRICK_COLS
-  +double POWER_UP_WIDTH
-  +double POWER_UP_HEIGHT
-  +double POWER_UP_FALL_SPEED
-  +double POWER_UP_DROP_CHANCE
-  +double POWER_UP_DURATION
-  +double POWER_UP_EXPAND_FACTOR
-  +double POWER_UP_LASER_FACTOR
-  +double POWER_UP_SLOW_BALL_SCALE
-  +double ENEMY_WIDTH
-  +double ENEMY_HEIGHT
-  +double ENEMY_FALL_SPEED
-  +double DOOR_TOP_Y
-  +double DOOR_TOP_X_LEFT
-  +double DOOR_TOP_X_RIGHT
-  +double ZIGZAG_INTERVAL
-  +int MAX_ENEMIES
-  +double ENEMY_SPEED_Y
-  +double ENEMY_SPEED_X
-  +double BULLET_WIDTH
-}
+class Constants 
 class PasswordHasher {
-  +return username
-  +String salted
-  +MessageDigest md
-  +byte[] digest
-  +StringBuilder sb
-  +PasswordHasher() : private
+  -username : return
+  -salted : String
+  -md : MessageDigest
+  -digest : byte[]
   +normalize(String username) : String
   +hash(String username, String plain) : String
-  +toHex(digest) : return
+  #toHex(digest) : return
   +verify(String username, String plain, String expectedHash) : boolean
-  +hash(username, plain) : return
-  +toHex(byte[] bytes) : String
+  #hash(username, plain) : return
+  -toHex(byte[] bytes) : String
 }
 class SqlLoader {
-  +InputStream in
-  +StringBuilder sb
-  +String line
-  +SqlLoader() : private
+  -in : InputStream
   +load(String resourcePath) : String
 }
 class MenuAnimator {
-  +List<Button> buttons
-  +List<Double> originalX
-  +List<Double> originalY
-  +List<Button> oldOrder
-  +Button first
-  +List<Button> oldOrder
-  +Button last
-  +int n
-  +Button btn
-  +Button newButton
-  +double targetX
-  +double targetY
-  +boolean isLast
-  +double deltaX
-  +double deltaY
-  +TranslateTransition tt
-  +Button center
-  +List<Button> sorted
-  +int centerIndex
-  +Button b
-  +int distance
-  +List<Button> sorted
-  +int centerIndex
-  +MenuAnimator(List<Button> orderedButtons) : public
+  -oldOrder : List<Button>
+  -first : Button
+  -last : Button
+  -n : int
+  -btn : Button
+  -newButton : Button
+  -targetX : double
+  -targetY : double
+  -isLast : boolean
+  -deltaX : double
+  -deltaY : double
+  -tt : TranslateTransition
+  -center : Button
+  -sorted : List<Button>
+  -centerIndex : int
+  -b : Button
+  -distance : int
   +moveLeft() : void
   +moveRight() : void
-  +animateAll(List<Button> oldOrder) : void
-  +animateMove(Button btn, double newX, double newY, Runnable onFinished) : void
-  +postMoveUpdate() : void
-  +updateHighlight() : void
-  +updateVisibility() : void
-  +getCenterButton() : Button
+  -animateAll(List<Button> oldOrder) : void
+  -animateMove(Button btn, double newX, double newY, Runnable onFinished) : void
+  -postMoveUpdate() : void
+  -updateHighlight() : void
+  -updateVisibility() : void
 }
 class BallsRenderer {
-  +Pane pane
-  +Image ballImage
-  +ImageView node
-  +ImageView view
-  +double diameter
-  +return view
-  +return null
-  +BallsRenderer(Pane pane) : public
+  -node : ImageView
+  -view : ImageView
+  -diameter : double
+  -view : return
   +render(List<Ball> balls) : void
-  +createNode(Ball ball) : ImageView
-  +getNode() : ImageView
+  -createNode(Ball ball) : ImageView
 }
 class BricksRenderer {
-  +Pane pane
-  +Image brick1Img
-  +Image brick2Img
-  +Image brick3Img
-  +Image brick4Img
-  +Image brick5Img
-  +Image brick6Img
-  +Image brick7Img
-  +Image brick8Img
-  +Image brick9Img
-  +List<Brick> snapshot
-  +ImageView iv
-  +return null
-  +return brick9Img
-  +BricksRenderer(Pane pane) : public
+  -snapshot : List<Brick>
+  -iv : ImageView
+  -brick9Img : return
   +render(List<Brick> bricks) : void
-  +getNode() : ImageView
-  +getBrickImage(Brick b) : Image
-  +switch(b.getHealth() : return
+  -getBrickImage(Brick b) : Image
+  #switch(b.getHealth()) : return
 }
 class BulletRenderer {
-  +Pane pane
-  +Image bulletImage
-  +ImageView view
-  +ImageView view
-  +return view
-  +return null
-  +BulletRenderer(Pane pane) : public
   +render(List<Bullet> bullets) : void
-  +createNode(Bullet bullet) : ImageView
-  +getNode() : ImageView
+  -createNode(Bullet bullet) : ImageView
 }
 class DoorTopRenderer {
-  +Pane pane
-  +ImageView leftDoor
-  +ImageView rightDoor
-  +ImageView leftReverseDoor
-  +ImageView rightReverseDoor
-  +List<Image> leftFrames
-  +List<Image> rightFrames
-  +List<Image> leftReverseFrames
-  +List<Image> rightReverseFrames
-  +GameEventBus eventBus
-  +Subscription> subscriptions
-  +ImageView iv
-  +return iv
-  +Timeline timeline
-  +Image frame
-  +Timeline timeline
-  +Image frame
-  +Timeline timeline
-  +Image frame
-  +Timeline timeline
-  +Image frame
-  +return pane
-  +DoorTopRenderer(Pane pane, ImageView edge_top) : public
-  +createImageView(ImageView edge_top, Image img) : ImageView
-  +registerEventListeners() : void
+  -iv : return
+  -timeline : Timeline
+  -pane : return
+  -createImageView(ImageView edge_top, Image img) : ImageView
   +playLeftDoor(Runnable onFinished) : void
-  +KeyFrame(Duration.millis(i * 160) : new
+  #KeyFrame(Duration.millis(i * 160) : new
   +playLeftReverseDoor(Runnable onFinished) : void
-  +KeyFrame(Duration.millis(i * 160) : new
   +playRightDoor(Runnable onFinished) : void
-  +KeyFrame(Duration.millis(i * 160) : new
   +playRightReverseDoor(Runnable onFinished) : void
-  +KeyFrame(Duration.millis(i * 160) : new
   +render(Void v) : void
-  +getNode() : Pane
 }
 class EnemyRenderer {
-  +Pane pane
-  +int ENEMY_FRAME_COUNT
-  +double ENEMY_FRAME_DURATION
-  +int EXPLOSION_FRAME_COUNT
-  +double EXPLOSION_FRAME_DURATION
-  +Image[] explosionFrames
-  +double elapsedTime
-  +List<Explosion> explosions
-  +GameEventBus eventBus
-  +Subscription> subscriptions
-  +Image[] frames
-  +String name
-  +ImageView view
-  +ImageView node
-  +return null
-  +ImageView imageView
-  +return imageView
-  +long lastTime
-  +double delta
-  +int currentFrame
-  +Image[] frames
-  +Iterator<Explosion> it
-  +Explosion exp
-  +int frameIndex
-  +ImageView view
-  +double elapsed
-  +EnemyRenderer(Pane pane) : public
-  +loadFrames() : void
-  +subscribeToExplosionEvent() : void
+  -elapsedTime : double
+  -frames : Image[]
+  -imageView : ImageView
+  -imageView : return
+  -lastTime : long
+  -delta : double
+  -currentFrame : int
+  -it : Iterator<Explosion>
+  -exp : Explosion
+  -frameIndex : int
+  -elapsed : double
+  -loadFrames() : void
+  -subscribeToExplosionEvent() : void
   +playExplosion(double x, double y, double width, double height) : void
   +render(List<Enemy> enemies) : void
-  +getNode() : ImageView
-  +createEnemyNode(Enemy enemy) : ImageView
-  +startAnimation() : void
-  +AnimationTimer() : new
-  +handle(long now) : void
+  -createEnemyNode(Enemy enemy) : ImageView
+  -startAnimation() : void
+  #AnimationTimer() : new
 }
 class LifeRenderer {
-  +double LIFE_ICON_WIDTH
-  +HBox lifeBox
-  +Image lifeIcon
-  +int lastLifeCount
-  +int displayLives
-  +ImageView icon
-  +return lifeBox
-  +LifeRenderer(HBox lifeBox) : public
+  -lastLifeCount : int
+  -displayLives : int
+  -icon : ImageView
+  -lifeBox : return
   +reset() : void
   +render(Integer lives) : void
-  +getNode() : Node
 }
 class PaddleRenderer {
-  +ImageView node
-  +List<Image> introFrames
-  +List<Image> pulsateFrames
-  +List<Image> wideFrames
-  +List<Image> shrinkFrames
-  +List<Image> widePulsateFrames
-  +List<Image> laserFrames
-  +List<Image> laserPulsateFrames
-  +Timeline currentAnimation
-  +double elapsedExpand
-  +double elapsedShrink
-  +double elapsedLaser
-  +boolean isTransforming
-  +return node
-  +int FRAME_COUNT
-  +double FRAME_DURATION
-  +double TOTAL_DURATION
-  +long lastTime
-  +double delta
-  +int currentFrame
-  +Image frame
-  +int FRAME_COUNT
-  +double FRAME_DURATION
-  +double TOTAL_DURATION
-  +long lastTime
-  +double delta
-  +int currentFrame
-  +Image frame
-  +int FRAME_COUNT
-  +double FRAME_DURATION
-  +double TOTAL_DURATION
-  +long lastTime
-  +double delta
-  +int currentFrame
-  +Image frame
-  +Image frame
-  +PaddleRenderer(Pane pane) : public
+  -currentAnimation : Timeline
+  -elapsedExpand : double
+  -elapsedShrink : double
+  -elapsedLaser : double
+  -isTransforming : boolean
+  -node : return
+  -frame : Image
+  +registerEventListeners() : void
   +onPowerUpActivated(PowerUpActivatedEvent event) : void
   +onPowerUpExpired(PowerUpExpiredEvent event) : void
   +render(Paddle paddle) : void
-  +getNode() : ImageView
-  +playIntro() : void
+  +playIntro(Runnable onFinished) : void
+  +playExplosion() : void
+  -publishExplodeFinishedEvent() : void
   +startPulsate() : void
   +playExpand(Runnable onFinished) : void
-  +handle(long now) : void
   +startWidePulsate() : void
   +playShrink(Runnable onFinished) : void
-  +handle(long now) : void
   +playLaser(Runnable onFinished) : void
-  +handle(long now) : void
   +startLaserPulsate() : void
   +stopAnimation() : void
-  +playFrameSequence(List<Image> frames, double frameDurationMs, boolean loop, Runnable onFinished) : void
-  +KeyFrame(Duration.millis(i * frameDurationMs) : new
+  -playFrameSequence(List<Image> frames, double frameDurationMs, boolean loop, Runnable onFinished) : void
+  #KeyFrame(Duration.millis(i * frameDurationMs) : new
 }
 class PowerUpRenderer {
-  +Pane pane
-  +int FRAME_COUNT
-  +double FRAME_DURATION
-  +double elapsedTime
-  +Image[] frames
-  +return frames
-  +ImageView node
-  +return null
-  +ImageView imageView
-  +return imageView
-  +long lastTime
-  +double delta
-  +int currentFrame
-  +PowerUp p
-  +ImageView view
-  +Image[] frames
-  +PowerUpRenderer(Pane pane) : public
-  +loadSprites() : void
-  +loadFrames(String name) : Image[]
+  -frames : return
+  -p : PowerUp
+  -loadSprites() : void
+  -loadFrames(String name) : Image[]
   +render(List<PowerUp> powerUps) : void
-  +getNode() : ImageView
-  +createNode(PowerUp powerUp) : ImageView
-  +startAnimation() : void
-  +AnimationTimer() : new
-  +handle(long now) : void
+  -createNode(PowerUp powerUp) : ImageView
 }
-interface Renderer {
-  +getNode() : Node
-  +render(Model model) : void
+class Renderer {
+  #render(Model model) : void
 }
 class SoundManager {
-  +SoundManager instance
-  +GameEventBus eventBus
-  +Subscription> subscriptions
-  +List<MediaPlayer> activePlayers
-  +DoubleProperty masterVolume
-  +DoubleProperty musicVolume
-  +DoubleProperty sfxVolume
-  +MediaPlayer bgmPlayer
-  +return instance
-  +Media media
-  +Media media
-  +MediaPlayer player
-  +Media media
-  +SoundManager() : private
-  +getInstance() : SoundManager
-  +registerEventListeners() : void
-  +loadSounds() : void
-  +loadSound(String key, String path) : void
-  +play(String key) : void
-  +playLoop(String key) : void
-  +playMenuBGM() : void
-  +playGameBGM() : void
-  +stopBGM() : void
-  +playRoundStart() : void
-  +playBrickHit() : void
-  +playPaddleHit() : void
-  +playWallHit() : void
-  +playBulletFire() : void
-  +playGameOver() : void
-  +playPowerUpHit() : void
-  +stopLoop() : void
+  -instance : SoundManager
+  -bgmPlayer : MediaPlayer
+  -media : Media
+  -clip : AudioClip
+  -loadSounds() : void
+  -loadBGM(String key, String path) : void
+  -loadSFX(String key, String path) : void
+  -playBGM(String key) : void
+  -stopBGM() : void
+  -playSFX(String key) : void
   +masterVolumeProperty() : DoubleProperty
   +musicVolumeProperty() : DoubleProperty
   +sfxVolumeProperty() : DoubleProperty
   +dispose() : void
 }
 class BlurFadeStrategy {
-  +Duration duration
-  +double maxBlurRadius
-  +GaussianBlur blur
-  +FadeTransition fade
-  +Timeline blurTimeline
-  +BlurFadeStrategy() : public
-  +BlurFadeStrategy(Duration duration, double maxBlurRadius) : public
+  -blur : GaussianBlur
+  -fade : FadeTransition
   +play(Node root, Runnable onFinished) : void
-  +KeyFrame(Duration.ZERO, new KeyValue(blur.radiusProperty() : new
-  +KeyFrame(duration, new KeyValue(blur.radiusProperty() : new
+  #KeyFrame(Duration.ZERO, new KeyValue(blur.radiusProperty() : new
+  #KeyFrame(duration, new KeyValue(blur.radiusProperty() : new
 }
-class FadeTransitionStrategy {
-  +Duration duration
-  +double fromValue
-  +double toValue
-  +FadeTransition ft
-  +FadeTransitionStrategy() : public
-  +FadeTransitionStrategy(Duration duration, double fromValue, double toValue) : public
-  +play(Node root, Runnable onFinished) : void
-}
+class FadeTransitionStrategy 
 class SlideFadeStrategy {
-  +Duration duration
-  +double translateY
-  +TranslateTransition slide
-  +FadeTransition fade
-  +ParallelTransition parallel
-  +SlideFadeStrategy() : public
-  +SlideFadeStrategy(Duration duration, double translateY) : public
-  +play(Node root, Runnable onFinished) : void
+  -slide : TranslateTransition
+  -fade : javafx.animation.FadeTransition
+  -parallel : ParallelTransition
 }
 class TransitionFactory {
   +forMenuScene() : TransitionStrategy
@@ -1365,7 +843,6 @@ class TransitionFactory {
   +forLevelScene() : TransitionStrategy
 }
 class TransitionManager {
-  +TransitionFactory factory
   +menuTransition() : TransitionStrategy
   +gameTransition() : TransitionStrategy
   +gameOverTransition() : TransitionStrategy
@@ -1375,40 +852,8 @@ class TransitionManager {
   +levelTransition() : TransitionStrategy
   +play(Node root, TransitionStrategy strategy, Runnable onFinished) : void
 }
-interface TransitionStrategy {
-  +play(Node root, Runnable onFinished) : void
-}
-class BricksServiceTest {
-  +int[][] layout
-  +BricksService service
-  +List<Brick> bricks
-  +Brick singleHit
-  +Brick doubleHit
-  +BricksService service
-  +List<Brick> bricks
-  +Brick maxHealthBrick
-  +createBricksFromLayoutTracksRemainingAndDestruction() : void
-  +createBricksFromResourceIgnoresInvalidSymbolsAndClampsHealth() : void
-}
-class DatabaseConnectionTest {
-  +Statement stmt
-  +ResultSet rs
-  +main(String[] args) : void
-}
-class RoundServiceTest {
-  +BricksService bricksService
-  +BallService ballService
-  +PaddleService paddleService
-  +RoundService roundService
-  +GameState state
-  +double paddleWidth
-  +Paddle paddle
-  +Ball ball
-  +double expectedX
-  +double expectedY
-  +setUp() : void
-  +loadNextLevelAdvancesUntilCompletion() : void
-  +loadLevelResetsBallAndClearsState() : void
+class TransitionStrategy {
+  #play(Node root, Runnable onFinished) : void
 }
 Application <|-- Main
 AutoCloseable <|.. Subscription
@@ -1419,124 +864,99 @@ MovableObject <|-- Enemy
 GameObject <|-- MovableObject
 MovableObject <|-- Paddle
 MovableObject <|-- PowerUp
-Renderer <|.. BallsRenderer
-Renderer <|.. BricksRenderer
+Renderer <|..> BallsRenderer
+Renderer <|..> BricksRenderer
 Renderer <|.. BulletRenderer
 Renderer <|.. DoorTopRenderer
 Renderer <|.. EnemyRenderer
 Renderer <|.. LifeRenderer
 Renderer <|.. PaddleRenderer
-Renderer <|.. PowerUpRenderer
+Renderer <|..> PowerUpRenderer
 TransitionStrategy <|.. BlurFadeStrategy
 TransitionStrategy <|.. FadeTransitionStrategy
 TransitionStrategy <|.. SlideFadeStrategy
-Main --> SceneController : navigator
-AppContext --> DatabaseService : database
-AppContext --> User : currentUser
-Container --> GameState : state
-Container --> GameService : game
-Container --> Paddle : paddle
-Container --> Ball : ball
-Container --> BricksService : bricksSvc
-Container --> BallService : ballSvc
-Container --> PaddleService : paddleSvc
-Container --> SoundManager : sound
-Container --> PowerUpService : powerUpSvc
-Container --> EnemyService : enemySvc
-Container --> BulletService : bulletSvc
-Container --> RoundService : roundSvc
-GameController --> GameService : gameService
-GameController --> GameState : gameState
-GameController --> SceneController : navigator
-GameController --> BallsRenderer : ballsRenderer
-GameController --> PaddleRenderer : paddleRenderer
-GameController --> BricksRenderer : bricksRenderer
-GameController --> PowerUpRenderer : powerUpRenderer
-GameController --> BulletRenderer : bulletRenderer
-GameController --> LifeRenderer : lifeRenderer
-GameController --> EnemyRenderer : enemyRenderer
-GameController --> DoorTopRenderer : doorTopRenderer
-GameController --> DoorType : doorType
-GameController --> InputState : in
-GameController --> User : u
-GameController --> GameStateSnapshot : snap
-GameController --> User : currentUser
-GameOverController --> SceneController : navigator
-LoginController --> SceneController : navigator
-MenuController --> SceneController : navigator
-MenuController --> SoundManager : sound
-MenuController --> GameEventBus : eventBus
-MenuController --> MenuAnimator : animator
-MenuController --> User : current
-MenuController --> GameStateSnapshot : snap
-MenuController --> User : user
-RankingsController --> SceneController : navigator
-SceneController --> TransitionManager : transitionManager
-SceneController --> GameController : activeGameController
-SceneController --> Container : container
-SceneController --> AppContext : app
-SceneController --> User : u
-SceneController --> GameStateSnapshot : snap
-SettingsController --> SceneController : navigator
-SettingsController --> SoundManager : sound
-SettingsController --> Difficulty : selected
-SignupController --> SceneController : navigator
-WinController --> SceneController : navigator
-Enemy --> EnemyType : type
-GameState --> Ball : ball
-GameState --> Paddle : paddle
-GameStateSnapshot --> PowerUpType : type
-GameStateSnapshot --> Brick : b
-GameStateSnapshot --> PowerUp : pu
-GameStateSnapshot --> Ball : b
-GameStateSnapshot --> EnemyType : type
-GameStateSnapshot --> Enemy : enemy
-PowerUp --> PowerUpType : type
-GameStateRepository --> GameStateSnapshot : s
-BallService --> Paddle : paddle
-BulletService --> BricksService : bricksService
-BulletService --> Bullet : bullet
-BulletService --> Brick : hit
-DatabaseService --> UserRepository : users
-DatabaseService --> ScoreRepository : scores
-DatabaseService --> GameStateRepository : states
-DatabaseService --> User : u
-EnemyService --> GameEventBus : eventBus
-EnemyService --> EnemyType : types
-EnemyService --> EnemyType : type
-EnemyService --> Enemy : enemy
-GameService --> BallService : ballSvc
-GameService --> PaddleService : paddleSvc
-GameService --> BricksService : bricksSvc
-GameService --> PowerUpService : powerUpSvc
-GameService --> BulletService : bulletSvc
-GameService --> EnemyService : enemySvc
-GameService --> RoundService : roundSvc
-GameService --> GameState : boundState
-GameService --> Ball : ball
-GameService --> Brick : brick
-GameService --> PowerUp : spawned
-PowerUpService --> GameEventBus : eventBus
-PowerUpService --> PowerUpType : types
-PowerUpService --> PowerUpType : type
-PowerUpService --> Ball : extra
-RoundService --> BricksService : bricksService
-RoundService --> BallService : ballService
-RoundService --> PaddleService : paddleService
-DoorTopRenderer --> GameEventBus : eventBus
-EnemyRenderer --> GameEventBus : eventBus
-PowerUpRenderer --> PowerUp : p
-SoundManager --> GameEventBus : eventBus
-TransitionManager --> TransitionFactory : factory
-BricksServiceTest --> BricksService : service
-BricksServiceTest --> Brick : singleHit
-BricksServiceTest --> Brick : doubleHit
-BricksServiceTest --> Brick : maxHealthBrick
-RoundServiceTest --> BricksService : bricksService
-RoundServiceTest --> BallService : ballService
-RoundServiceTest --> PaddleService : paddleService
-RoundServiceTest --> RoundService : roundService
-RoundServiceTest --> GameState : state
-RoundServiceTest --> Paddle : paddle
-RoundServiceTest --> Ball : ball
-@enduml
+Main o-- SceneController
+AppContext o-- User
+Container o-- BallService
+Container o-- BricksService
+Container o-- BulletService
+Container o-- EnemyService
+Container o-- PaddleService
+Container o-- PowerUpService
+Container o-- RoundService
+Container o-- SoundManager
+GameController o-- BallsRenderer
+GameController o-- BricksRenderer
+GameController o-- BulletRenderer
+GameController o-- DoorTopRenderer
+GameController o-- DoorType
+GameController o-- EnemyRenderer
+GameController o-- GameStateSnapshot
+GameController o-- InputState
+GameController o-- LifeRenderer
+GameController o-- PaddleRenderer
+GameController o-- PowerUpRenderer
+GameController o-- User
+MenuController o-- GameStateSnapshot
+MenuController o-- MenuAnimator
+MenuController o-- User
+SceneController o-- AppContext
+SceneController o-- Container
+SceneController o-- GameController
+SceneController o-- GameStateSnapshot
+SceneController o-- User
+SettingsController o-- Difficulty
+GameStateSnapshot o-- Ball
+GameStateSnapshot o-- Brick
+GameStateSnapshot o-- EnemyType
+GameStateSnapshot o-- PowerUpType
+GameStateRepository o-- GameStateSnapshot
+ScoreRepository o-- RankingEntry
+BallService o-- Paddle
+BricksService o-- Brick
+BulletService o-- Brick
+BulletService o-- Bullet
+DatabaseService o-- User
+EnemyService o-- Bullet
+EnemyService o-- Enemy
+EnemyService o-- EnemyType
+GameService o-- Ball
+GameService o-- Brick
+GameService o-- BulletService
+GameService o-- GameState
+GameService o-- PowerUp
+PowerUpService o-- Ball
+PowerUpService o-- PowerUp
+PowerUpService o-- PowerUpType
+RoundService o-- Brick
+BricksRenderer o-- Brick
+PowerUpRenderer o-- PowerUp
+AppContext --> DatabaseService : uses
+GameController --> SceneId : uses
+GameController --> TransitionStrategy : uses
+RankingsController --> RankingEntry : uses
+SceneController --> SceneId : uses
+SceneController --> TransitionManager : uses
+SceneController --> TransitionStrategy : uses
+GameStateSnapshot --> GameState : uses
+UserRepository --> User : uses
+BallService --> Ball : uses
+BallService --> GameObject : uses
+BulletService --> GameState : uses
+BulletService --> Paddle : uses
+DatabaseService --> GameStateSnapshot : uses
+DatabaseService --> RankingEntry : uses
+EnemyService --> Ball : uses
+EnemyService --> GameObject : uses
+EnemyService --> GameState : uses
+GameService --> InputState : uses
+PaddleService --> Paddle : uses
+PowerUpService --> GameState : uses
+PowerUpService --> Paddle : uses
+RoundService --> GameState : uses
+BallsRenderer --> Ball : uses
+BulletRenderer --> Bullet : uses
+EnemyRenderer --> Enemy : uses
+PaddleRenderer --> Paddle : uses
+TransitionFactory --> TransitionStrategy : uses
+TransitionManager --> TransitionStrategy : uses
