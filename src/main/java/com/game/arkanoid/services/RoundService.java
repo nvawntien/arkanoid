@@ -13,6 +13,7 @@ public final class RoundService {
 
     private final BricksService bricksService;
     private final BallService ballService;
+    private final PaddleService paddleService;
 
     private final String[] levelResources = new String[] {
         "/com/game/arkanoid/levels/level1.txt",
@@ -21,9 +22,10 @@ public final class RoundService {
         "/com/game/arkanoid/levels/level4.txt"
     };
 
-    public RoundService(BricksService bricksService, BallService ballService) {
+    public RoundService(BricksService bricksService, BallService ballService, PaddleService paddleService) {
         this.bricksService = bricksService;
         this.ballService = ballService;
+        this.paddleService = paddleService;
     }
 
     /** Load the given 1-based level index. */
@@ -36,8 +38,17 @@ public final class RoundService {
         state.bricks.clear();
         state.bricks.addAll(bricks);
         state.level = idx;
-        state.extraBalls.clear();
+        state.balls.clear();
+        state.enemies.clear();
         state.powerUps.clear();
+        state.activePowerUps.clear();
+        state.levelTransitionPending = false;
+        state.paused = true;
+        state.running = false;
+        state.paddle.setWidthClamped(state.basePaddleWidth);
+        state.timeScale = 1.0;
+        paddleService.resetPaddlePosition(state.paddle);
+        state.balls.add(state.ball);
         // Reset ball on paddle for new level
         ballService.resetOnPaddle(state.ball, state.paddle);
     }
@@ -46,10 +57,11 @@ public final class RoundService {
      * Advance to the next level if any. If already at the last level, mark the game as completed.
      */
     public void loadNextLevel(GameState state) {
-        if (state.level >= levelResources.length) {
+        int nextIndex = state.level + 1;
+        if (nextIndex > levelResources.length) {
             state.gameCompleted = true;
             return;
         }
-        loadLevel(state, state.level + 1);
+        loadLevel(state, nextIndex);
     }
 }

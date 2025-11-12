@@ -1,45 +1,103 @@
 package com.game.arkanoid.controller;
 
+import com.game.arkanoid.container.AppContext;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.game.CloseDoorTopLeftEvent;
+import com.game.arkanoid.events.game.CloseDoorTopRightEvent;
+import com.game.arkanoid.events.game.DoorOpenedEvent;
+import com.game.arkanoid.events.game.LevelClearedEvent;
+import com.game.arkanoid.events.game.OpenDoorTopLeftEvent;
+import com.game.arkanoid.events.game.OpenDoorTopRightEvent;
+import com.game.arkanoid.events.paddle.ExplodePaddleEvent;
+import com.game.arkanoid.events.paddle.ExplodePaddleFinishedEvent;
+import com.game.arkanoid.events.paddle.IntroPaddleEvent;
 import com.game.arkanoid.models.GameState;
+import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
+import com.game.arkanoid.models.User;
+import com.game.arkanoid.models.DoorType;
 import com.game.arkanoid.services.GameService;
-import com.game.arkanoid.view.BallRenderer;
-import com.game.arkanoid.view.BricksRenderer;
-import com.game.arkanoid.view.ExtraBallsRenderer;
-import com.game.arkanoid.view.PaddleRenderer;
-import com.game.arkanoid.view.PowerUpRenderer;
-import com.game.arkanoid.view.SceneNavigator;
+import com.game.arkanoid.view.renderer.BallsRenderer;
+import com.game.arkanoid.view.renderer.BulletRenderer;
+import com.game.arkanoid.view.renderer.DoorTopRenderer;
+import com.game.arkanoid.view.renderer.BricksRenderer;
+import com.game.arkanoid.view.renderer.PaddleRenderer;
+import com.game.arkanoid.view.renderer.PowerUpRenderer;
+import com.game.arkanoid.view.renderer.LifeRenderer;
+import com.game.arkanoid.view.renderer.EnemyRenderer;
+import com.game.arkanoid.utils.Constants;
+
+import java.util.List;
+
+import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
+import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
+import com.game.arkanoid.events.sound.GameBGMSoundEvent;
+import com.game.arkanoid.view.transition.TransitionStrategy;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import javafx.animation.AnimationTimer;
+
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.image.ImageView;
+import javafx.util.Duration;
 
+/**
+ * Main controller for the in-game scene.
+ * Handles game loop, input, rendering, events, transitions, and pause menu.
+ */
 public final class GameController {
 
-    @FXML
-    private Pane gamePane;
-
-    private final Set<KeyCode> activeKeys = new HashSet<>();
-    private final GameService gameService;
-    private final GameState gameState;
-    private final SceneNavigator navigator;
-
-    private BallRenderer ballRenderer;
-    private PaddleRenderer paddleRenderer;
-    private BricksRenderer bricksRenderer;
-    private ExtraBallsRenderer extraBallsRenderer;
-    private PowerUpRenderer powerUpRenderer;
-    private AnimationTimer loop;
-
+    // --- FXML UI Components ---
+    @FXML private StackPane rootStack;
+    @FXML private Pane gamePane;
+    @FXML private HBox lifeBox;
+    @FXML private StackPane overlayLayer;
+    @FXML private StackPane bannerLayer;
     @FXML private Label livesLabel;
+    @FXML private Label bannerLabel;
     @FXML private Label scoreLabel;
     @FXML private Label highScoreLabel;
+    @FXML private ImageView edge_top;
 
-    public GameController(GameState gameState, GameService gameService, SceneNavigator navigator) {
+    // --- Core Dependencies ---
+    private final GameService gameService;
+    private final GameState gameState;
+    private final SceneController navigator;
+    private final Set<KeyCode> activeKeys = new HashSet<>();
+    private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
+
+    // --- Rendering Components ---
+    private BallsRenderer ballsRenderer;
+    private PaddleRenderer paddleRenderer;
+    private BricksRenderer bricksRenderer;
+    private PowerUpRenderer powerUpRenderer;
+    private BulletRenderer bulletRenderer;
+    private LifeRenderer lifeRenderer;
+    private EnemyRenderer enemyRenderer;
+    private DoorTopRenderer doorTopRenderer;
+
+    // --- State Tracking ---
+    private AnimationTimer loop;
+    private SequentialTransition levelIntroSequence;
+    private Parent pauseOverlay;
+    private int lastLevelObserved = Integer.MIN_VALUE;
+    private Timeline spawnTimer;
+    private DoorType doorType;
+
+    // Constructor ------------------------------------------------------------
+    public GameController(GameState gameState, GameService gameService, SceneController navigator) {
         this.gameState = gameState;
         this.gameService = gameService;
         this.navigator = navigator;
@@ -47,85 +105,541 @@ public final class GameController {
 
     @FXML
     public void initialize() {
-        paddleRenderer = new PaddleRenderer(gamePane);
-        ballRenderer = new BallRenderer(gamePane, gameState.ball);
-        bricksRenderer = new BricksRenderer(gamePane, gameState.bricks);
-        extraBallsRenderer = new ExtraBallsRenderer(gamePane);
-        powerUpRenderer = new PowerUpRenderer(gamePane);
+        setupRenderers();
+        setupPauseOverlay();
+        setupInputHandlers();
+        loadAndDisplayHighScore();
+        updateHud();
+        registerEventListeners();
+        startEnemySpawnTimer();
+        startGameLoop();
+        //GameEventBus.getInstance().publish(new GameBGMSoundEvent());
+        lastLevelObserved = gameState.level;
+        startLevelIntro();
+    }
 
-        gamePane.setOnKeyPressed(event -> {
-            KeyCode code = event.getCode();
-            if (code == KeyCode.ESCAPE) {
-                navigator.showMenu();
-                return;
-            }
-            if (code == KeyCode.P) {
-                gameState.paused = !gameState.paused;
-                return;
-            }
-            activeKeys.add(code);
-        });
+    // ======================================================================
+    // region 1. GAME LOOP (Core runtime logic)
+    // ======================================================================
 
-        gamePane.setOnKeyReleased(event -> activeKeys.remove(event.getCode()));
-        gamePane.setFocusTraversable(true);
-        Platform.runLater(gamePane::requestFocus);
-        // Play paddle intro animation
-        paddleRenderer.playIntro();
-        
+    private void startGameLoop() {
         loop = new AnimationTimer() {
             private long last = -1;
 
             @Override
             public void handle(long now) {
-                if (last < 0) {
-                    last = now;
-                    return;
-                }
+                if (last < 0) { last = now; return; }
 
-                double dt = (now - last) / 11_000_000.0;
+                double dt = (now - last) / 11_000_000.0; // ns to ms
                 last = now;
 
                 InputState in = readInput();
                 gameService.update(gameState, in, dt, gamePane.getWidth(), gamePane.getHeight());
-                
-               
+                // Render updated state
                 paddleRenderer.render(gameState.paddle);
-                ballRenderer.render(gameState.ball);
-                extraBallsRenderer.render(gameState.extraBalls);
+                ballsRenderer.render(gameState.balls);
                 powerUpRenderer.render(gameState.powerUps);
+                bulletRenderer.render(gameState.bullets);
                 bricksRenderer.render(gameState.bricks);
+                lifeRenderer.render(gameState.lives);
+                enemyRenderer.render(gameState.enemies);
 
-                if (livesLabel != null) livesLabel.setText("1UP " + Math.max(0, gameState.lives));
-                if (scoreLabel != null) scoreLabel.setText(Integer.toString(gameState.score));
-                if (highScoreLabel != null) highScoreLabel.setText("HIGH SCORE 00000");
+                // Update hud
+                updateHud();
+                trackLevelTransition();
 
+                // --- Transition to other scenes ---
                 if (gameState.gameOver) {
-                    stop();
-                    navigator.showGameOver();
+                    // persist bests and clear in-progress
+                    User u = AppContext.getInstance().getCurrentUser();
+                    if (u != null) {
+                        int bestRound = Math.max(u.getBestRound(), gameState.level);
+                        int bestScore = Math.max(u.getBestScore(), gameState.score);
+                        AppContext.getInstance().db().updateBest(u.getId(), bestRound, bestScore);
+                        AppContext.getInstance().db().clearInProgress(u.getId());
+                    }
+                    stopLoopAndNavigate(SceneId.GAME_OVER, navigator.transitions().gameOverTransition());
                     return;
                 }
-
                 if (gameState.gameCompleted) {
-                    stop();
-                    navigator.showMenu();
+                    // persist bests and clear in-progress, then show Win scene
+                    User u = AppContext.getInstance().getCurrentUser();
+                    if (u != null) {
+                        int bestRound = Math.max(u.getBestRound(), gameState.level);
+                        int bestScore = Math.max(u.getBestScore(), gameState.score);
+                        AppContext.getInstance().db().updateBest(u.getId(), bestRound, bestScore);
+                        AppContext.getInstance().db().clearInProgress(u.getId());
+                    }
+                    stopLoopAndNavigate(SceneId.WIN, navigator.transitions().winTransition());
                 }
             }
         };
-
         loop.start();
+    }
+
+    private void startEnemySpawnTimer() {
+        spawnTimer = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
+            if (gameState.paused || gameState.levelTransitionPending) return;
+            System.out.println("Enemy spawn tick at " + System.currentTimeMillis());
+            boolean left = Math.random() < 0.5;
+            GameEventBus.getInstance().publish(left ? new OpenDoorTopLeftEvent() : new OpenDoorTopRightEvent());
+        }));
+        spawnTimer.setCycleCount(Timeline.INDEFINITE);
+        spawnTimer.play();
     }
 
     private InputState readInput() {
         InputState in = new InputState();
-        in.left = activeKeys.contains(KeyCode.LEFT) || activeKeys.contains(KeyCode.A);
-        in.right = activeKeys.contains(KeyCode.RIGHT) || activeKeys.contains(KeyCode.D);
+        if (gameState.paused) return in;
+        in.left   = activeKeys.contains(KeyCode.LEFT)  || activeKeys.contains(KeyCode.A);
+        in.right  = activeKeys.contains(KeyCode.RIGHT) || activeKeys.contains(KeyCode.D);
         in.launch = activeKeys.contains(KeyCode.SPACE);
+        in.fire   = activeKeys.contains(KeyCode.SPACE);
         return in;
     }
 
-    public void stop() {
-        if (loop != null) {
-            loop.stop();
+    // endregion
+
+
+    // ======================================================================
+    // region 2. INPUT HANDLING
+    // ======================================================================
+
+    private void setupInputHandlers() {
+        rootStack.addEventFilter(KeyEvent.KEY_PRESSED, this::handleGlobalKeyPressed);
+        gamePane.setOnKeyPressed(this::handleGameKeyPressed);
+        gamePane.setOnKeyReleased(event -> activeKeys.remove(event.getCode()));
+    }
+
+    @FXML
+    private void handlePauseButton() {
+        togglePause();
+    }
+    
+    private void handleGlobalKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ESCAPE) {
+            togglePause();
+            event.consume();
         }
     }
+
+    private void handleGameKeyPressed(KeyEvent event) {
+        KeyCode code = event.getCode();
+        if (code == KeyCode.P) {
+            togglePause();
+            event.consume();
+            return;
+        }
+        if (gameState.paused) {
+            event.consume();
+            return;
+        }
+        activeKeys.add(code);
+    }
+
+    // endregion
+
+
+    // ======================================================================
+    // region 3. LEVEL TRANSITION + EVENT HANDLING
+    // ======================================================================
+
+   // ...existing code...
+    private void registerEventListeners() {
+        subscriptions.add(GameEventBus.getInstance().subscribe(LevelClearedEvent.class, this::onLevelCleared));
+
+        // chạy trên FX thread, log để debug nếu handler nhận event hay không
+        subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpActivatedEvent.class, paddleRenderer::onPowerUpActivated));
+
+        subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpExpiredEvent.class, paddleRenderer::onPowerUpExpired));
+        subscriptions.add(GameEventBus.getInstance().subscribe(DoorOpenedEvent.class, ev -> {
+            if (ev.left()) {    
+                gameService.getEnemySvc().spawnEnemy(gameState, Constants.DOOR_TOP_X_LEFT, Constants.DOOR_TOP_Y);
+                GameEventBus.getInstance().publish(new CloseDoorTopLeftEvent());
+            } else {
+                gameService.getEnemySvc().spawnEnemy(gameState, Constants.DOOR_TOP_X_RIGHT, Constants.DOOR_TOP_Y);
+                GameEventBus.getInstance().publish(new CloseDoorTopRightEvent());
+            }
+        }));
+
+        subscriptions.add(GameEventBus.getInstance().subscribe(ExplodePaddleFinishedEvent.class, fn -> {
+            if (fn.finished()) {
+                gameState.gameOver = true;  
+                gameState.balls.add(gameState.ball);
+                gameService.getBallSvc().resetOnPaddle(gameState.ball, gameState.paddle);
+            }
+        }));
+    }
+
+    // ...existing code...
+
+    private void onLevelCleared(LevelClearedEvent event) {
+        Platform.runLater(() -> {
+            if (loop != null) loop.stop();
+            gameState.paused = true;
+
+            bannerLayer.setVisible(true);
+            bannerLayer.setManaged(true);
+            // Apply bigger style for cleared banner; remove countdown style
+            bannerLabel.getStyleClass().remove("level-banner-countdown");
+            bannerLabel.getStyleClass().remove("level-banner-start");
+            if (!bannerLabel.getStyleClass().contains("level-banner-cleared")) {
+                bannerLabel.getStyleClass().add("level-banner-cleared");
+            }
+            bannerLabel.setText("LEVEL " + event.level() + " CLEARED!");
+
+            PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
+            pause.setOnFinished(e -> {
+                int nextLevel = gameState.level + 1;
+
+                // Ensure nothing persists to next round
+                gameState.bullets.clear();
+                gameState.powerUps.clear();
+                gameState.activePowerUps.clear();
+                gameState.balls.clear();
+                gameState.laserCooldown = 0.0;
+
+                gameService.loadNextLevel(gameState);
+                if (gameState.gameCompleted) {
+                    // persist bests and clear in-progress, then show Win view
+                    User u = AppContext.getInstance().getCurrentUser();
+                    if (u != null) {
+                        int bestRound = Math.max(u.getBestRound(), gameState.level);
+                        int bestScore = Math.max(u.getBestScore(), gameState.score);
+                        AppContext.getInstance().db().updateBest(u.getId(), bestRound, bestScore);
+                        AppContext.getInstance().db().clearInProgress(u.getId());
+                    }
+                    stopLoopAndNavigate(SceneId.WIN, navigator.transitions().winTransition());
+                    return;
+                }
+
+                // 🔹 Chuyển qua Round mới bằng SceneController
+                navigator.showGameRound(nextLevel);
+            });
+            pause.play();
+        });
+    }
+
+    private void trackLevelTransition() {
+        int currentLevel = gameState.level;
+        if (currentLevel != lastLevelObserved) {
+            lastLevelObserved = currentLevel;
+            if (currentLevel > 0) startLevelIntro();
+        }
+    }
+
+    private void startLevelIntro() {
+        if (levelIntroSequence != null) {
+            levelIntroSequence.stop();
+        }
+
+        System.out.println("[GameController] Starting level intro for level " + gameState.level);
+
+        bannerLayer.setVisible(true);
+        bannerLayer.setManaged(true);
+        gameState.paused = true;
+
+        PauseTransition showLevel = createBannerStep("LEVEL " + gameState.level, 0.8);
+        PauseTransition countdown3 = createBannerStep("3", 0.6);
+        PauseTransition countdown2 = createBannerStep("2", 0.6);
+        PauseTransition countdown1 = createBannerStep("1", 0.6);
+
+        levelIntroSequence = new SequentialTransition(showLevel, countdown3, countdown2, countdown1);
+        levelIntroSequence.setOnFinished(e -> {
+            System.out.println("[GameController] Countdown finished → startNextLevel()");
+            bannerLayer.setVisible(false);
+            bannerLayer.setManaged(false);
+            gameService.startNextLevel(gameState);
+        });
+        levelIntroSequence.playFromStart();
+    }
+
+
+    private PauseTransition createBannerStep(String text, double seconds) {
+        PauseTransition pt = new PauseTransition(Duration.seconds(seconds));
+        pt.statusProperty().addListener((obs, oldStatus, newStatus) -> {
+            if (newStatus == Animation.Status.RUNNING) {
+                bannerLabel.setText(text);
+
+                // Determine which banner variant to show
+                boolean isCountdown = text.chars().allMatch(Character::isDigit);
+                boolean isCleared = text.contains("CLEARED!");
+                boolean isLevelStart = text.startsWith("LEVEL ") && text.length() > 6 &&
+                        text.substring(6).chars().allMatch(Character::isDigit);
+
+                // Reset all variant classes first
+                bannerLabel.getStyleClass().remove("level-banner-countdown");
+                bannerLabel.getStyleClass().remove("level-banner-cleared");
+                bannerLabel.getStyleClass().remove("level-banner-start");
+
+                // Apply appropriate class
+                if (isCountdown) {
+                    if (!bannerLabel.getStyleClass().contains("level-banner-countdown")) {
+                        bannerLabel.getStyleClass().add("level-banner-countdown");
+                    }
+                } else if (isCleared) {
+                    if (!bannerLabel.getStyleClass().contains("level-banner-cleared")) {
+                        bannerLabel.getStyleClass().add("level-banner-cleared");
+                    }
+                } else if (isLevelStart) {
+                    if (!bannerLabel.getStyleClass().contains("level-banner-start")) {
+                        bannerLabel.getStyleClass().add("level-banner-start");
+                    }
+                }
+            }
+        });
+        return pt;
+    }
+
+    // endregion
+
+
+    // ======================================================================
+    // region 4. PAUSE MENU & NAVIGATION
+    // ======================================================================
+
+    private void togglePause() {
+        if (isPauseVisible()) resumeGame();
+        else showPauseMenu();
+    }
+
+    private boolean isPauseVisible() {
+        return overlayLayer.isVisible();
+    }
+
+    private void showPauseMenu() {
+        if (pauseOverlay == null || isPauseVisible()) return;
+        gameState.paused = true;
+        activeKeys.clear();
+
+        overlayLayer.setOpacity(1.0);
+        overlayLayer.setVisible(true);
+        overlayLayer.setManaged(true);
+        pauseOverlay.setOpacity(0.0);
+
+        FadeTransition ft = new FadeTransition(Duration.millis(200), pauseOverlay);
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0);
+        ft.play();
+
+        // region SOUND - Pause feedback
+       // soundService.playSfx("pause_on");
+        //soundService.fade("level_bgm", soundService.effectiveMusicVolume() * 0.35, Duration.millis(250));
+        // endregion
+
+        pauseOverlay.requestFocus();
+    }
+
+    private void hidePauseMenu() {
+        if (!isPauseVisible()) return;
+
+        FadeTransition ft = new FadeTransition(Duration.millis(180), pauseOverlay);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.setOnFinished(e -> {
+            overlayLayer.setVisible(false);
+            overlayLayer.setManaged(false);
+        });
+        ft.play();
+    }
+
+    private void resumeGame() {
+        hidePauseMenu();
+        // show 3-2-1 countdown before resuming
+        bannerLayer.setVisible(true);
+        bannerLayer.setManaged(true);
+
+        PauseTransition three = createBannerStep("3", 0.6);
+        PauseTransition two = createBannerStep("2", 0.6);
+        PauseTransition one = createBannerStep("1", 0.6);
+        SequentialTransition seq = new SequentialTransition(three, two, one);
+        seq.setOnFinished(e -> {
+            bannerLayer.setVisible(false);
+            bannerLayer.setManaged(false);
+            gameState.paused = false;
+            Platform.runLater(gamePane::requestFocus);
+        });
+        seq.playFromStart();
+    }
+
+    private void restartLevel() {
+        hidePauseMenu();
+        gameService.restartLevel(gameState);
+        lastLevelObserved = gameState.level;
+        lifeRenderer.reset();
+        startLevelIntro();
+        //playsound
+        Platform.runLater(gamePane::requestFocus);
+    }
+
+    private void exitToMenu() {
+        hidePauseMenu();
+        // Save in-progress game state for current user
+        User u = AppContext.getInstance().getCurrentUser();
+        if (u != null) {
+            GameStateSnapshot snap = GameStateSnapshot.from(gameState);
+            // Ensure save completes before navigating to avoid race on level 1
+            AppContext.getInstance().db().saveInProgress(u.getId(), snap).join();
+            // Optionally refresh bests so Rankings is current
+            AppContext.getInstance().db().updateBest(u.getId(), gameState.level, gameState.score).join();
+        }
+        stop();
+        navigator.navigateTo(SceneId.MENU, navigator.transitions().menuTransition());
+    }
+
+    // endregion
+
+
+    // ======================================================================
+    // region 5. RENDERING & HUD
+    // ======================================================================
+
+    private void setupRenderers() {
+        paddleRenderer = new PaddleRenderer(gamePane);
+        ballsRenderer = new BallsRenderer(gamePane);
+        bricksRenderer = new BricksRenderer(gamePane);
+        powerUpRenderer = new PowerUpRenderer(gamePane);
+        bulletRenderer = new BulletRenderer(gamePane);
+        lifeRenderer = new LifeRenderer(lifeBox);
+        doorTopRenderer = new DoorTopRenderer(gamePane, edge_top);
+        enemyRenderer = new EnemyRenderer(gamePane);
+
+        gamePane.setFocusTraversable(true);
+        Platform.runLater(gamePane::requestFocus);
+        GameEventBus.getInstance().publish(new IntroPaddleEvent());
+    }
+
+
+    private void updateHud() {
+        User currentUser = AppContext.getInstance().getCurrentUser();
+        String username = (currentUser != null) ? currentUser.getName() : "PLAYER";
+
+        if (livesLabel != null) 
+            livesLabel.setText(username + " " + Math.max(0, gameState.lives));
+        
+        if (scoreLabel != null) 
+            scoreLabel.setText(Integer.toString(gameState.score));
+        
+        // Keep high score updated locally once surpassed by current run
+        if (gameState.score > gameState.highScore) {
+            gameState.highScore = gameState.score;
+        }
+        if (highScoreLabel != null) {
+            highScoreLabel.setText(Integer.toString(gameState.highScore));
+        }
+    }
+
+    public int getScore() {
+        return gameState.score;
+    }
+
+    private void loadAndDisplayHighScore() {
+        // Query top 1 ranking once; from then on, update locally when surpassed
+        AppContext.getInstance().db().getRankings(1).whenComplete((list, err) -> {
+            Platform.runLater(() -> {
+                int bestScore = 0;
+                if (err == null && list != null && !list.isEmpty()) {
+                    try { bestScore = Math.max(0, list.get(0).getBestScore()); } catch (Exception ignore) {}
+                }
+                gameState.highScore = bestScore;
+                if (highScoreLabel != null) {
+                    highScoreLabel.setText(Integer.toString(gameState.highScore));
+                }
+            });
+        });
+    }
+
+    private void setupPauseOverlay() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/PauseView.fxml"));
+            loader.setControllerFactory(cls -> {
+                if (cls == PauseController.class) {
+                    return new PauseController(this::resumeGame, this::restartLevel, this::exitToMenu);
+                }
+                throw new IllegalArgumentException("Unsupported pause controller type: " + cls);
+            });
+            pauseOverlay = loader.load();
+            overlayLayer.getChildren().setAll(pauseOverlay);
+            overlayLayer.setVisible(false);
+            overlayLayer.setManaged(false);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load pause overlay", e);
+        }
+    }
+
+    // endregion
+
+
+    // ======================================================================
+    // region 6. STOP / CLEANUP
+    // ======================================================================
+
+    private void stopLoopAndNavigate(SceneId target, TransitionStrategy transition) {
+        stop();
+        navigator.navigateTo(target, transition);
+    }
+
+    public void stop() {
+        if (loop != null) loop.stop();
+        if (levelIntroSequence != null) levelIntroSequence.stop();
+        //soundService.stopBgm("level_bgm");
+        subscriptions.forEach(GameEventBus.Subscription::close);
+        subscriptions.clear();
+    }
+
+    // endregion
+
+    // ============================================================
+    // region 7. CONTINUE SUPPORT (apply snapshot + countdown)
+    // ============================================================
+
+    public void applySnapshot(GameStateSnapshot snapshot) {
+        // Cancel any intro sequence that may have been scheduled in initialize()
+        if (levelIntroSequence != null) {
+            levelIntroSequence.stop();
+            levelIntroSequence = null;
+        }
+        bannerLayer.setVisible(false);
+        bannerLayer.setManaged(false);
+
+        // Ensure correct level is loaded before applying: handled by SceneController
+        snapshot.applyTo(gameState);
+        updateHud();
+        lifeRenderer.reset();
+        // Re-notify view about active paddle effects for correct visuals
+        if (gameState.activePowerUps.containsKey(com.game.arkanoid.models.PowerUpType.EXPAND_PADDLE)) {
+            com.game.arkanoid.events.GameEventBus.getInstance().publish(
+                    new com.game.arkanoid.events.powerup.PowerUpActivatedEvent(com.game.arkanoid.models.PowerUpType.EXPAND_PADDLE));
+        }
+        if (gameState.activePowerUps.containsKey(com.game.arkanoid.models.PowerUpType.LASER_PADDLE)) {
+            com.game.arkanoid.events.GameEventBus.getInstance().publish(
+                    new com.game.arkanoid.events.powerup.PowerUpActivatedEvent(com.game.arkanoid.models.PowerUpType.LASER_PADDLE));
+        }
+    }
+
+    public void resumeWithCountdown() {
+        bannerLayer.setVisible(true);
+        bannerLayer.setManaged(true);
+        PauseTransition three = createBannerStep("3", 0.6);
+        PauseTransition two = createBannerStep("2", 0.6);
+        PauseTransition one = createBannerStep("1", 0.6);
+        SequentialTransition seq = new SequentialTransition(three, two, one);
+        seq.setOnFinished(e -> {
+            bannerLayer.setVisible(false);
+            bannerLayer.setManaged(false);
+            gameService.startNextLevel(gameState); // simply resume running
+        });
+        seq.playFromStart();
+    }
+
+    /** Whether current state can be resumed (not game over/completed). */
+    public boolean isResumable() {
+        return !gameState.gameOver && !gameState.gameCompleted;
+    }
+
+    /** Capture a snapshot of current game state for persistence. */
+    public GameStateSnapshot captureSnapshot() {
+        return GameStateSnapshot.from(gameState);
+    }
+    // endregion
 }

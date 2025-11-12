@@ -31,7 +31,11 @@ public final class GameSettings {
     }
 
     private static boolean soundEnabled = true;
+    private static double masterVolume = 1.0;
+    private static double musicVolume = 0.7;
+    private static double sfxVolume = 0.8;
     private static Difficulty difficulty = Difficulty.MEDIUM;
+    private static int highScore = 0;
 
     private GameSettings() {
     }
@@ -42,6 +46,30 @@ public final class GameSettings {
 
     public static void setSoundEnabled(boolean enabled) {
         soundEnabled = enabled;
+    }
+
+    public static double getMasterVolume() {
+        return masterVolume;
+    }
+
+    public static void setMasterVolume(double value) {
+        masterVolume = clamp01(value);
+    }
+
+    public static double getMusicVolume() {
+        return musicVolume;
+    }
+
+    public static void setMusicVolume(double value) {
+        musicVolume = clamp01(value);
+    }
+
+    public static double getSfxVolume() {
+        return sfxVolume;
+    }
+
+    public static void setSfxVolume(double value) {
+        sfxVolume = clamp01(value);
     }
 
     public static Difficulty getDifficulty() {
@@ -58,5 +86,20 @@ public final class GameSettings {
 
     public static double getPaddleWidthMultiplier() {
         return difficulty.paddleWidthMultiplier();
+    }
+
+    public static int getHighScore() {
+        return Math.max(0, highScore);
+    }
+
+    public static void setHighScore(int score) {
+        highScore = Math.max(highScore, Math.max(0, score));
+    }
+
+    private static double clamp01(double value) {
+        if (Double.isNaN(value)) {
+            return 0.0;
+        }
+        return Math.max(0.0, Math.min(1.0, value));
     }
 }

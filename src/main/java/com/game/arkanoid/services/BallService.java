@@ -1,6 +1,9 @@
 package com.game.arkanoid.services;
 
 import com.game.arkanoid.config.GameSettings;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
+import com.game.arkanoid.events.sound.WallHitSoundEvent;
 import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.GameObject;
 import com.game.arkanoid.models.Paddle;
@@ -19,6 +22,8 @@ public class BallService {
         double t = Math.toRadians(Constants.BALL_LAUNCH_ANGLE);
         ball.setVelocity(speed * Math.cos(t), -speed * Math.sin(t));
         ball.setMoving(true);
+        ball.setStuck(false);
+        ball.setStuckOffsetX(0.0);
     }
 
     public void step(Ball ball, double dt) {
@@ -27,17 +32,22 @@ public class BallService {
 
     public void bounceWorld(Ball ball, double worldW, double worldH) {
         double r = ball.getRadius();
+        boolean check = false;
         if (ball.getCenterX() - r < 22) {
             ball.setCenter(r + 22, ball.getCenterY());
             ball.setVelocity(Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
+            check = true;
         } else if (ball.getCenterX() + r > worldW - 22) {
             ball.setCenter(worldW - 22 - r, ball.getCenterY());
             ball.setVelocity(-Math.abs(ball.getDx()) * Constants.BALL_RESTITUTION, ball.getDy());
+            check = true;
         }
         if (ball.getCenterY() - r < 172) {
             ball.setCenter(ball.getCenterX(), r + 172);
             ball.setVelocity(ball.getDx(), Math.abs(ball.getDy()) * Constants.BALL_RESTITUTION);
+            check = true;
         }
+        if (check) GameEventBus.getInstance().publish(new WallHitSoundEvent());
     }
 
     public boolean fellBelow(Ball ball, double worldH) {
@@ -46,6 +56,8 @@ public class BallService {
 
     public void resetOnPaddle(Ball ball, Paddle paddle) {
         ball.setMoving(false);
+        ball.setStuck(false);
+        ball.setStuckOffsetX(0.0);
         ball.setVelocity(0, 0);
         ball.setCenter(
                 paddle.getX() + paddle.getWidth() / 2.0,
@@ -85,28 +97,71 @@ public class BallService {
 
             if (other instanceof Paddle) {
                 Paddle paddle = (Paddle) other;
+                if (ball.isStuck()) {
+                    // Nếu bóng đã được "catch" bởi power-up: gắn bóng vào vị trí va chạm trên paddle
+                    double paddleX = paddle.getX();
+                    double paddleW = paddle.getWidth();
+                    // Giữ bóng nằm trong biên paddle (theo trục X)
+                    double collisionX = Math.max(paddleX + ball.getRadius(), Math.min(ball.getCenterX(), paddleX + paddleW - ball.getRadius()));
+                    // Đặt bóng lên trên paddle, dừng chuyển động và ghi offset để theo paddle
+                    ball.setCenter(collisionX, oT - ball.getRadius() - Constants.BALL_NUDGE);
+                    ball.setVelocity(0.0, 0.0);
+                    ball.setMoving(false);
+                    ball.setStuck(true);
+                    ball.setStuckOffsetX(collisionX - paddleX);
+                    return;
+                }
+
+                // Đưa bóng ra khỏi paddle một chút
+                ball.setCenter(ball.getX(), oT - ball.getRadius() - Constants.BALL_NUDGE);
+
+                double paddleX = paddle.getX();
+                double paddleW = paddle.getWidth();
+                double paddleH = paddle.getHeight();
+
+                double ballX = ball.getCenterX();
+
+                // --- 1. Tính vị trí va chạm tương đối ---
+                double relX = (ballX - paddleX) / paddleW; // 0..1
+                double offset = (relX - 0.5) * 2.0;        // -1 (trái) .. +1 (phải)
+
+                // --- 2. Phát hiện va chạm ở góc cong ---
+                double cornerRadius = paddleH / 2.0; // bán kính giả định góc cong
+                boolean hitLeftCorner = (ballX < paddleX + cornerRadius);
+                boolean hitRightCorner = (ballX > paddleX + paddleW - cornerRadius);
+
+                // --- 3. Tính góc nảy theo vật lý ---
+                double minAngle = Math.toRadians(Constants.MIN_BALL_ANGLE); // vd: 35°
+                double maxAngle = Math.toRadians(Constants.MAX_BALL_ANGLE); // vd: 75°
+                double angle;
+
+                if (hitLeftCorner) {
+                    // góc trái cong → nảy về trái, góc lớn hơn
+                    angle = maxAngle - Math.abs(offset) * (maxAngle - minAngle);
+                    angle = Math.min(maxAngle, angle);
+                } else if (hitRightCorner) {
+                    // góc phải cong → nảy về phải
+                    angle = maxAngle - Math.abs(offset) * (maxAngle - minAngle);
+                    angle = Math.min(maxAngle, angle);
+                } else {
+                    // giữa paddle → góc gần vuông lên trên
+                    angle = minAngle + (maxAngle - minAngle) * Math.abs(offset);
+                }
+
+                // --- 4. Ảnh hưởng vận tốc paddle ---
                 double paddleDx = paddle.getDx();
+                double influence = 0.25; // hệ số ảnh hưởng paddle
+                angle += paddleDx * influence * 0.01; // tăng/giảm nhẹ theo hướng paddle
 
-                // Influence constant — tweak for responsiveness
-                final double influence = 0.35;
+                // Giới hạn lại góc
+                angle = Math.max(minAngle, Math.min(maxAngle, angle));
 
-                // Add paddle velocity influence
-                vx += paddleDx * influence;
+                // --- 5. Tính vận tốc mới ---
+                double speed = baseSpeed();
+                vx = speed * Math.sin(angle) * Math.signum(offset);
+                vy = -speed * Math.cos(angle);
 
-                // Normalize to keep overall speed consistent
-                double speed = Math.sqrt(vx * vx + vy * vy);
-                double base = baseSpeed();
-                double scale = base / speed;
-                vx *= scale;
-                vy *= scale;
-
-                // Clamp outgoing angle to stay within limits
-                double angle = Math.toDegrees(Math.atan2(-vy, vx));
-                angle = Math.max(Constants.MIN_BALL_ANGLE, Math.min(Constants.MAX_BALL_ANGLE, angle));
-
-                double rad = Math.toRadians(angle);
-                vx = base * Math.cos(rad);
-                vy = -base * Math.sin(rad);
+                ball.setVelocity(vx, vy);
             }
 
             ball.setVelocity(vx, vy);

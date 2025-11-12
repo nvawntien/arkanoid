@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.Pane?>
+
+<Pane stylesheets="@../css/game.css" prefHeight="800.0" prefWidth="600.0" styleClass="pause-overlay" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.game.arkanoid.controller.PauseController">
+   <children>
+      <ImageView fitHeight="600.0" fitWidth="400.0" layoutX="100.0" layoutY="150.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/gameover_bg.png" />
+         </image>
+      </ImageView>
+      <Button id="mainMenuButton" layoutX="220.0" layoutY="557.0" minWidth="160" onAction="#onExitToMenu" styleClass="pause-button" />
+      <Button id="resumeButton" layoutX="220.0" layoutY="434.0" minWidth="160" onAction="#onResume" styleClass="pause-button"  />
+      <Button id="playAgainButton" layoutX="220.0" layoutY="492.0" minWidth="160" onAction="#onRestart"  styleClass="pause-button" />
+      <ImageView fitHeight="79.0" fitWidth="234.0" layoutX="183.0" layoutY="262.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/pause.png" />
+         </image>
+      </ImageView>
+   </children>
+</Pane>

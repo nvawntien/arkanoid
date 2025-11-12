@@ -1,9 +1,35 @@
+
 .gamePane {
-    -fx-background-color: #0b0f1a;
-    /* -fx-border-color: rgba(46, 119, 255, 1);
-    -fx-border-width: 3;*/
+    -fx-background-color:#000000;
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+}
+#gamePane {
+     -fx-background-color:#000000;
+}
+.settingPane {
+    -fx-background-color:#000000;
+}
+/* Level 1 */
+.level-1 {
+    -fx-background-image: url("../images/bg_level1.png");
 }
 
+/* Level 2 */
+.level-2 {
+    -fx-background-image: url("../images/bg_level2.png");
+}
+
+/* Level 3 */
+.level-3 {
+    -fx-background-image: url("../images/bg_level3.png");
+}
+.level-4 {
+     -fx-background-image: url("../images/bg_level4.png");
+}
+.level-5 {
+     -fx-background-image: url("../images/bg_level5.png");
+}
 .paddle { 
     -fx-fill: #e6e6e6; 
 }
@@ -17,6 +43,12 @@
 .menu-root {
     -fx-background-image: url("../images/menu_background.png");
     -fx-padding: 40;
+}
+.login-bg {
+    -fx-background-image: url("../images/login_bg.png");
+}
+.win-bg {
+    -fx-background-image: url("../images/kieuvantuyen.png");
 }
 
 .menu-title {
@@ -39,11 +71,8 @@
     -fx-cursor: hand;
 
     /* Hiệu ứng mặc định */
-    -fx-opacity: 0.6;
     -fx-scale-x: 1;
     -fx-scale-y: 1;
-    -fx-effect: dropshadow(gaussian, rgba(150, 142, 142, 0.4), 10, 0.5, 0, 2);
-    -fx-transition: all 0.2s ease-in-out;
 }
 
 /* Khi hover (rê chuột qua) */
@@ -51,7 +80,6 @@
     -fx-opacity: 0.8;
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
-    -fx-effect: dropshadow(gaussian, rgba(227, 216, 216, 0.6), 20, 0.8, 0, 0);
 }
 
 /* Khi được chọn (ở giữa) — highlight đẹp, đều, không viền bẩn */
@@ -60,11 +88,41 @@
     -fx-scale-x: 1.25;
     -fx-scale-y: 1.25;
 
-    /* Glow mượt kết hợp inner + outer */
-    -fx-effect: innershadow(gaussian, rgba(0,255,255,0.6), 20, 0.3, 0, 0),
-                 dropshadow(three-pass-box, rgba(0,255,255,0.7), 30, 0.3, 0, 0);
-
     -fx-transition: all 0.25s ease-in-out;
+}
+#startButton {
+    -fx-background-image: url("../images/startbutton.png");
+}
+#startButton.selected {
+    -fx-background-image: url("../images/startbutton2.png");
+}
+
+#optionButton {
+    -fx-background-image: url("../images/optionbutton.png");
+}
+#optionButton.selected {
+    -fx-background-image: url("../images/optionbutton2.png");
+}
+
+#exitButton {
+    -fx-background-image: url("../images/exitbutton.png");
+}
+#exitButton.selected {
+    -fx-background-image: url("../images/exitbutton2.png");
+}
+
+#continueButton {
+    -fx-background-image: url("../images/continuebutton.png");
+}
+#continueButton.selected {
+    -fx-background-image: url("../images/continuebutton2.png");
+}
+
+#rankingButton {
+    -fx-background-image: url("../images/rankingbutton.png");
+}
+#rankingButton.selected {
+    -fx-background-image: url("../images/rankingbutton2.png");
 }
 
 /* Ảnh nền nút */
@@ -76,6 +134,62 @@
 }
 #exitButton {
     -fx-background-image: url("../images/exitbutton.png");
+}
+#rankingButton {
+     -fx-background-image: url("../images/rankingbutton.png")
+}
+#continueButton {
+     -fx-background-image: url("../images/continuebutton.png")
+}
+.gameover-bg {
+    -fx-background-image: url("../images/gameover_bg.png")
+}
+.gameover-button {
+    -fx-background-color: transparent;
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-effect: none; /* Không glow */
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+/* Khi hover hoặc được chọn  */
+#playAgainButton:hover,
+#playAgainButton.selected {
+    -fx-background-image: url("../images/playagainbutton2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+#mainMenuButton:hover,
+#mainMenuButton.selected {
+    -fx-background-image: url("../images/mainmenubutton2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+
+
+#resumeButton:hover,
+#resumeButton.selected {
+    -fx-background-image: url("../images/resumebutton2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+/* Ảnh mặc định */
+#playAgainButton {
+    -fx-background-image: url("../images/playagainbutton.png");
+}
+
+#mainMenuButton {
+    -fx-background-image: url("../images/mainmenubutton.png");
+}
+
+#resumeButton {
+    -fx-background-image: url("../images/resumebutton.png");
 }
 
 /* Power-up styles */
@@ -92,3 +206,166 @@
 .power-up-life   { -fx-fill: #03a9f4; }
 .power-up-slow   { -fx-fill: #9c27b0; }
 .power-up-catch { -fx-fill: #5016e4}
+
+.pause-title {
+    -fx-text-fill: linear-gradient(#ffffff, #a8d8ff);
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 6 0;
+}
+
+.pause-button {
+    -fx-background-color: transparent;
+    -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-effect: none; /* Không glow */
+    -fx-transition: all 0.2s ease-in-out;
+}
+
+#lifeBox {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.life-icon {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 12, 0.4, 0, 0);
+}
+
+.level-banner {
+    -fx-background-color: rgba(12, 18, 38, 0.88);
+    -fx-background-radius: 12;
+    -fx-padding: 18 34;
+    -fx-effect: dropshadow(gaussian, rgba(8, 12, 26, 0.75), 28, 0.3, 0, 12);
+}
+
+.level-banner-text {
+    -fx-text-fill: #f0f6ff;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+/* Larger, bolder style specifically for countdown numbers (3,2,1) */
+.level-banner-countdown {
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+}
+
+/* Bigger style for the "LEVEL X CLEARED!" banner */
+.level-banner-cleared {
+    -fx-font-size: 48px;
+    -fx-font-weight: bold;
+}
+
+/* Bigger style for the "LEVEL X" banner at level start */
+.level-banner-start {
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+}
+
+.ranking-bg {
+      -fx-background-image: url("../images/rankingbg.png");
+}
+
+/* Làm trong suốt hoàn toàn bảng xếp hạng */
+.ranking-table {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-table-cell-border-color: transparent;
+    -fx-control-inner-background: transparent;
+}
+
+/* Header trong suốt và chữ trắng */
+.ranking-table .column-header-background {
+    -fx-background-color: transparent;
+}
+.ranking-table .column-header, 
+.ranking-table .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+/* Center header text */
+.ranking-table .column-header .label {
+    -fx-alignment: CENTER;
+    -fx-text-alignment: center;
+}
+
+/* Dòng dữ liệu trong suốt */
+.ranking-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.ranking-table .table-cell {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+}
+
+/* Ẩn hiệu ứng hover, chọn */
+.ranking-table .table-row-cell:filled:selected,
+.ranking-table .table-row-cell:filled:hover {
+    -fx-background-color: transparent;
+}
+
+/* Ẩn scroll bar */
+.ranking-table .scroll-bar:vertical,
+.ranking-table .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+}
+#backButton {
+     -fx-background-image: url("../images/back.png");
+}
+#backButton:hover,
+#backButton.selected {
+    -fx-background-image: url("../images/back2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+#loginButton {
+    -fx-background-image: url("../images/login.png");
+}
+#loginButton:hover,
+#loginButton.selected {
+    -fx-background-image: url("../images/login2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+#createButton {
+    -fx-background-image: url("../images/create.png");
+}
+#createButton:hover,
+#createButton.selected {
+    -fx-background-image: url("../images/create2.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+
+
+#mainmenuButton2 {
+    -fx-background-image: url("../images/mainmenu3.png");
+}
+#mainmenuButton2:hover,
+#mainmenuButton2.selected {
+    -fx-background-image: url("../images/mainmenu4.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+#continueButton2 {
+    -fx-background-image: url("../images/continue3.png");
+}
+#continueButton2:hover,
+#continueButton2.selected {
+    -fx-background-image: url("../images/continue4.png");
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}

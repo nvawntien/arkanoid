@@ -1,17 +1,31 @@
 package com.game.arkanoid.controller;
 
-import com.game.arkanoid.view.SceneNavigator;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import com.game.arkanoid.container.Container;
 
-/** Simple controller for the game over screen. */
 public final class GameOverController {
-    private final SceneNavigator navigator;
+    private final SceneController navigator;
+    private final int finalScore;
 
-    public GameOverController(SceneNavigator navigator) {
+    @FXML private Label scoreLabel;
+
+    public GameOverController(SceneController navigator, int finalScore) {
         this.navigator = navigator;
+        this.finalScore = finalScore;
+    }
+
+    @FXML
+    private void initialize() {
+        if (scoreLabel != null) {
+            scoreLabel.setText(" " + finalScore);
+        }
     }
 
     public void onPlayAgain(ActionEvent e) {
+        // Reset game container to start a fresh session
+        Container.reset();
         navigator.showGame();
     }
 
@@ -19,4 +33,3 @@ public final class GameOverController {
         navigator.showMenu();
     }
 }
-
