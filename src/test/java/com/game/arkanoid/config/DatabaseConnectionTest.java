@@ -1,4 +1,4 @@
-package com.game.arkanoid.services;
+package com.game.arkanoid.config;
 
 import com.game.arkanoid.config.DatabaseConfig;
 import java.sql.Connection;
