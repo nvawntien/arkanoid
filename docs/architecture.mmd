@@ -1,4 +1,5 @@
 classDiagram
+<<<<<<< HEAD
 class Main {
   -navigator : SceneController
   +start(Stage stage) : void
@@ -960,3 +961,528 @@ EnemyRenderer --> Enemy : uses
 PaddleRenderer --> Paddle : uses
 TransitionFactory --> TransitionStrategy : uses
 TransitionManager --> TransitionStrategy : uses
+=======
+direction TB
+    class Main {
+	    -navigator : SceneController
+	    +start(stage: Stage) : void
+	    +main(args: String[]) : void
+    }
+
+    class SceneController {
+	    +navigateTo(id: SceneId, t: TransitionStrategy) : void
+	    +showMenu() : void
+	    +showSettings() : void
+	    +showGame() : void
+	    +showGameRound(round: int) : void
+	    +startGameFromSnapshot(snap: GameStateSnapshot) : void
+	    +showGameOver() : void
+	    +showWin() : void
+	    +showLogin() : void
+	    +showSignup() : void
+	    +showRankings() : void
+	    +saveInProgressIfAny() : void
+	    +exit() : void
+    }
+
+    class GameController {
+	    -gameService : GameService
+	    -gameState : GameState
+	    +initialize() : void
+	    +applySnapshot(snap: GameStateSnapshot) : void
+	    +resumeWithCountdown() : void
+	    +isResumable() : boolean
+	    +captureSnapshot() : GameStateSnapshot
+	    +stop() : void
+	    +getScore() : int
+    }
+
+    class MenuController {
+	    +onStartGame(e: ActionEvent) : void
+	    +onContinueGame(e: ActionEvent) : void
+	    +onOpenSettings(e: ActionEvent) : void
+	    +onShowRanking(e: ActionEvent) : void
+	    +onExit(e: ActionEvent) : void
+    }
+
+    class LoginController {
+	    +onLogin(e: ActionEvent) : void
+	    +onBack(e: ActionEvent) : void
+    }
+
+    class SignupController {
+	    +onSignup(e: ActionEvent) : void
+	    +onBack(e: ActionEvent) : void
+    }
+
+    class SettingsController {
+	    +initialize() : void
+	    +onBack(e: ActionEvent) : void
+    }
+
+    class RankingsController {
+	    +initialize() : void
+    }
+
+    class PauseController {
+	    +onResume(e: ActionEvent) : void
+	    +onRestart(e: ActionEvent) : void
+	    +onExit(e: ActionEvent) : void
+    }
+
+    class GameOverController {
+	    +onPlayAgain(e: ActionEvent) : void
+	    +onMainMenu(e: ActionEvent) : void
+    }
+
+    class WinController {
+	    +onShowRankings(e: ActionEvent) : void
+	    +onMainMenu(e: ActionEvent) : void
+    }
+
+    class GameService {
+	    +update(state: GameState, in: InputState, dt: double, worldW: double, worldH: double) : void
+	    +restartLevel(state: GameState) : void
+	    +loadNextLevel(state: GameState) : void
+	    +startNextLevel(state: GameState) : void
+	    +loadLevel(state: GameState, levelIndex: int) : void
+	    +bindState(state: GameState) : void
+	    +getEnemyService() : EnemyService
+    }
+
+    class BallService {
+	    +launch(ball: Ball) : void
+	    +step(ball: Ball, dt: double) : void
+	    +bounceWorld(ball: Ball, worldW: double, worldH: double) : void
+	    +fellBelow(ball: Ball, worldH: double) : boolean
+	    +resetOnPaddle(ball: Ball, paddle: Paddle) : void
+	    +bounceOff(ball: Ball, other: GameObject) : void
+    }
+
+    class PaddleService {
+	    +moveLeft(p: Paddle, dt: double, worldW: double) : void
+	    +moveRight(p: Paddle, dt: double, worldW: double) : void
+	    +clampWithin(p: Paddle, worldW: double) : void
+	    +stop(p: Paddle) : void
+	    +scaleWidth(p: Paddle, factor: double, worldW: double) : void
+	    +resetPaddlePosition(p: Paddle) : void
+    }
+
+    class BricksService {
+	    +createBricksFromLayout(layout: int[][]) : List
+	    +createBricksFromResource(resourcePath: String) : List
+	    +handleBrickHit(brick: Brick) : boolean
+	    +allBricksCleared(bricks: List) : boolean
+	    +getBricksRemaining() : int
+	    +recalculateBricksRemaining(bricks: List) : void
+    }
+
+    class BulletService {
+	    +tickCooldown(state: GameState, dt: double) : void
+	    +tryFire(state: GameState, paddle: Paddle) : boolean
+	    +update(state: GameState, bricks: List, dt: double, worldH: double) : List
+    }
+
+    class PowerUpService {
+	    +spawnPowerUpIfAny(x: double, y: double, width: double) : PowerUp
+	    +update(state: GameState, dt: double, worldW: double, worldH: double) : void
+    }
+
+    class EnemyService {
+	    +spawnEnemy(state: GameState, x: double, y: double) : void
+	    +update(state: GameState, dt: double, worldW: double, worldH: double) : void
+    }
+
+    class RoundService {
+	    +loadLevel(state: GameState, levelIndex: int) : void
+	    +loadNextLevel(state: GameState) : void
+    }
+
+    class DatabaseService {
+	    +initializeSchema() : CompletableFuture
+	    +login(username: String, password: String) : CompletableFuture
+	    +signup(username: String, password: String) : CompletableFuture
+	    +getRankings(limit: int) : CompletableFuture
+	    +loadInProgressState(userId: int) : CompletableFuture
+	    +saveInProgress(userId: int, snap: GameStateSnapshot) : CompletableFuture
+	    +clearInProgress(userId: int) : CompletableFuture
+	    +updateBest(userId: int, bestRound: int, bestScore: int) : CompletableFuture
+	    +shutdown() : void
+    }
+
+    class GameState {
+	    +ball : Ball
+	    +paddle : Paddle
+	    +bricks : List
+	    +balls : List
+	    +bullets : List
+	    +powerUps : List
+	    +enemies : List
+	    +activePowerUps : Map
+	    +score : int
+	    +highScore : int
+	    +lives : int
+	    +level : int
+	    +running : boolean
+	    +paused : boolean
+	    +levelTransitionPending : boolean
+	    +timeScale : double
+	    +basePaddleWidth : double
+	    +basePaddleSpeed : double
+	    +laserCooldown : double
+	    +resetForLife() : void
+	    +resetForLevel() : void
+	    +decrementScore(amount: int) : void
+	    +decrementLives() : void
+	    +incrementLives() : void
+    }
+
+    class GameStateSnapshot {
+	    +currentLevel : int
+	    +score : int
+	    +lives : int
+	    +paddleX : double
+	    +ballX : double
+	    +ballY : double
+	    +ballDx : double
+	    +ballDy : double
+	    +ballMoving : boolean
+	    +ballDownward : boolean
+	    +ballStuck : boolean
+	    +ballStuckOffsetX : double
+	    +paddleWidth : double
+	    +timeScale : double
+	    +laserCooldown : double
+	    +from(state: GameState) : GameStateSnapshot
+	    +applyTo(state: GameState) : void
+    }
+
+    class GameObject {
+	    -x : double
+	    -y : double
+	    -width : double
+	    -height : double
+	    +update(dt: double) : void
+	    +getX() : double
+	    +getY() : double
+	    +getWidth() : double
+	    +getHeight() : double
+    }
+
+    class MovableObject {
+	    -dx : double
+	    -dy : double
+	    +update(dt: double) : void
+	    +setVelocity(dx: double, dy: double) : void
+	    +getDx() : double
+	    +getDy() : double
+    }
+
+    class Ball {
+	    -radius : double
+	    +getCenterX() : double
+	    +getCenterY() : double
+	    +setCenter(x: double, y: double) : void
+	    +getRadius() : double
+	    +setRadius(r: double) : void
+	    +isMoving() : boolean
+	    +setMoving(m: boolean) : void
+	    +isStuck() : boolean
+	    +setStuck(v: boolean) : void
+	    +getStuckOffsetX() : double
+	    +setStuckOffsetX(v: double) : void
+	    +update(dt: double) : void
+	    +left() : double
+	    +right() : double
+	    +top() : double
+	    +bottom() : double
+    }
+
+    class Paddle {
+	    -speed : double
+	    -minWidth : double
+	    -maxWidth : double
+	    +update(dt: double) : void
+	    +getSpeed() : double
+	    +setSpeed(v: double) : void
+	    +setWidthBounds(min: double, max: double) : void
+	    +setWidthClamped(w: double) : void
+    }
+
+    class Brick {
+	    -health : int
+	    +update(dt: double) : void
+	    +getHealth() : int
+	    +setHealth(h: int) : void
+	    +isDestroyed() : boolean
+	    +isIndestructible() : boolean
+    }
+
+    class Bullet {
+	    +update(dt: double) : void
+	    +top() : double
+	    +bottom() : double
+	    +left() : double
+	    +right() : double
+    }
+
+    class PowerUp {
+	    -type : PowerUpType
+	    -collected : boolean
+	    +getType() : PowerUpType
+	    +isCollected() : boolean
+	    +markCollected() : void
+	    +update(dt: double) : void
+    }
+
+    class Enemy {
+	    -zigzagTimer : double
+	    -type : EnemyType
+	    +getType() : EnemyType
+	    +getVx() : double
+	    +setVx(v: double) : void
+	    +getVy() : double
+	    +setVy(v: double) : void
+	    +update(dt: double) : void
+    }
+
+    class InputState {
+	    +left : boolean
+	    +right : boolean
+	    +launch : boolean
+	    +fire : boolean
+    }
+
+    class RankingEntry {
+	    -name : String
+	    -bestScore : int
+	    -bestRound : int
+	    +getName() : String
+	    +getBestScore() : int
+	    +getBestRound() : int
+    }
+
+    class User {
+	    -id : int
+	    -name : String
+	    -passwordHash : String
+	    -bestScore : int
+	    -bestRound : int
+	    -lastLogin : LocalDateTime
+	    +getId() : int
+	    +getName() : String
+	    +getPasswordHash() : String
+	    +getBestScore() : int
+	    +getBestRound() : int
+	    +getLastLogin() : LocalDateTime
+    }
+
+    class DatabaseConfig {
+	    -connection : Connection
+	    +getConnection() : Connection
+	    +close() : void
+    }
+
+    class GameSettings {
+	    +isSoundEnabled() : boolean
+	    +setSoundEnabled(v: boolean) : void
+	    +getMasterVolume() : double
+	    +setMasterVolume(v: double) : void
+	    +getMusicVolume() : double
+	    +setMusicVolume(v: double) : void
+	    +getSfxVolume() : double
+	    +setSfxVolume(v: double) : void
+	    +getDifficulty() : Difficulty
+	    +setDifficulty(d: Difficulty) : void
+	    +getBallSpeedMultiplier() : double
+	    +getPaddleWidthMultiplier() : double
+	    +getHighScore() : int
+	    +setHighScore(score: int) : void
+    }
+
+    class GameEventBus {
+	    +getInstance() : GameEventBus
+	    +subscribe(type: Class, handler: Consumer) : Subscription
+	    +publish(event: Object) : void
+    }
+
+    class Renderer~Model~ {
+	    +getNode() : Node
+	    +render(model: Model) : void
+	    +dispose() : void
+    }
+
+    class BallRenderer {
+	    +render(balls: List) : void
+	    +getNode() : ImageView
+    }
+
+    class BricksRenderer {
+	    +render(bricks: List) : void
+	    +getNode() : ImageView
+    }
+
+    class BulletRenderer {
+	    +render(bullets: List) : void
+	    +getNode() : ImageView
+    }
+
+    class EnemyRenderer {
+	    +render(enemies: List) : void
+	    +getNode() : ImageView
+    }
+
+    class PaddleRenderer {
+	    +render(paddle: Paddle) : void
+	    +getNode() : ImageView
+    }
+
+    class PowerUpRenderer {
+	    +render(powerUps: List) : void
+	    +getNode() : ImageView
+    }
+
+    class LifeRenderer {
+	    +render(lives: Integer) : void
+	    +getNode() : Node
+    }
+
+    class DoorTopRenderer {
+	    +render(Void) : void
+	    +getNode() : Pane
+    }
+
+    class MenuAnimator {
+	    +moveLeft() : void
+	    +moveRight() : void
+	    +getCenterButton() : Button
+    }
+
+    class SoundManager {
+	    +playMenuBGM() : void
+	    +playGameBGM() : void
+	    +playPowerUpHit() : void
+	    +stopBGM() : void
+    }
+
+    class Button {
+    }
+
+    class Container {
+    }
+
+    class TransitionManager {
+    }
+
+    class TransitionFactory {
+    }
+
+    class TransitionStrategy {
+    }
+
+    class FadeTransitionStrategy {
+    }
+
+    class BlurFadeStrategy {
+    }
+
+    class SlideFadeStrategy {
+    }
+
+    class UntitledClass {
+    }
+
+	<<interface>> Renderer
+
+    GameObject <|-- MovableObject
+    MovableObject <|-- Ball
+    MovableObject <|-- Paddle
+    MovableObject <|-- Bullet
+    MovableObject <|-- PowerUp
+    MovableObject <|-- Enemy
+    Main --> SceneController : uses
+    SceneController --> GameController : creates
+    SceneController --> MenuController : creates
+    SceneController --> SettingsController : creates
+    SceneController --> LoginController : creates
+    SceneController --> SignupController : creates
+    SceneController --> RankingsController : creates
+    SceneController --> GameOverController : creates
+    SceneController --> WinController : creates
+    GameController --> GameService : uses
+    GameController --> GameState : uses
+    GameController --> SceneController : uses
+    GameController ..> GameStateSnapshot : capture/apply
+    MenuController ..> DatabaseService : uses
+    LoginController ..> DatabaseService : uses
+    SignupController ..> DatabaseService : uses
+    RankingsController ..> DatabaseService : uses
+    GameOverController --> SceneController : navigates
+    WinController --> SceneController : navigates
+    GameService o-- BallService
+    GameService o-- PaddleService
+    GameService o-- BricksService
+    GameService o-- PowerUpService
+    GameService o-- BulletService
+    GameService o-- EnemyService
+    GameService o-- RoundService
+    GameService --> GameState : mutates
+    RoundService o-- BricksService
+    RoundService o-- BallService
+    RoundService o-- PaddleService
+    BulletService --> GameState : uses
+    BulletService --> Bullet : uses
+    BulletService --> Brick : uses
+    BallService --> Ball : uses
+    BallService --> Paddle : uses
+    BallService --> GameObject : uses
+    PowerUpService --> GameState : uses
+    PowerUpService --> PowerUp : uses
+    EnemyService --> GameState : uses
+    EnemyService --> Enemy : uses
+    BricksService --> Brick : creates
+    DatabaseService ..> User : returns
+    DatabaseService ..> RankingEntry : returns
+    DatabaseService ..> GameStateSnapshot : uses
+    GameState --> Ball : has
+    GameState --> Paddle : has
+    GameState --> Brick : has many
+    GameState --> Bullet : has many
+    GameState --> PowerUp : has many
+    GameState --> Enemy : has many
+    Renderer <|.. BallRenderer
+    Renderer <|.. BricksRenderer
+    Renderer <|.. BulletRenderer
+    Renderer <|.. EnemyRenderer
+    Renderer <|.. PaddleRenderer
+    Renderer <|.. PowerUpRenderer
+    Renderer <|.. LifeRenderer
+    Renderer <|.. DoorTopRenderer
+    BallRenderer --> Ball : renders
+    BricksRenderer --> Brick : renders many
+    BulletRenderer --> Bullet : renders many
+    EnemyRenderer --> Enemy : renders many
+    PaddleRenderer --> Paddle : renders
+    PowerUpRenderer --> PowerUp : renders many
+    LifeRenderer --> GameState : uses lives
+    DoorTopRenderer --> GameEventBus : reacts to door events
+    SoundManager --> GameEventBus : subscribes
+    MenuAnimator --> Button : animates
+    GameController --> Renderer : updates visual layer
+    MenuController --> MenuAnimator : controls
+    Container --> GameSettings : reads config
+    SettingsController --> GameSettings : updates
+    GameController --> InputState : creates & updates
+    GameService --> InputState : reads
+    GameController --> GameEventBus : publish & subscribe
+    EnemyRenderer --> GameEventBus : subscribe (explosion)
+    GameController --> PauseController : uses
+    SceneController --> TransitionManager : uses
+    TransitionManager *-- TransitionFactory : creates
+    TransitionFactory --> TransitionStrategy : returns
+    TransitionStrategy <|.. FadeTransitionStrategy
+    TransitionStrategy <|.. BlurFadeStrategy
+    TransitionStrategy <|.. SlideFadeStrategy
+    TransitionStrategy -- UntitledClass
+
+>>>>>>> a0ed4c4de45a0cf98b96750bf5181cfa4b8d91fe
