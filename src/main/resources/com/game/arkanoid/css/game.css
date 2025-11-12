@@ -369,3 +369,15 @@
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }
+
+@font-face {
+    font-family: 'fontcucdep';
+    src: url('../fonts/generation.ttf'); 
+}
+
+.hud-label {
+    -fx-font-family: 'fontcucdep';
+    -fx-font-size: 20px; 
+    -fx-text-fill: white; 
+    -fx-alignment: center-right; 
+}
