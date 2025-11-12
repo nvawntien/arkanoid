@@ -145,13 +145,6 @@ mvn exec:java -Dexec.mainClass="com.game.arkanoid.app.Main"
 | 🐌   | Slow Ball     | Slows down overall gameplay time scale                     |
 
 
-## 🧮 Scoring System
-
--
--
--
--
-
 ## 🧠 UML & Architecture
 
 Visual representation of the core architecture and class relationships:
