@@ -26,7 +26,7 @@ public final class BricksService {
                 int brickHealth = layout[row][col]; 
                 if (brickHealth > 0) {
                     double brickX = col * Constants.BRICK_WIDTH + 22;
-                    double brickY = row * Constants.BRICK_HEIGHT + 250;
+                    double brickY = row * Constants.BRICK_HEIGHT + 300;
 
                     createdBricks.add(new Brick( brickX,  brickY,  Constants.BRICK_WIDTH,  Constants.BRICK_HEIGHT, brickHealth ));
                 }
@@ -59,7 +59,7 @@ public final class BricksService {
                 if (health <= 0) continue;
 
                 double x = col * Constants.BRICK_WIDTH + 22;
-                double y = row * Constants.BRICK_HEIGHT + 172;
+                double y = row * Constants.BRICK_HEIGHT + 300;
                 
                 bricks.add(new Brick( x, y, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, health ));
             }
