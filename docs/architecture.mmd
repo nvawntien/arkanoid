@@ -408,6 +408,27 @@ direction TB
     class Container {
     }
 
+    class TransitionManager {
+    }
+
+    class TransitionFactory {
+    }
+
+    class TransitionStrategy {
+    }
+
+    class FadeTransitionStrategy {
+    }
+
+    class BlurFadeStrategy {
+    }
+
+    class SlideFadeStrategy {
+    }
+
+    class UntitledClass {
+    }
+
 	<<interface>> Renderer
 
     GameObject <|-- MovableObject
@@ -493,4 +514,11 @@ direction TB
     GameController --> GameEventBus : publish & subscribe
     EnemyRenderer --> GameEventBus : subscribe (explosion)
     GameController --> PauseController : uses
+    SceneController --> TransitionManager : uses
+    TransitionManager *-- TransitionFactory : creates
+    TransitionFactory --> TransitionStrategy : returns
+    TransitionStrategy <|.. FadeTransitionStrategy
+    TransitionStrategy <|.. BlurFadeStrategy
+    TransitionStrategy <|.. SlideFadeStrategy
+    TransitionStrategy -- UntitledClass
 
