@@ -23,7 +23,7 @@ public final class EnemyService {
     private final GameEventBus eventBus = GameEventBus.getInstance();
 
     /** Maximum number of enemies allowed on screen simultaneously */
-    private static final int MAX_ENEMIES = 5;
+    private static final int MAX_ENEMIES = 3;
 
     public EnemyService() {}
 

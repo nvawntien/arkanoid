@@ -17,7 +17,7 @@ public class Constants {
     public static final double MAX_BALL_ANGLE = 75.0;   // degrees (left-most)
     public static final double BALL_RESTITUTION = 1;  // energy kept on bounce (0..1)
     public static final double BALL_NUDGE = 0.5;         // px to separate after paddle hit
-    public static final double BALL_LAUNCH_ANGLE = 95.0; // degrees (straight up)
+    public static final double BALL_LAUNCH_ANGLE = 90.0; // degrees (straight up)
 
     // Paddle constants
     public static final double PADDLE_WIDTH  = 79;
@@ -39,7 +39,7 @@ public class Constants {
     public static final double POWER_UP_WIDTH = 32.0;
     public static final double POWER_UP_HEIGHT = 16.0;
     public static final double POWER_UP_FALL_SPEED = 2.0;
-    public static final double POWER_UP_DROP_CHANCE = 0.36;
+    public static final double POWER_UP_DROP_CHANCE = 0.4;
     public static final double POWER_UP_DURATION = 550.0;
     public static final double POWER_UP_EXPAND_FACTOR = 119.0 / 79.0;
     public static final double POWER_UP_LASER_FACTOR = 1.0;

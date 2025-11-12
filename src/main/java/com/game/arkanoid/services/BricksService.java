@@ -77,7 +77,7 @@ public final class BricksService {
                 if (health <= 0) continue;
 
                 double x = col * Constants.BRICK_WIDTH + 22;
-                double y = row * Constants.BRICK_HEIGHT + 172;
+                double y = row * Constants.BRICK_HEIGHT + 250;
                 
                 bricks.add(new Brick( x, y, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, health ));
             }
