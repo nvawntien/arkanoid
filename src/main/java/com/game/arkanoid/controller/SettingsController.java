@@ -3,6 +3,8 @@ package com.game.arkanoid.controller;
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.config.GameSettings.Difficulty;
 import com.game.arkanoid.view.sound.SoundManager;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.sound.ClickSoundEvent;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,6 +19,7 @@ import javafx.scene.control.Slider;
  * </p>
  */
 public final class SettingsController {
+    private final GameEventBus eventBus = GameEventBus.getInstance();
 
     /** ComboBox for selecting the game difficulty level. */
     @FXML
@@ -78,6 +81,7 @@ public final class SettingsController {
      */
     @FXML
     private void onDifficultyChanged(ActionEvent event) {
+        eventBus.publish(new ClickSoundEvent());
         Difficulty selected = difficultyCombo.getSelectionModel().getSelectedItem();
         if (selected != null) {
             GameSettings.setDifficulty(selected);
@@ -92,6 +96,7 @@ public final class SettingsController {
      */
     @FXML
     private void onBack(ActionEvent event) {
+        eventBus.publish(new ClickSoundEvent());
         navigator.showMenu();
     }
 }

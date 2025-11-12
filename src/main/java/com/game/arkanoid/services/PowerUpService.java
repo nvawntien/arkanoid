@@ -49,11 +49,11 @@ public final class PowerUpService {
         if (random.nextDouble() > Constants.POWER_UP_DROP_CHANCE) {
             return null;
         }
-        PowerUpType[] types = {PowerUpType.CATCH_BALL, PowerUpType.MULTI_BALL};
+        PowerUpType[] types = PowerUpType.values();
         PowerUpType type = types[random.nextInt(types.length)];
         double spawnX = x + (width - Constants.POWER_UP_WIDTH) / 2.0;
         double spawnY = y + Constants.BRICK_HEIGHT;
-        return new PowerUp(type.MULTI_BALL, spawnX, spawnY, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
+        return new PowerUp(type, spawnX, spawnY, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
     /**

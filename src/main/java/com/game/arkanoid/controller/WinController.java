@@ -1,5 +1,9 @@
 package com.game.arkanoid.controller;
 
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.sound.ClickSoundEvent;
+import com.game.arkanoid.events.sound.WinSoundEvent;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -42,6 +46,7 @@ public final class WinController {
      */
     @FXML
     private void initialize() {
+        GameEventBus.getInstance().publish(new WinSoundEvent());
         if (scoreLabel != null) {
             scoreLabel.setText(" " + finalScore);
         }
@@ -53,6 +58,7 @@ public final class WinController {
      * @param e the {@link ActionEvent} triggered by the button
      */
     public void onMainMenu(ActionEvent e) {
+        GameEventBus.getInstance().publish(new ClickSoundEvent());
         navigator.showMenu();
     }
 
@@ -62,6 +68,7 @@ public final class WinController {
      * @param e the {@link ActionEvent} triggered by the button
      */
     public void onShowRankings(ActionEvent e) {
+        GameEventBus.getInstance().publish(new ClickSoundEvent());
         navigator.showRankings();
     }
 }

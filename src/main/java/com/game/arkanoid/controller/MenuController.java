@@ -3,8 +3,7 @@ package com.game.arkanoid.controller;
 import com.game.arkanoid.container.AppContext;
 import com.game.arkanoid.container.Container;
 import com.game.arkanoid.events.GameEventBus;
-import com.game.arkanoid.events.sound.MenuBGMSoundEvent;
-import com.game.arkanoid.events.sound.StopBGMSoundEvent;
+import com.game.arkanoid.events.sound.*;
 import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.User;
 import com.game.arkanoid.view.animator.MenuAnimator;
@@ -106,6 +105,7 @@ public final class MenuController {
      */
     @FXML private void onStartGame(ActionEvent e) {
         eventBus.publish(new StopBGMSoundEvent());
+        eventBus.publish(new ClickSoundEvent());
         Container.reset();
         navigator.showGame();
     }
@@ -115,6 +115,8 @@ public final class MenuController {
      * @param e
      */
     @FXML private void onOpenSettings(ActionEvent e) {
+        eventBus.publish(new ClickSoundEvent());
+        eventBus.publish(new StopBGMSoundEvent());
         navigator.showSettings();
     }
 
@@ -123,7 +125,8 @@ public final class MenuController {
      * @param e
      */
     @FXML private void onExit(ActionEvent e) {
-        
+        eventBus.publish(new ClickSoundEvent());
+        eventBus.publish(new StopBGMSoundEvent());
         navigator.exit();
     }
 
@@ -132,6 +135,8 @@ public final class MenuController {
      * @param e
      */
     @FXML private void onContinueGame(ActionEvent e) {
+        eventBus.publish(new StopBGMSoundEvent());
+        eventBus.publish(new ClickSoundEvent());
         User current = AppContext.getInstance().getCurrentUser();
         if (current == null) return;
         continueButton.setDisable(true);
@@ -166,5 +171,9 @@ public final class MenuController {
      * Handle "Ranking" button action.
      * @param e
      */
-    @FXML private void onShowRanking(ActionEvent e) { navigator.showRankings(); }
+    @FXML private void onShowRanking(ActionEvent e) { 
+        eventBus.publish(new StopBGMSoundEvent());
+        eventBus.publish(new ClickSoundEvent());
+        navigator.showRankings(); 
+    }
 }

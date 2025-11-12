@@ -4,6 +4,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import com.game.arkanoid.container.Container;
+import com.game.arkanoid.events.GameEventBus;
+import com.game.arkanoid.events.sound.GameOverSoundEvent;
+import com.game.arkanoid.events.sound.ClickSoundEvent;
 
 public final class GameOverController {
     private final SceneController navigator;
@@ -26,6 +29,7 @@ public final class GameOverController {
      */
     @FXML
     private void initialize() {
+        GameEventBus.getInstance().publish(new GameOverSoundEvent());
         if (scoreLabel != null) {
             scoreLabel.setText(" " + finalScore);
         }
@@ -37,6 +41,7 @@ public final class GameOverController {
      */
     public void onPlayAgain(ActionEvent e) {
         // Reset game container to start a fresh session
+        GameEventBus.getInstance().publish(new ClickSoundEvent());
         Container.reset();
         navigator.showGame();
     }
@@ -46,6 +51,7 @@ public final class GameOverController {
      * @param e
      */
     public void onMainMenu(ActionEvent e) {
+        GameEventBus.getInstance().publish(new ClickSoundEvent());
         navigator.showMenu();
     }
 }

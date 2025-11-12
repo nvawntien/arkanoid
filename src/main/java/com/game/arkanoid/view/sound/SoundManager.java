@@ -58,7 +58,7 @@ public final class SoundManager {
         loadBGM("menu", "/com/game/arkanoid/sounds/menu_sound.mp3");
         loadBGM("game", "/com/game/arkanoid/sounds/game_sound.mp3");
         loadBGM("round_start", "/com/game/arkanoid/sounds/round_start.mp3");
-
+        loadBGM("win", "/com/game/arkanoid/sounds/win_sound.mp3");
         // SFX
         loadSFX("brick_hit", "/com/game/arkanoid/sounds/brick_hit.wav");
         loadSFX("paddle_hit", "/com/game/arkanoid/sounds/paddle_hit.wav");
@@ -66,6 +66,9 @@ public final class SoundManager {
         loadSFX("bullet_fire", "/com/game/arkanoid/sounds/bullet_fire.wav");
         loadSFX("powerup_hit", "/com/game/arkanoid/sounds/powerup_hit.wav");
         loadSFX("game_over", "/com/game/arkanoid/sounds/game_over.wav");
+        loadSFX("click", "/com/game/arkanoid/sounds/click.wav");
+        loadSFX("countDown", "/com/game/arkanoid/sounds/countDown.wav");
+        loadSFX("round_start", "/com/game/arkanoid/sounds/round_start.wav");
     }
 
     /**
@@ -104,6 +107,7 @@ public final class SoundManager {
         subscriptions.add(eventBus.subscribe(MenuBGMSoundEvent.class, e -> playBGM("menu")));
         subscriptions.add(eventBus.subscribe(RoundStartSoundEvent.class, e -> playBGM("round_start")));
         subscriptions.add(eventBus.subscribe(StopBGMSoundEvent.class, e -> stopBGM()));
+        subscriptions.add(eventBus.subscribe(WinSoundEvent.class, e -> playBGM("win")));
 
         subscriptions.add(eventBus.subscribe(BrickHitSoundEvent.class, e -> playSFX("brick_hit")));
         subscriptions.add(eventBus.subscribe(PaddleHitSoundEvent.class, e -> playSFX("paddle_hit")));
@@ -111,6 +115,9 @@ public final class SoundManager {
         subscriptions.add(eventBus.subscribe(BulletFireSoundEvent.class, e -> playSFX("bullet_fire")));
         subscriptions.add(eventBus.subscribe(PowerUpHitSoundEvent.class, e -> playSFX("powerup_hit")));
         subscriptions.add(eventBus.subscribe(GameOverSoundEvent.class, e -> playSFX("game_over")));
+        subscriptions.add(eventBus.subscribe(ClickSoundEvent.class, e -> playSFX("click")));
+        subscriptions.add(eventBus.subscribe(CountDownSoundEvent.class, e -> playSFX("countDown")));
+        subscriptions.add(eventBus.subscribe(RoundStartSoundEvent.class, e -> playSFX("round_start")));
     }
 
     /**

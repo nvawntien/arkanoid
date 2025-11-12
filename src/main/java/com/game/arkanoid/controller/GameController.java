@@ -10,6 +10,7 @@ import com.game.arkanoid.events.game.OpenDoorTopLeftEvent;
 import com.game.arkanoid.events.game.OpenDoorTopRightEvent;
 import com.game.arkanoid.events.paddle.ExplodePaddleFinishedEvent;
 import com.game.arkanoid.events.paddle.IntroPaddleEvent;
+import com.game.arkanoid.events.sound.*;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
@@ -29,7 +30,6 @@ import java.util.List;
 
 import com.game.arkanoid.events.powerup.PowerUpActivatedEvent;
 import com.game.arkanoid.events.powerup.PowerUpExpiredEvent;
-import com.game.arkanoid.events.sound.GameBGMSoundEvent;
 import com.game.arkanoid.view.transition.TransitionStrategy;
 
 import java.io.IOException;
@@ -75,6 +75,7 @@ public final class GameController {
     private final SceneController navigator;
     private final Set<KeyCode> activeKeys = new HashSet<>();
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
+    private final GameEventBus eventBus = GameEventBus.getInstance();
 
     // --- Rendering Components ---
     private BallsRenderer ballsRenderer;
@@ -92,6 +93,7 @@ public final class GameController {
     private Parent pauseOverlay;
     private int lastLevelObserved = Integer.MIN_VALUE;
     private Timeline spawnTimer;
+    private boolean countDowning = false;
 
    /**
     * Constructor.
@@ -115,7 +117,6 @@ public final class GameController {
         registerEventListeners();
         startEnemySpawnTimer();
         startGameLoop();
-        //GameEventBus.getInstance().publish(new GameBGMSoundEvent());
         lastLevelObserved = gameState.level;
         startLevelIntro();
     }
@@ -162,6 +163,7 @@ public final class GameController {
                     stopLoopAndNavigate(SceneId.GAME_OVER, navigator.transitions().gameOverTransition());
                     return;
                 }
+
                 if (gameState.gameCompleted) {
                     // persist bests and clear in-progress, then show Win scene
                     User u = AppContext.getInstance().getCurrentUser();
@@ -172,6 +174,7 @@ public final class GameController {
                         AppContext.getInstance().db().clearInProgress(u.getId());
                     }
                     stopLoopAndNavigate(SceneId.WIN, navigator.transitions().winTransition());
+                    return;
                 }
             }
         };
@@ -182,7 +185,7 @@ public final class GameController {
      * Start enemy spawn timer.
      */
     private void startEnemySpawnTimer() {
-        spawnTimer = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
+        spawnTimer = new Timeline(new KeyFrame(Duration.seconds(13.6), e -> {
             if (gameState.paused || gameState.levelTransitionPending) return;
             System.out.println("Enemy spawn tick at " + System.currentTimeMillis());
             boolean left = Math.random() < 0.5;
@@ -361,11 +364,13 @@ public final class GameController {
         PauseTransition countdown1 = createBannerStep("1", 0.6);
 
         levelIntroSequence = new SequentialTransition(showLevel, countdown3, countdown2, countdown1);
+        eventBus.publish(new RoundStartSoundEvent());
         levelIntroSequence.setOnFinished(e -> {
             System.out.println("[GameController] Countdown finished → startNextLevel()");
             bannerLayer.setVisible(false);
             bannerLayer.setManaged(false);
             gameService.startNextLevel(gameState);
+            eventBus.publish(new GameBGMSoundEvent());
         });
         levelIntroSequence.playFromStart();
     }
@@ -417,7 +422,11 @@ public final class GameController {
      */
     private void togglePause() {
         if (isPauseVisible()) resumeGame();
-        else showPauseMenu();
+        else {
+            if (countDowning) return;
+            showPauseMenu();
+            eventBus.publish(new StopBGMSoundEvent());
+        }
     }
 
     /**
@@ -435,7 +444,7 @@ public final class GameController {
         if (pauseOverlay == null || isPauseVisible()) return;
         gameState.paused = true;
         activeKeys.clear();
-
+        countDowning = true;
         overlayLayer.setOpacity(1.0);
         overlayLayer.setVisible(true);
         overlayLayer.setManaged(true);
@@ -481,6 +490,7 @@ public final class GameController {
             bannerLayer.setVisible(false);
             bannerLayer.setManaged(false);
             gameState.paused = false;
+            countDowning = false;
             Platform.runLater(gamePane::requestFocus);
         });
         seq.playFromStart();
@@ -618,8 +628,10 @@ public final class GameController {
      * Stop the game controller and clean up resources.
      */
     public void stop() {
+        eventBus.publish(new StopBGMSoundEvent());
         if (loop != null) loop.stop();
         if (levelIntroSequence != null) levelIntroSequence.stop();
+        spawnTimer.stop();
         subscriptions.forEach(GameEventBus.Subscription::close);
         subscriptions.clear();
     }
