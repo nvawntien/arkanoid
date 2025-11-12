@@ -6,8 +6,11 @@ import com.game.arkanoid.models.GameState;
 import java.util.List;
 
 /**
- * Loads level layouts from resources and handles level progression.
- * Pure logic; no JavaFX types to keep MVC boundaries.
+ * Service responsible for loading level layouts and managing level progression.
+ * <p>
+ * Pure logic; no JavaFX types are used to maintain MVC separation.
+ * Handles resetting game state when a new level is loaded and advancing levels.
+ * </p>
  */
 public final class RoundService {
 
@@ -22,13 +25,27 @@ public final class RoundService {
         "/com/game/arkanoid/levels/level4.txt"
     };
 
+    /**
+     * Constructor for RoundService.
+     *
+     * @param bricksService Service for handling bricks.
+     * @param ballService Service for handling balls.
+     * @param paddleService Service for handling the paddle.
+     */
     public RoundService(BricksService bricksService, BallService ballService, PaddleService paddleService) {
         this.bricksService = bricksService;
         this.ballService = ballService;
         this.paddleService = paddleService;
     }
 
-    /** Load the given 1-based level index. */
+    /**
+     * Loads a specific level into the game state.
+     * Clears existing balls, enemies, power-ups, and resets the paddle and time scale.
+     * Level index is 1-based; out-of-range indices are clamped to valid levels.
+     *
+     * @param state Current game state to modify.
+     * @param levelIndex 1-based index of the level to load.
+     */
     public void loadLevel(GameState state, int levelIndex) {
         int idx = Math.max(1, Math.min(levelResources.length, levelIndex));
         String resource = levelResources[idx - 1];
@@ -49,12 +66,15 @@ public final class RoundService {
         state.timeScale = 1.0;
         paddleService.resetPaddlePosition(state.paddle);
         state.balls.add(state.ball);
-        // Reset ball on paddle for new level
+        // Reset ball position on paddle for the new level
         ballService.resetOnPaddle(state.ball, state.paddle);
     }
 
     /**
-     * Advance to the next level if any. If already at the last level, mark the game as completed.
+     * Loads the next level if available.
+     * If the current level is the last one, marks the game as completed.
+     *
+     * @param state Current game state to modify.
      */
     public void loadNextLevel(GameState state) {
         int nextIndex = state.level + 1;

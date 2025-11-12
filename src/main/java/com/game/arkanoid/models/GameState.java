@@ -41,12 +41,18 @@ public final class GameState {
         this.balls.add(ball);
     }
 
+    /**
+     * Reset transient state for a new life.
+     */
     public void resetForLife() {
         paused = false;
         bullets.clear();
         laserCooldown = 0.0;
     }
 
+    /**
+     * Reset entire game state for a new level or new game.
+     */
     public void resetForLevel() {
         score = 0;
         lives = Constants.DEFAULT_LIVES;
@@ -59,14 +65,24 @@ public final class GameState {
         laserCooldown = 0.0;
     }
 
+    /**
+     * Increment score by amount.
+     * @param amount
+     */
     public void decrementScore(int amount) {
         score = Math.max(0, score - amount);
     }
 
+    /**
+     * Decrement lives by one.
+     */
     public void decrementLives() {
         lives--;
     }
 
+    /**
+     * Increment lives by one.
+     */
     public void incrementLives() {
         lives++;
     }

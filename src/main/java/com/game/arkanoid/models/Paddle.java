@@ -2,12 +2,22 @@ package com.game.arkanoid.models;
 
 import com.game.arkanoid.utils.Constants;
 
-/** Paddle là AABB: x,y = top-left; width,height = kích thước. */
+/**
+ * Paddle controlled by the player.
+ */
 public class Paddle extends MovableObject {
-    private double speed;            // px/s
-    private double minWidth;         // để clamp power-up
+    private double speed;          
+    private double minWidth;         
     private double maxWidth;
 
+    /**
+     * Paddle constructor.
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param speed
+     */
     public Paddle(double x, double y, double width, double height, double speed) {
         super(x, y, width, height);
         this.speed = speed;
@@ -27,6 +37,7 @@ public class Paddle extends MovableObject {
     public double getSpeed() {
         return speed;
     }
+
     public void setSpeed(double speed) {
         this.speed = speed;
     }
@@ -34,14 +45,19 @@ public class Paddle extends MovableObject {
     public double getMinWidth() {
         return minWidth;
     }
+
     public double getMaxWidth() {
         return maxWidth;
     }
+
     public void setWidthBounds(double minW, double maxW) {
         this.minWidth = minW; this.maxWidth = maxW;
     }
 
-    /** Thay đổi width có clamp theo min/max. */
+    /**
+     * Set width clamped within minWidth and maxWidth.
+     * @param newWidth
+     */
     public void setWidthClamped(double newWidth) {
         this.width = Math.max(minWidth, Math.min(maxWidth, newWidth));
     }

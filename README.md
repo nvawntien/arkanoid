@@ -145,13 +145,6 @@ mvn exec:java -Dexec.mainClass="com.game.arkanoid.app.Main"
 | 🐌   | Slow Ball     | Slows down overall gameplay time scale                     |
 
 
-## 🧮 Scoring System
-
--
--
--
--
-
 ## 🧠 UML & Architecture
 
 Visual representation of the core architecture and class relationships:
@@ -222,15 +215,15 @@ Rankings are derived directly from `users` (best score/round), while the latest 
 ## 📺 Gameplay Demo
 
 🎥 Watch the gameplay demo on YouTube:
-👉 https://youtu.be/your-demo-link
+👉 https://youtu.be/-pdxJ3mrEVg?si=cibv7gh3pPN2UHON
 
 ## Authors
 
-| Name                 | Role                                             |
-| -------------------- | -------------------------------------------------|
-| **Nguyễn Văn TIến**  | Leader Developer / Game logic / Event System     |   
-| **Nguyễn Bảo Minh**  | Database / System Architect / Scene Management   |
-| **Lê Đình Anh Tuấn** | JavaFX - FXML / UI Intergration                  | 
+| Name                             | Role                                             |
+| ---------------------------------| -------------------------------------------------|
+| **Nguyễn Văn Tiến  - 24021641**  | Leader Developer / Game logic / Event System     |   
+| **Nguyễn Bảo Minh  - 24021569**  | Database / System Architect / Scene Management   |
+| **Lê Đình Anh Tuấn - 24021657**  | JavaFX - FXML / UI Intergration                  | 
 
 ## 🪪 License
 

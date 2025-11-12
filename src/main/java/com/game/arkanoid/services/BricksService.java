@@ -10,14 +10,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service class responsible for creating, managing, and updating bricks in the game.
+ * Handles creation from 2D layouts or resource files, brick hits, and remaining brick count.
+ */
 public final class BricksService {
 
+    /** Number of non-indestructible bricks still alive */
     private int bricksRemaining;
 
+    /** Default constructor */
     public BricksService() {
     }
 
-    // --- Tạo từ layout 2D (ĐÃ SỬA) ---
+    /**
+     * Creates bricks from a 2D layout array.
+     * Each non-zero value in the layout represents a brick's health.
+     *
+     * @param layout 2D array representing brick health values
+     * @return list of created Brick objects
+     */
     public List<Brick> createBricksFromLayout(int[][] layout) {
         List<Brick> createdBricks = new ArrayList<>();
         for (int row = 0; row < Constants.BRICK_ROWS; row++) {
@@ -26,7 +38,7 @@ public final class BricksService {
                 int brickHealth = layout[row][col]; 
                 if (brickHealth > 0) {
                     double brickX = col * Constants.BRICK_WIDTH + 22;
-                    double brickY = row * Constants.BRICK_HEIGHT + 172;
+                    double brickY = row * Constants.BRICK_HEIGHT + 300;
 
                     createdBricks.add(new Brick( brickX,  brickY,  Constants.BRICK_WIDTH,  Constants.BRICK_HEIGHT, brickHealth ));
                 }
@@ -36,7 +48,13 @@ public final class BricksService {
         return createdBricks;
     }
 
-    // --- Tạo từ file resource (ĐÃ SỬA) ---
+    /**
+     * Creates bricks by reading a resource file.
+     * Each non-zero integer in the file represents a brick's health.
+     *
+     * @param resourcePath path to the resource file
+     * @return list of created Brick objects
+     */
     public List<Brick> createBricksFromResource(String resourcePath) {
         List<String> lines = readResourceLines(resourcePath);
         List<Brick> bricks = new ArrayList<>();
@@ -50,7 +68,7 @@ public final class BricksService {
                 String token = tokens[col];
                 if (token.isEmpty()) continue;
 
-                int health; // Đây là health đọc từ file
+                int health;
                 try {
                     health = Integer.parseInt(token);
                 } catch (NumberFormatException ex) {
@@ -59,7 +77,7 @@ public final class BricksService {
                 if (health <= 0) continue;
 
                 double x = col * Constants.BRICK_WIDTH + 22;
-                double y = row * Constants.BRICK_HEIGHT + 172;
+                double y = row * Constants.BRICK_HEIGHT + 250;
                 
                 bricks.add(new Brick( x, y, Constants.BRICK_WIDTH, Constants.BRICK_HEIGHT, health ));
             }
@@ -68,10 +86,14 @@ public final class BricksService {
         bricksRemaining = countAlive(bricks);
         return bricks;
     }
-    private int countAlive(List<Brick> bricks) {
-        return (int) bricks.stream().filter(b -> !b.isDestroyed() && !b.isIndestructible()).count();
-    }
 
+    /**
+     * Handles a hit on a brick.
+     * Decreases brick health and updates remaining brick count if destroyed.
+     *
+     * @param brick the brick that was hit
+     * @return true if the brick was destroyed by this hit
+     */
     public boolean handleBrickHit(Brick brick) {
         if (brick.isDestroyed() || brick.isIndestructible()) return false;
 
@@ -83,21 +105,52 @@ public final class BricksService {
         return false;
     }
 
+    /**
+     * Checks if all non-indestructible bricks have been cleared.
+     *
+     * @param bricks list of bricks to check
+     * @return true if all destructible bricks are destroyed
+     */
     public boolean allBricksCleared(List<Brick> bricks) {
-        // chỉ kiểm tra bricks thường
         return bricks.stream()
                      .filter(b -> !b.isIndestructible())
                      .allMatch(Brick::isDestroyed);
     }
 
+    /**
+     * Returns the current number of remaining non-indestructible bricks.
+     *
+     * @return remaining bricks count
+     */
     public int getBricksRemaining() {
         return bricksRemaining;
     }
 
+    /**
+     * Recalculates the number of remaining non-indestructible bricks.
+     *
+     * @param bricks list of bricks to count
+     */
     public void recalculateBricksRemaining(List<Brick> bricks) {
         bricksRemaining = countAlive(bricks);
     }
 
+    /**
+     * Counts the number of alive, destructible bricks in a list.
+     *
+     * @param bricks list of bricks
+     * @return count of alive bricks
+     */
+    private int countAlive(List<Brick> bricks) {
+        return (int) bricks.stream().filter(b -> !b.isDestroyed() && !b.isIndestructible()).count();
+    }
+
+    /**
+     * Reads all non-blank lines from a resource file.
+     *
+     * @param resourcePath path to the resource
+     * @return list of non-blank lines
+     */
     private List<String> readResourceLines(String resourcePath) {
         List<String> out = new ArrayList<>();
         try (InputStream in = getClass().getResourceAsStream(resourcePath)) {

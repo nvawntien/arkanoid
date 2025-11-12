@@ -18,7 +18,16 @@ import com.game.arkanoid.events.game.CloseDoorTopLeftEvent;
 import com.game.arkanoid.events.game.CloseDoorTopRightEvent;
 import com.game.arkanoid.events.game.DoorOpenedEvent;
 
+/**
+ * Renderer for the top doors in the game.
+ * <p>
+ * Handles opening and closing animations for left and right doors using
+ * a sequence of image frames. Publishes events when doors are fully opened.
+ * Supports callback functions after animation completion.
+ * </p>
+ */
 public final class DoorTopRenderer implements Renderer<Void> {
+
     private final Pane pane;
 
     private final ImageView leftDoor;
@@ -32,6 +41,12 @@ public final class DoorTopRenderer implements Renderer<Void> {
     private final GameEventBus eventBus = GameEventBus.getInstance();
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
 
+    /**
+     * Constructs a DoorTopRenderer for the specified pane and edge image.
+     *
+     * @param pane the parent pane where doors will be rendered
+     * @param edge_top the reference ImageView for door layout and sizing
+     */
     public DoorTopRenderer(Pane pane, ImageView edge_top) {
         this.pane = pane;
 
@@ -62,6 +77,13 @@ public final class DoorTopRenderer implements Renderer<Void> {
         registerEventListeners();
     }
 
+    /**
+     * Creates a new ImageView for a door frame based on the reference edge.
+     *
+     * @param edge_top the reference ImageView for layout and sizing
+     * @param img the initial image for the door
+     * @return the created ImageView
+     */
     private ImageView createImageView(ImageView edge_top, Image img) {
         ImageView iv = new ImageView(img);
         iv.setLayoutX(edge_top.getLayoutX());
@@ -72,6 +94,9 @@ public final class DoorTopRenderer implements Renderer<Void> {
         return iv;
     }
 
+    /**
+     * Registers event listeners for door open/close events.
+     */
     private void registerEventListeners() {
         subscriptions.add(eventBus.subscribe(OpenDoorTopLeftEvent.class, e -> playLeftDoor(null)));
         subscriptions.add(eventBus.subscribe(CloseDoorTopLeftEvent.class, e -> playLeftReverseDoor(null)));
@@ -79,9 +104,13 @@ public final class DoorTopRenderer implements Renderer<Void> {
         subscriptions.add(eventBus.subscribe(CloseDoorTopRightEvent.class, e -> playRightReverseDoor(null)));
     }
 
-    // --- Animation with callback ---
+    /**
+     * Plays the left door opening animation.
+     *
+     * @param onFinished callback to run after animation completes (can be null)
+     */
     public void playLeftDoor(Runnable onFinished) {
-        leftDoor.setVisible(true);         // hiện cửa trái
+        leftDoor.setVisible(true);
         leftReverseDoor.setVisible(false);
         rightReverseDoor.setVisible(false);
         rightDoor.setVisible(false);
@@ -96,13 +125,18 @@ public final class DoorTopRenderer implements Renderer<Void> {
         timeline.setCycleCount(1);
         timeline.setOnFinished(e -> {
             if (onFinished != null) onFinished.run();
-            eventBus.publish(new DoorOpenedEvent(true));  // ⚡ thông báo cửa trái mở xong
+            eventBus.publish(new DoorOpenedEvent(true));
         });
         timeline.play();
     }
 
+    /**
+     * Plays the left door closing (reverse) animation.
+     *
+     * @param onFinished callback to run after animation completes (can be null)
+     */
     public void playLeftReverseDoor(Runnable onFinished) {
-        leftReverseDoor.setVisible(true);  // hiện cửa đóng
+        leftReverseDoor.setVisible(true);
         leftDoor.setVisible(false);
         rightDoor.setVisible(false);
         rightReverseDoor.setVisible(false);
@@ -120,8 +154,13 @@ public final class DoorTopRenderer implements Renderer<Void> {
         timeline.play();
     }
 
+    /**
+     * Plays the right door opening animation.
+     *
+     * @param onFinished callback to run after animation completes (can be null)
+     */
     public void playRightDoor(Runnable onFinished) {
-        rightDoor.setVisible(true);        // hiện cửa phải
+        rightDoor.setVisible(true);
         rightReverseDoor.setVisible(false);
         leftReverseDoor.setVisible(false);
         leftDoor.setVisible(false);
@@ -135,13 +174,18 @@ public final class DoorTopRenderer implements Renderer<Void> {
         timeline.setCycleCount(1);
         timeline.setOnFinished(e -> {
             if (onFinished != null) onFinished.run();
-            eventBus.publish(new DoorOpenedEvent(false)); // ⚡ thông báo cửa phải mở xong
+            eventBus.publish(new DoorOpenedEvent(false));
         });
         timeline.play();
     }
 
+    /**
+     * Plays the right door closing (reverse) animation.
+     *
+     * @param onFinished callback to run after animation completes (can be null)
+     */
     public void playRightReverseDoor(Runnable onFinished) {
-        rightReverseDoor.setVisible(true); // hiện cửa đóng
+        rightReverseDoor.setVisible(true);
         rightDoor.setVisible(false);
         leftDoor.setVisible(false);
         leftReverseDoor.setVisible(false);
@@ -159,11 +203,21 @@ public final class DoorTopRenderer implements Renderer<Void> {
         timeline.play();
     }
 
+    /**
+     * Rendering is not needed for doors as their positions are static.
+     *
+     * @param v ignored
+     */
     @Override
     public void render(Void v) {
-        // Không cần update vị trí liên tục
+        // No continuous update needed
     }
 
+    /**
+     * Returns the parent pane containing the door ImageViews.
+     *
+     * @return the Pane node
+     */
     @Override
     public Pane getNode() {
         return pane;

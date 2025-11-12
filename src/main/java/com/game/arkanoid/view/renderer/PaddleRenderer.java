@@ -19,6 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
+/**
+ * Renders the player's paddle and manages all paddle animations.
+ * <p>
+ * Supports intro animation, pulsate, expand/shrink for power-ups, laser mode,
+ * and explosion animation when the paddle is destroyed.
+ * </p>
+ */
 public final class PaddleRenderer implements Renderer<Paddle> {
     private final ImageView node;
     private final List<Image> introFrames = new ArrayList<>();
@@ -36,8 +43,13 @@ public final class PaddleRenderer implements Renderer<Paddle> {
     private double elapsedExpand = 0;
     private double elapsedShrink = 0;
     private double elapsedLaser = 0;
-    private boolean isTransforming = false; // đang expand hoặc shrink
+    private boolean isTransforming = false; // true if paddle is expanding or shrinking
 
+    /**
+     * Constructs a PaddleRenderer and loads all paddle animation frames.
+     *
+     * @param pane the Pane to which the paddle node will be added
+     */
     public PaddleRenderer(Pane pane) {
         // Load intro frames
         for (int i = 1; i <= 15; i++) {
@@ -74,7 +86,7 @@ public final class PaddleRenderer implements Renderer<Paddle> {
             )));
         }
 
-        // shrink là wide đảo ngược
+        // shrink is reverse of wide frames
         shrinkFrames.addAll(wideFrames);
         Collections.reverse(shrinkFrames);
 
@@ -98,74 +110,107 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         pane.getChildren().add(node);
     }
 
+    /**
+     * Registers event listeners for paddle intro and explosion events.
+     */
     public void registerEventListeners() {
         subscriptions.add(GameEventBus.getInstance().subscribe(IntroPaddleEvent.class, e -> playIntro(this::startPulsate)));
         subscriptions.add(GameEventBus.getInstance().subscribe(ExplodePaddleEvent.class,e -> playExplosion()));
     }
 
+    /**
+     * Handles activation of power-ups affecting the paddle.
+     *
+     * @param event the power-up activation event
+     */
     public void onPowerUpActivated(PowerUpActivatedEvent event) {
         switch (event.type()) {
-            case EXPAND_PADDLE -> {
-                playExpand(null);
-            }
-            case LASER_PADDLE -> {
-                playLaser(null);
-            }
+            case EXPAND_PADDLE -> playExpand(null);
+            case LASER_PADDLE -> playLaser(null);
             default -> {}
         }
     }
 
+    /**
+     * Handles expiration of power-ups affecting the paddle.
+     *
+     * @param event the power-up expiration event
+     */
     public void onPowerUpExpired(PowerUpExpiredEvent event) {
         switch (event.type()) {
-            case EXPAND_PADDLE -> {
-                playShrink(null);
-            }
-            case LASER_PADDLE -> {
-                startPulsate();
-            }
+            case EXPAND_PADDLE -> playShrink(null);
+            case LASER_PADDLE -> startPulsate();
             default -> {}
         }
     }
 
+    /**
+     * Updates the paddle position and size based on the Paddle model.
+     *
+     * @param paddle the current paddle state
+     */
     @Override
     public void render(Paddle paddle) { 
-        // 🟢 Chỉ cập nhật vị trí, KHÔNG ép kích thước trong lúc animation đang chạy
         node.setTranslateX(paddle.getX());
         node.setTranslateY(paddle.getY());
 
         if (!isTransforming) {
-            // Chỉ update kích thước khi paddle ở trạng thái tĩnh (normal/pulsate)
             node.setFitWidth(paddle.getWidth());
             node.setFitHeight(paddle.getHeight());
         }
     }
     
+    /**
+     * Returns the ImageView node representing the paddle.
+     *
+     * @return the paddle ImageView
+     */
     @Override
     public ImageView getNode() {
         return node;
     }
 
     // --- Animation controls ---
+
+    /**
+     * Plays the intro animation for the paddle.
+     *
+     * @param onFinished a callback to run after the animation completes
+     */
     public void playIntro(Runnable onFinished) {
         if (introFrames.isEmpty()) return;
         playFrameSequence(introFrames, 80, false, onFinished);
     }
 
+    /**
+     * Plays the paddle explosion animation.
+     */
     public void playExplosion() {
         if (explodeFrames.isEmpty()) return;
         playFrameSequence(explodeFrames, 80, false, this::publishExplodeFinishedEvent);
     }
 
+    /**
+     * Publishes an event when the paddle explosion animation finishes.
+     */
     private void publishExplodeFinishedEvent() {
         GameEventBus.getInstance().publish(new ExplodePaddleFinishedEvent(true));
     }
 
+    /**
+     * Starts pulsate animation for normal paddle.
+     */
     public void startPulsate() {
         if (pulsateFrames.isEmpty()) return;
         isTransforming = false;
         playFrameSequence(pulsateFrames, 100, true, null);
     }
 
+    /**
+     * Plays expand animation when the paddle grows in size.
+     *
+     * @param onFinished callback executed after animation completes
+     */
     public void playExpand(Runnable onFinished) {
         stopAnimation();
 
@@ -205,12 +250,20 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         expandTimer.start();
     }
 
+    /**
+     * Starts wide paddle pulsate animation.
+     */
     public void startWidePulsate() {
         if (widePulsateFrames.isEmpty()) return;
         isTransforming = false;
         playFrameSequence(widePulsateFrames, 100, true, null);
     }
 
+    /**
+     * Plays shrink animation when the paddle returns to normal size.
+     *
+     * @param onFinished callback executed after animation completes
+     */
     public void playShrink(Runnable onFinished) {
         stopAnimation();
 
@@ -250,6 +303,11 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         shrinkTimer.start();
     }
 
+    /**
+     * Plays laser paddle animation.
+     *
+     * @param onFinished callback executed after animation completes
+     */
     public void playLaser(Runnable onFinished) {
         stopAnimation();
 
@@ -289,12 +347,18 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         laserTimer.start();
     }
 
+    /**
+     * Starts laser paddle pulsate animation.
+     */
     public void startLaserPulsate() {
         if (laserPulsateFrames.isEmpty()) return;
         isTransforming = false;
         playFrameSequence(laserPulsateFrames, 100, true, null);
     }
 
+    /**
+     * Stops all current paddle animations.
+     */
     public void stopAnimation() {
         if (currentAnimation != null) currentAnimation.stop();
         if (expandTimer != null) expandTimer.stop();
@@ -302,6 +366,14 @@ public final class PaddleRenderer implements Renderer<Paddle> {
         if (laserTimer != null) laserTimer.stop();
     }
 
+    /**
+     * Plays a sequence of frames for paddle animation.
+     *
+     * @param frames the list of images representing animation frames
+     * @param frameDurationMs duration of each frame in milliseconds
+     * @param loop whether to loop the animation indefinitely
+     * @param onFinished callback executed when animation finishes (ignored if loop=true)
+     */
     private void playFrameSequence(List<Image> frames, double frameDurationMs, boolean loop, Runnable onFinished) {
         if (currentAnimation != null) currentAnimation.stop();
 

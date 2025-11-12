@@ -21,7 +21,7 @@
         <PasswordField fx:id="passwordField" layoutX="206.0" layoutY="542.0" maxWidth="260" prefHeight="26.0" prefWidth="187.0" promptText="Password" />
 
         <!-- Visible password field -->
-        <TextField fx:id="passwordVisibleField" layoutX="225.0" layoutY="543.0" managed="false" maxWidth="260" promptText="Password" visible="false" />
+        <TextField fx:id="passwordVisibleField" layoutX="206.0" layoutY="542.0" managed="false" maxWidth="260" prefHeight="26.0" prefWidth="187.0" promptText="Password" visible="false" />
 
         <!-- Checkbox to toggle password visibility -->
         <CheckBox fx:id="showPasswordCheckBox" layoutX="416.0" layoutY="542.0" prefHeight="26.0" prefWidth="73.0" text="Show" textFill="#de2900">

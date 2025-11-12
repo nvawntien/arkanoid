@@ -17,26 +17,55 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Handles spawning, updating and applying power-ups. Talks directly to renderers for animations.
+ * Service responsible for managing power-ups in the game.
+ * Handles spawning, updating, applying effects, and expiring active power-ups.
+ * <p>
+ * This service also communicates with renderers and sound layers via events.
+ * </p>
+ * <p>
+ * Typical power-ups include: Expand Paddle, Laser Paddle, Catch Ball, Multi-Ball, Extra Life, Slow Ball.
+ * </p>
  */
 public final class PowerUpService {
+
     private final Random random = new Random();
     private final GameEventBus eventBus = GameEventBus.getInstance();
 
+    /**
+     * Default constructor.
+     */
     public PowerUpService() {
     }
 
-    public PowerUp spawnPowerUpIfAny( double x, double y, double width) {
+    /**
+     * Randomly spawns a power-up at the specified position with a drop chance.
+     *
+     * @param x X-coordinate of the brick.
+     * @param y Y-coordinate of the brick.
+     * @param width Width of the brick to center the power-up.
+     * @return A new PowerUp instance or null if no power-up is spawned.
+     */
+    public PowerUp spawnPowerUpIfAny(double x, double y, double width) {
         if (random.nextDouble() > Constants.POWER_UP_DROP_CHANCE) {
             return null;
         }
-        PowerUpType[] types = {PowerUpType.CATCH_BALL, PowerUpType.MULTI_BALL};
+        PowerUpType[] types = PowerUpType.values();
         PowerUpType type = types[random.nextInt(types.length)];
         double spawnX = x + (width - Constants.POWER_UP_WIDTH) / 2.0;
         double spawnY = y + Constants.BRICK_HEIGHT;
-        return new PowerUp(type.MULTI_BALL, spawnX, spawnY, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
+        return new PowerUp(type, spawnX, spawnY, Constants.POWER_UP_WIDTH, Constants.POWER_UP_HEIGHT, Constants.POWER_UP_FALL_SPEED);
     }
 
+    /**
+     * Updates all active power-ups and applies their effects when collected.
+     * Removes power-ups that fall below the playfield.
+     * Updates active timed power-ups and expires them if necessary.
+     *
+     * @param state Current game state.
+     * @param dt Time delta in seconds.
+     * @param worldW Width of the game world.
+     * @param worldH Height of the game world.
+     */
     public void update(GameState state, double dt, double worldW, double worldH) {
         List<PowerUp> toRemove = new ArrayList<>();
         for (PowerUp powerUp : state.powerUps) {
@@ -55,6 +84,13 @@ public final class PowerUpService {
         tickActiveEffects(state, dt, worldW);
     }
 
+    /**
+     * Checks if a power-up intersects with the paddle.
+     *
+     * @param powerUp The power-up to check.
+     * @param paddle The paddle to check collision with.
+     * @return True if the power-up intersects the paddle, false otherwise.
+     */
     private boolean intersects(PowerUp powerUp, Paddle paddle) {
         double px1 = paddle.getX();
         double py1 = paddle.getY();
@@ -69,6 +105,13 @@ public final class PowerUpService {
         return ox1 < px2 && ox2 > px1 && oy1 < py2 && oy2 > py1;
     }
 
+    /**
+     * Applies the effect of a collected power-up to the game state.
+     *
+     * @param state Current game state.
+     * @param type Type of the collected power-up.
+     * @param worldW Width of the game world for clamping the paddle.
+     */
     private void applyPowerUp(GameState state, PowerUpType type, double worldW) {
         switch (type) {
             case EXPAND_PADDLE -> {
@@ -98,20 +141,26 @@ public final class PowerUpService {
             case SLOW_BALL -> {
                 state.timeScale = Constants.POWER_UP_SLOW_BALL_SCALE;
                 state.activePowerUps.put(PowerUpType.SLOW_BALL, Constants.POWER_UP_DURATION);
-            }           
+            }
         }
         clampPaddle(state.paddle, worldW);
     }
 
+    /**
+     * Spawns additional balls for the MULTI_BALL power-up.
+     * Each existing moving ball spawns two new balls at slight angle offsets.
+     *
+     * @param state Current game state.
+     */
     private void spawnAdditionalBalls(GameState state) {
-        List <Ball> newBall = new ArrayList<>();
+        List<Ball> newBall = new ArrayList<>();
         for (Ball source : state.balls) {
             if (!source.isMoving()) {
                 continue;
             }
 
             double baseSpeed = Math.hypot(source.getDx(), source.getDy());
-            
+
             if (baseSpeed < 1e-3) {
                 baseSpeed = Constants.BALL_SPEED * GameSettings.getBallSpeedMultiplier();
             }
@@ -130,6 +179,12 @@ public final class PowerUpService {
         state.balls.addAll(newBall);
     }
 
+    /**
+     * Clamps the paddle's horizontal position within the world bounds.
+     *
+     * @param paddle The paddle to clamp.
+     * @param worldW Width of the game world.
+     */
     private void clampPaddle(Paddle paddle, double worldW) {
         if (paddle.getX() < 22) {
             paddle.setX(22);
@@ -140,6 +195,14 @@ public final class PowerUpService {
         }
     }
 
+    /**
+     * Updates the remaining duration of all active power-ups.
+     * Expires any power-ups whose duration has ended.
+     *
+     * @param state Current game state.
+     * @param dt Time delta in seconds.
+     * @param worldW Width of the game world for clamping the paddle when effects expire.
+     */
     private void tickActiveEffects(GameState state, double dt, double worldW) {
         Iterator<PowerUpType> iterator = new ArrayList<>(state.activePowerUps.keySet()).iterator();
         while (iterator.hasNext()) {
@@ -154,6 +217,14 @@ public final class PowerUpService {
         }
     }
 
+    /**
+     * Handles expiration of a power-up effect.
+     * Resets paddle size, clears bullets for LASER_PADDLE, restores timeScale for SLOW_BALL, and emits expiration events.
+     *
+     * @param state Current game state.
+     * @param type Type of power-up that expired.
+     * @param worldW Width of the game world for clamping the paddle.
+     */
     private void onEffectExpired(GameState state, PowerUpType type, double worldW) {
         switch (type) {
             case EXPAND_PADDLE, LASER_PADDLE -> {

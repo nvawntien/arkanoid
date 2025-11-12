@@ -20,17 +20,20 @@ public final class GameEventBus {
     private GameEventBus() {
     }
 
+    /**
+     * Get the singleton instance.
+     * @return the singleton instance
+     */
     public static GameEventBus getInstance() {
         return INSTANCE;
     }
 
     /**
      * Subscribe to events of the given type.
-     *
-     * @param type    event class to listen for
-     * @param handler consumer that will receive events
-     * @param <T>     event type
-     * @return subscription handle (auto-closeable) to remove the listener
+     * @param <T>
+     * @param type
+     * @param handler
+     * @return
      */
     public <T> Subscription subscribe(Class<T> type, Consumer<T> handler) {
         Objects.requireNonNull(type, "type");
@@ -40,7 +43,8 @@ public final class GameEventBus {
     }
 
     /**
-     * Publish an event to all registered subscribers for its type.
+     * Publish an event to all subscribers.
+     * @param event
      */
     public void publish(Object event) {
         if (event == null) {
@@ -57,6 +61,9 @@ public final class GameEventBus {
         }
     }
 
+    /**
+     * Subscription handle returned from subscribe() to allow unsubscription.
+     */
     public final class Subscription implements AutoCloseable {
         private final Class<?> type;
         private final Consumer<?> handler;

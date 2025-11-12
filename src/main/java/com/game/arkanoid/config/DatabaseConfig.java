@@ -17,6 +17,11 @@ public final class DatabaseConfig {
 
     private DatabaseConfig() {}
 
+    /**
+     * Get a connection to the database.
+     * @return
+     * @throws SQLException
+     */
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
 
@@ -36,6 +41,9 @@ public final class DatabaseConfig {
         return connection;
     }
 
+    /**
+     * Close the database connection.
+     */
     public static void close() {
         try {
             if (connection != null && !connection.isClosed()) {
@@ -47,6 +55,11 @@ public final class DatabaseConfig {
         }
     }
 
+    /**
+     * Get environment variable or from .env file.
+     * @param key
+     * @return
+     */
     private static String getEnv(String key) {
         String val = System.getenv(key);
         if (val == null) val = dotenv.get(key);

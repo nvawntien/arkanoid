@@ -17,15 +17,27 @@ public class BlurFadeStrategy implements TransitionStrategy {
     private final Duration duration;
     private final double maxBlurRadius;
 
+    /**
+     * Default constructor.
+     */
     public BlurFadeStrategy() {
         this(Duration.millis(320), 24.0);
     }
 
+    /**
+     * Parameterized constructor.
+     * @param duration
+     * @param maxBlurRadius
+     */
     public BlurFadeStrategy(Duration duration, double maxBlurRadius) {
         this.duration = duration;
         this.maxBlurRadius = maxBlurRadius;
     }
 
+    /**
+     * Play the blur fade transition.
+     * @param root
+     */
     @Override
     public void play(Node root, Runnable onFinished) {
         if (root == null) {

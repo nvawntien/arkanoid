@@ -13,6 +13,15 @@ public final class User {
     private final int bestRound;
     private final LocalDateTime lastLogin;
 
+    /**
+     * Constructor.
+     * @param id
+     * @param name
+     * @param passwordHash
+     * @param bestScore
+     * @param bestRound
+     * @param lastLogin
+     */
     public User(int id, String name, String passwordHash, int bestScore, int bestRound, LocalDateTime lastLogin) {
         this.id = id;
         this.name = name;

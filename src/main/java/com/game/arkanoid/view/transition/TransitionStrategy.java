@@ -10,7 +10,6 @@ public interface TransitionStrategy {
 
     /**
      * Play the transition on the given root node.
-     *
      * @param root       node to animate
      * @param onFinished callback invoked when animation completes
      */

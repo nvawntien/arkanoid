@@ -12,7 +12,11 @@ import javafx.scene.layout.Pane;
 import java.util.*;
 
 /**
- * Renders enemies and explosion animations using event-driven system.
+ * Renderer for enemies in the game.
+ * <p>
+ * Manages enemy sprites, positions, and explosion animations using an
+ * event-driven system. Supports animated frames for enemies and explosions.
+ * </p>
  */
 public final class EnemyRenderer implements Renderer<List<Enemy>> {
 
@@ -33,6 +37,11 @@ public final class EnemyRenderer implements Renderer<List<Enemy>> {
     private final GameEventBus eventBus = GameEventBus.getInstance();
     private final List<GameEventBus.Subscription> subscriptions = new ArrayList<>();
 
+    /**
+     * Constructs an EnemyRenderer attached to the specified pane.
+     *
+     * @param pane the Pane where enemies and explosions will be rendered
+     */
     public EnemyRenderer(Pane pane) {
         this.pane = pane;
         loadFrames();
@@ -40,7 +49,7 @@ public final class EnemyRenderer implements Renderer<List<Enemy>> {
         startAnimation();
     }
 
-    /** Load enemy sprite frames and explosion frames */
+    /** Loads sprite frames for all enemy types and explosion animations. */
     private void loadFrames() {
         // Load enemy frames
         for (EnemyType type : EnemyType.values()) {
@@ -63,14 +72,21 @@ public final class EnemyRenderer implements Renderer<List<Enemy>> {
         }
     }
 
-    /** Subscribe to ExplosionEvent from GameEventBus */
+    /** Subscribes to ExplosionEvent from the GameEventBus. */
     private void subscribeToExplosionEvent() {
         subscriptions.add(eventBus.subscribe(ExplosionEvent.class, event -> {
             playExplosion(event.x(), event.y(), event.width(), event.height());
         }));
     }
 
-    /** Trigger explosion animation at specified position and size */
+    /**
+     * Plays an explosion animation at the specified location.
+     *
+     * @param x the X coordinate of the explosion
+     * @param y the Y coordinate of the explosion
+     * @param width the width of the explosion image
+     * @param height the height of the explosion image
+     */
     public void playExplosion(double x, double y, double width, double height) {
         ImageView view = new ImageView(explosionFrames[0]);
         view.setFitWidth(width);
@@ -81,6 +97,12 @@ public final class EnemyRenderer implements Renderer<List<Enemy>> {
         explosions.add(new Explosion(view));
     }
 
+    /**
+     * Renders the list of enemies, adding new ones and updating positions.
+     * Removes nodes for enemies that no longer exist.
+     *
+     * @param enemies the list of current enemies
+     */
     @Override
     public void render(List<Enemy> enemies) {
         // Remove enemy nodes that no longer exist
@@ -106,6 +128,7 @@ public final class EnemyRenderer implements Renderer<List<Enemy>> {
         return null;
     }
 
+    /** Creates a new ImageView for the given enemy with its first sprite frame. */
     private ImageView createEnemyNode(Enemy enemy) {
         ImageView imageView = new ImageView(enemySprites.get(enemy.getType())[0]);
         imageView.setFitWidth(enemy.getWidth());
@@ -114,7 +137,7 @@ public final class EnemyRenderer implements Renderer<List<Enemy>> {
         return imageView;
     }
 
-    /** Animation timer for enemies and explosions */
+    /** Starts the animation timer for enemy sprite updates and explosions. */
     private void startAnimation() {
         new AnimationTimer() {
             private long lastTime = 0;
@@ -151,6 +174,7 @@ public final class EnemyRenderer implements Renderer<List<Enemy>> {
         }.start();
     }
 
+    /** Represents a single explosion animation instance. */
     private static class Explosion {
         ImageView view;
         double elapsed = 0;

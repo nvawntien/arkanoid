@@ -43,20 +43,11 @@
                     <children>
                         <HBox fx:id="lifeBox" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="34.0" />
 
-                                    <Label fx:id="livesLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="468.0" layoutY="81.0" prefHeight="24.0" prefWidth="116.0" styleClass="hud-label" text="0000" textAlignment="RIGHT" textFill="WHITE">
-                     <font>
-                        <Font name="Cambria Math" size="20.0" />
-                     </font>
+                        <Label fx:id="livesLabel" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="468.0" layoutY="79.0" prefHeight="24.0" prefWidth="116.0" styleClass="hud-label" text="0000" textAlignment="RIGHT" textFill="WHITE">
                   </Label>
-                        <Label fx:id="highScoreLabel" alignment="CENTER_RIGHT" layoutX="539.0" layoutY="43.0" prefHeight="24.0" prefWidth="45.0" styleClass="hud-label" text="0000" textAlignment="RIGHT" textFill="WHITE">
-                     <font>
-                        <Font name="Cambria Math" size="20.0" />
-                     </font>
+                        <Label fx:id="highScoreLabel" alignment="CENTER_RIGHT" layoutX="539.0" layoutY="43.0" prefHeight="24.0" prefWidth="45.0" styleClass="hud-label" text="0" textAlignment="RIGHT" textFill="WHITE">
                   </Label>
-                        <Label fx:id="scoreLabel" alignment="CENTER_RIGHT" layoutX="539.0" layoutY="111.0" prefHeight="24.0" prefWidth="46.0" styleClass="hud-label" text="0" textFill="WHITE">
-                     <font>
-                        <Font name="Cambria Math" size="20.0" />
-                     </font>
+                        <Label fx:id="scoreLabel" alignment="CENTER_RIGHT" layoutX="539.0" layoutY="111.0" prefHeight="24.0" prefWidth="46.0" styleClass="hud-label" text="0" textAlignment="RIGHT" textFill="WHITE">
                   </Label>
                   <ImageView fitHeight="42.0" fitWidth="116.0" layoutX="416.0" layoutY="48.0" pickOnBounds="true" preserveRatio="true">
                      <image>

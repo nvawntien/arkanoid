@@ -10,6 +10,10 @@ public final class Bullet extends MovableObject {
         setVelocity(0.0, -Math.abs(speed));
     }
 
+    /**
+     * Update the bullet's position based on its velocity and the elapsed time.
+     * @param dt Time elapsed since the last update (in seconds).
+     */
     @Override
     public void update(double dt) {
         move(dt);

@@ -7,8 +7,17 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * Repository for user data.
+ */
 public final class UserRepository {
 
+    /**
+     * Find user by exact name.
+     * @param name
+     * @return
+     * @throws SQLException
+     */
     public Optional<User> findByName(String name) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/select_user_by_name.sql");
         try (Connection c = DatabaseConfig.getConnection();
@@ -23,7 +32,12 @@ public final class UserRepository {
         }
     }
 
-    /** Case-insensitive lookup; returns one match if any (prefers highest bests). */
+    /**
+     * Find user by name, case insensitive.
+     * @param name
+     * @return
+     * @throws SQLException
+     */
     public Optional<User> findByNameInsensitive(String name) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/select_user_by_name_insensitive.sql");
         try (Connection c = DatabaseConfig.getConnection();
@@ -36,7 +50,12 @@ public final class UserRepository {
         }
     }
 
-
+    /**
+     * Update password hash for user.
+     * @param userId
+     * @param newHash
+     * @throws SQLException
+     */
     public void updatePasswordHash(int userId, String newHash) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/update_password.sql");
         try (Connection c = DatabaseConfig.getConnection();
@@ -47,7 +66,13 @@ public final class UserRepository {
         }
     }
 
-    /** Try to rename a user to a canonical name. May fail if unique constraint conflicts. */
+    /**
+     * Try to update user name.
+     * @param userId
+     * @param newName
+     * @return
+     * @throws SQLException
+     */
     public boolean tryUpdateName(int userId, String newName) throws SQLException {
         String sql = "UPDATE users SET name = ? WHERE id = ?";
         try (Connection c = DatabaseConfig.getConnection();
@@ -61,7 +86,13 @@ public final class UserRepository {
         }
     }
 
-    
+    /**
+     * Insert new user.
+     * @param name
+     * @param passwordHash
+     * @return
+     * @throws SQLException
+     */
     public User insert(String name, String passwordHash) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/insert_user.sql");
         try (Connection c = DatabaseConfig.getConnection();
@@ -75,6 +106,13 @@ public final class UserRepository {
         }
     }
 
+    /**
+     * Update best score and round for user.
+     * @param userId
+     * @param bestRound
+     * @param bestScore
+     * @throws SQLException
+     */
     public void updateBest(int userId, int bestRound, int bestScore) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/user/update_best.sql");
         try (Connection c = DatabaseConfig.getConnection();
@@ -86,6 +124,12 @@ public final class UserRepository {
         }
     }
 
+    /**
+     * Map ResultSet row to User object.
+     * @param rs
+     * @return
+     * @throws SQLException
+     */
     private User mapUser(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String name = rs.getString("name");

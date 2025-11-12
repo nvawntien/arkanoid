@@ -5,7 +5,6 @@ import javafx.beans.property.DoubleProperty;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +16,9 @@ import java.util.concurrent.Executors;
 import com.game.arkanoid.events.GameEventBus;
 import com.game.arkanoid.events.sound.*;
 
+/**
+ * Manages game sounds (BGM and SFX).
+ */
 public final class SoundManager {
     private static SoundManager instance;
 
@@ -37,6 +39,10 @@ public final class SoundManager {
         registerEventListeners();
     }
 
+    /**
+     * Get singleton instance.
+     * @return SoundManager instance.
+     */
     public static SoundManager getInstance() {
         if (instance == null) {
             instance = new SoundManager();
@@ -44,12 +50,15 @@ public final class SoundManager {
         return instance;
     }
 
+    /**
+     * Load sound assets.
+     */
     private void loadSounds() {
         // BGM
         loadBGM("menu", "/com/game/arkanoid/sounds/menu_sound.mp3");
         loadBGM("game", "/com/game/arkanoid/sounds/game_sound.mp3");
         loadBGM("round_start", "/com/game/arkanoid/sounds/round_start.mp3");
-
+        loadBGM("win", "/com/game/arkanoid/sounds/win_sound.mp3");
         // SFX
         loadSFX("brick_hit", "/com/game/arkanoid/sounds/brick_hit.wav");
         loadSFX("paddle_hit", "/com/game/arkanoid/sounds/paddle_hit.wav");
@@ -57,8 +66,16 @@ public final class SoundManager {
         loadSFX("bullet_fire", "/com/game/arkanoid/sounds/bullet_fire.wav");
         loadSFX("powerup_hit", "/com/game/arkanoid/sounds/powerup_hit.wav");
         loadSFX("game_over", "/com/game/arkanoid/sounds/game_over.wav");
+        loadSFX("click", "/com/game/arkanoid/sounds/click.wav");
+        loadSFX("countDown", "/com/game/arkanoid/sounds/countDown.wav");
+        loadSFX("round_start", "/com/game/arkanoid/sounds/round_start.wav");
     }
 
+    /**
+     * Load BGM from path.
+     * @param key
+     * @param path
+     */
     private void loadBGM(String key, String path) {
         try {
             Media media = new Media(getClass().getResource(path).toExternalForm());
@@ -68,6 +85,11 @@ public final class SoundManager {
         }
     }
 
+    /**
+     * Load SFX from path.
+     * @param key
+     * @param path
+     */
     private void loadSFX(String key, String path) {
         try {
             AudioClip clip = new AudioClip(getClass().getResource(path).toExternalForm());
@@ -77,11 +99,15 @@ public final class SoundManager {
         }
     }
 
+    /**
+     * Register event listeners.
+     */
     private void registerEventListeners() {
         subscriptions.add(eventBus.subscribe(GameBGMSoundEvent.class, e -> playBGM("game")));
         subscriptions.add(eventBus.subscribe(MenuBGMSoundEvent.class, e -> playBGM("menu")));
         subscriptions.add(eventBus.subscribe(RoundStartSoundEvent.class, e -> playBGM("round_start")));
         subscriptions.add(eventBus.subscribe(StopBGMSoundEvent.class, e -> stopBGM()));
+        subscriptions.add(eventBus.subscribe(WinSoundEvent.class, e -> playBGM("win")));
 
         subscriptions.add(eventBus.subscribe(BrickHitSoundEvent.class, e -> playSFX("brick_hit")));
         subscriptions.add(eventBus.subscribe(PaddleHitSoundEvent.class, e -> playSFX("paddle_hit")));
@@ -89,11 +115,15 @@ public final class SoundManager {
         subscriptions.add(eventBus.subscribe(BulletFireSoundEvent.class, e -> playSFX("bullet_fire")));
         subscriptions.add(eventBus.subscribe(PowerUpHitSoundEvent.class, e -> playSFX("powerup_hit")));
         subscriptions.add(eventBus.subscribe(GameOverSoundEvent.class, e -> playSFX("game_over")));
+        subscriptions.add(eventBus.subscribe(ClickSoundEvent.class, e -> playSFX("click")));
+        subscriptions.add(eventBus.subscribe(CountDownSoundEvent.class, e -> playSFX("countDown")));
+        subscriptions.add(eventBus.subscribe(RoundStartSoundEvent.class, e -> playSFX("round_start")));
     }
 
-    /** --------------------------
-     *  Play BGM
-     *  -------------------------- */
+    /**
+     * Play BGM by key.
+     * @param key
+     */
     private void playBGM(String key) {
         soundExecutor.submit(() -> {
             stopBGM();
@@ -107,6 +137,9 @@ public final class SoundManager {
         });
     }
 
+    /**
+     * Stop BGM.
+     */
     private void stopBGM() {
         if (bgmPlayer != null) {
             bgmPlayer.stop();
@@ -115,9 +148,10 @@ public final class SoundManager {
         }
     }
 
-    /** --------------------------
-     *  Play SFX
-     *  -------------------------- */
+    /**
+     * Play SFX by key.
+     * @param key
+     */
     private void playSFX(String key) {
         AudioClip clip = sfxMap.get(key);
         if (clip == null) return;
@@ -125,16 +159,17 @@ public final class SoundManager {
         soundExecutor.submit(() -> clip.play(masterVolume.get() * sfxVolume.get()));
     }
 
-    /** --------------------------
-     *  Volume properties
-     *  -------------------------- */
+    /**
+     * Get master volume property.
+     * @return
+     */
     public DoubleProperty masterVolumeProperty() { return masterVolume; }
     public DoubleProperty musicVolumeProperty() { return musicVolume; }
     public DoubleProperty sfxVolumeProperty() { return sfxVolume; }
 
-    /** --------------------------
-     *  Cleanup
-     *  -------------------------- */
+    /**
+     * Dispose SoundManager.
+     */
     public void dispose() {
         stopBGM();
         subscriptions.forEach(GameEventBus.Subscription::close);

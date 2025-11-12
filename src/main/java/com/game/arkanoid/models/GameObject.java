@@ -7,8 +7,8 @@ package com.game.arkanoid.models;
  * @author bmngxn
  */
 public abstract class GameObject {
-    protected double x, y;          // top left (ph chuẩn hóa sau dkm)
-    protected double width, height; // Ball dùng 2 * radius để có AABB xới
+    protected double x, y;          
+    protected double width, height;
 
     /**
      * Game Object constructor.

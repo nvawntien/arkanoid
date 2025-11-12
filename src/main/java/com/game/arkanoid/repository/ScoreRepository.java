@@ -7,8 +7,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Repository for fetching scores and rankings.
+ */
 public final class ScoreRepository {
 
+    /**
+     * Fetch rankings from the database.
+     * @param limit
+     * @return
+     * @throws SQLException
+     */
     public List<RankingEntry> fetchRankings(int limit) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load("/com/game/arkanoid/sql/score/select_rankings.sql");
         List<RankingEntry> list = new ArrayList<>();

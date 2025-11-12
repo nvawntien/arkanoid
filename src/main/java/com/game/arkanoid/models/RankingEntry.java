@@ -8,6 +8,12 @@ public final class RankingEntry {
     private final int bestScore;
     private final int bestRound;
 
+    /**
+     * Constructor.
+     * @param name
+     * @param bestScore
+     * @param bestRound
+     */
     public RankingEntry(String name, int bestScore, int bestRound) {
         this.name = name;
         this.bestScore = bestScore;
