@@ -185,7 +185,7 @@ public final class GameController {
      * Start enemy spawn timer.
      */
     private void startEnemySpawnTimer() {
-        spawnTimer = new Timeline(new KeyFrame(Duration.seconds(13.6), e -> {
+        spawnTimer = new Timeline(new KeyFrame(Duration.seconds(20), e -> {
             if (gameState.paused || gameState.levelTransitionPending) return;
             System.out.println("Enemy spawn tick at " + System.currentTimeMillis());
             boolean left = Math.random() < 0.5;
