@@ -361,11 +361,11 @@
 }
 
 #continueButton2 {
-    -fx-background-image: url("../images/continue3.png");
+    -fx-background-image: url("../images/ranking3.png");
 }
 #continueButton2:hover,
 #continueButton2.selected {
-    -fx-background-image: url("../images/continue4.png");
+    -fx-background-image: url("../images/ranking4.png");
     -fx-scale-x: 1.1;
     -fx-scale-y: 1.1;
 }
