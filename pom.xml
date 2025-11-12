@@ -41,15 +41,50 @@
       <artifactId>javafx-swing</artifactId>
       <version>${javafx.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-web</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
 
-    <!-- 🟨 FXGL -->
+    <!-- 🟨 UI / FXGL -->
+    <dependency>
+      <groupId>org.controlsfx</groupId>
+      <artifactId>controlsfx</artifactId>
+      <version>11.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.dlsc.formsfx</groupId>
+      <artifactId>formsfx-core</artifactId>
+      <version>11.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>net.synedra</groupId>
+      <artifactId>validatorfx</artifactId>
+      <version>0.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-javafx</artifactId>
+      <version>12.3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.kordamp.bootstrapfx</groupId>
+      <artifactId>bootstrapfx-core</artifactId>
+      <version>0.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>eu.hansolo</groupId>
+      <artifactId>tilesfx</artifactId>
+      <version>21.0.9</version>
+    </dependency>
     <dependency>
       <groupId>com.github.almasb</groupId>
       <artifactId>fxgl</artifactId>
       <version>11.17</version>
     </dependency>
 
-    <!-- 🧩 Database -->
+    <!-- ✅ PostgreSQL JDBC (Neon compatible) -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -61,6 +96,8 @@
       <artifactId>java-dotenv</artifactId>
       <version>5.2.2</version>
     </dependency>
+
+    <!-- (removed) Dotenv support not needed; using local loader -->
 
     <!-- 🧪 JUnit -->
     <dependency>
@@ -75,8 +112,6 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-
-    <!-- 🧪 TestFX -->
     <dependency>
       <groupId>org.testfx</groupId>
       <artifactId>testfx-junit5</artifactId>
@@ -101,68 +136,27 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
-          <release>24</release>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
         </configuration>
       </plugin>
 
-      <!-- 🟦 JavaFX Run Plugin -->
+      <!-- 🟦 JavaFX Plugin -->
       <plugin>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
           <mainClass>com.game.arkanoid/com.game.arkanoid.app.Main</mainClass>
-        </configuration>
-      </plugin>
-
-      <!-- ✅ JUnit + TestFX configuration -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
-        <configuration>
-          <!-- keep classpath mode to avoid modular conflicts -->
-          <useModulePath>false</useModulePath>
-          <forkCount>1</forkCount>
-          <reuseForks>false</reuseForks>
-
-          <!-- ✅ include all JavaFX jars (base + platform-specific) -->
-          <additionalClasspathElements>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-base/${javafx.version}/javafx-base-${javafx.version}.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-base/${javafx.version}/javafx-base-${javafx.version}-win.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-graphics/${javafx.version}/javafx-graphics-${javafx.version}.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-graphics/${javafx.version}/javafx-graphics-${javafx.version}-win.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-controls/${javafx.version}/javafx-controls-${javafx.version}.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-controls/${javafx.version}/javafx-controls-${javafx.version}-win.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-fxml/${javafx.version}/javafx-fxml-${javafx.version}.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-fxml/${javafx.version}/javafx-fxml-${javafx.version}-win.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-media/${javafx.version}/javafx-media-${javafx.version}.jar</additionalClasspathElement>
-            <additionalClasspathElement>${settings.localRepository}/org/openjfx/javafx-media/${javafx.version}/javafx-media-${javafx.version}-win.jar</additionalClasspathElement>
-          </additionalClasspathElements>
-
-          <!-- ✅ open internal JavaFX modules to TestFX -->
-          <argLine>
-            --add-opens javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
-            --add-opens javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED
-            --add-opens javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED
-            --add-opens javafx.graphics/com.sun.glass.ui=ALL-UNNAMED
-            --add-opens javafx.graphics/javafx.stage=ALL-UNNAMED
-            --add-exports javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
-            --add-exports javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED
-            --add-modules javafx.controls,javafx.fxml,javafx.media
-            --enable-native-access=ALL-UNNAMED
-          </argLine>
-
-          <!-- ✅ run tests with visible JavaFX UI -->
-          <systemPropertyVariables>
-            <testfx.robot>glass</testfx.robot>
-            <testfx.headless>false</testfx.headless>
-            <prism.order>sw</prism.order>
-            <java.awt.headless>false</java.awt.headless>
-          </systemPropertyVariables>
+          <jvmArgs>
+            --enable-native-access=javafx.graphics
+            --add-modules=javafx.media,java.sql
+            --add-reads com.game.arkanoid=ALL-UNNAMED
+          </jvmArgs>
         </configuration>
       </plugin>
 
     </plugins>
   </build>
+
 </project>
