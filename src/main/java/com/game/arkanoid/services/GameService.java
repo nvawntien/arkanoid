@@ -17,14 +17,25 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Core game orchestration service.
- * Handles update loop, physics, collisions, level transitions, and publishes events
- * for UI/sound layers to react.
+ * Core service orchestrating the Arkanoid game logic.
+ * Handles main update loop, entity updates, collision detection,
+ * power-ups, level progression, and publishes game events for UI and sound feedback.
  *
- * NOTE:
- * - GameController drives the render/UI.
- * - GameService drives all domain logic & updates GameState.
- * - Only GameService mutates GameState; Controller should read only.
+ * <p>Responsibilities:
+ * <ul>
+ *   <li>Process player input.</li>
+ *   <li>Update balls, bullets, power-ups, and enemies.</li>
+ *   <li>Handle collisions with paddle, bricks, and enemies.</li>
+ *   <li>Manage scoring, lives, and level transitions.</li>
+ *   <li>Publish events for sounds, explosions, and game progression.</li>
+ * </ul>
+ *
+ * <p>Note:
+ * <ul>
+ *   <li>GameController handles rendering and UI.</li>
+ *   <li>GameService contains all domain logic and mutates GameState.</li>
+ *   <li>Only GameService modifies GameState; UI/controller should read only.</li>
+ * </ul>
  */
 public final class GameService {
 
@@ -76,6 +87,18 @@ public final class GameService {
     private GameState boundState;
 
     // --- Constructor -------------------------------------------------------
+
+    /**
+     * Constructs the GameService with all sub-services required for game logic.
+     *
+     * @param ballSvc Ball movement and physics service.
+     * @param paddleSvc Paddle movement and collision service.
+     * @param bricksSvc Brick collision and state management service.
+     * @param powerUpSvc Power-up spawning and effects service.
+     * @param bulletSvc Laser bullets update and collision service.
+     * @param roundSvc Level loading and round management service.
+     * @param enemySvc Enemy spawning, movement, and collision service.
+     */
     public GameService(
             BallService ballSvc,
             PaddleService paddleSvc,
@@ -99,39 +122,46 @@ public final class GameService {
     // ======================================================================
 
     /**
-     * Main update tick, called every frame.
-     * Handles input, movement, collisions, power-ups, bullets, and level clearing.
+     * Main update tick called every frame.
+     * Handles input, entity updates, collisions, power-ups, and level progression.
+     *
+     * @param state Current game state.
+     * @param in Player input state.
+     * @param dt Delta time since last frame.
+     * @param worldW Width of the game world.
+     * @param worldH Height of the game world.
      */
     public void update(GameState state, InputState in, double dt, double worldW, double worldH) {
         if (!state.running || state.paused || state.levelTransitionPending) return;
 
         double scaledDt = dt * state.timeScale;
-        // 1. Handle input
         handleInput(state, in, scaledDt, worldW);
 
         enemySvc.update(state, scaledDt, worldW, worldH);
-        // 2. Update projectiles and entities
         bulletSvc.tickCooldown(state, scaledDt);
         updateBalls(state, scaledDt, worldW, worldH);
         updateBullets(state, scaledDt, worldH);
-        // 3. Power-ups and game progression
         powerUpSvc.update(state, scaledDt, worldW, worldH);
         checkLevelCleared(state);
         handleBallFall(state);
     }
 
     /**
-     * Handles keyboard input (movement, launch, fire).
+     * Processes player keyboard input for paddle movement, ball launch, and firing bullets.
+     *
+     * @param state Current game state.
+     * @param in Player input state.
+     * @param dt Delta time for movement scaling.
+     * @param worldW Width of the game world.
      */
     private void handleInput(GameState state, InputState in, double dt, double worldW) {
         if (in.left)  paddleSvc.moveLeft(state.paddle, dt, worldW);
         if (in.right) paddleSvc.moveRight(state.paddle, dt, worldW);
 
-        // Keep ball attached before launch
+        // Keep balls attached to paddle if not moving
         for (Ball ball : state.balls) {
             if (!ball.isMoving()) {
                 if (ball.isStuck()) {
-                    // Ball was caught: keep it attached to the paddle using the stored offset
                     double paddleX = state.paddle.getX();
                     double paddleW = state.paddle.getWidth();
                     double desiredX = paddleX + ball.getStuckOffsetX();
@@ -160,16 +190,19 @@ public final class GameService {
         }
     }
 
-    // endregion
-
-
     // ======================================================================
-    // region 2. ENTITY UPDATES (Ball, Extra Balls, Bullets, PowerUps)
+    // region 2. ENTITY UPDATES (Balls, Bullets, PowerUps)
     // ======================================================================
 
-  
     /**
-     * Updates all extra (duplicated) balls from power-ups.
+     * Updates all balls in the game, including extra balls from power-ups.
+     * Handles movement, world bouncing, collisions with paddle and bricks,
+     * and removes balls that fall below the game world.
+     *
+     * @param state Current game state.
+     * @param dt Delta time for movement scaling.
+     * @param worldW Width of the game world.
+     * @param worldH Height of the game world.
      */
     private void updateBalls(GameState state, double dt, double worldW, double worldH) {
         Iterator<Ball> iterator = state.balls.iterator();
@@ -186,7 +219,12 @@ public final class GameService {
     }
 
     /**
-     * Updates active bullets from the LASER_PADDLE power-up.
+     * Updates active bullets, handles collisions with bricks, and triggers
+     * brick destruction events and power-up spawning.
+     *
+     * @param state Current game state.
+     * @param dt Delta time for bullet movement.
+     * @param worldH Height of the game world.
      */
     private void updateBullets(GameState state, double dt, double worldH) {
         if (state.levelTransitionPending) return;
@@ -194,19 +232,22 @@ public final class GameService {
         List<BulletService.Impact> impacts = bulletSvc.update(state, state.bricks, dt, worldH);
         for (BulletService.Impact impact : impacts) {
             Brick brick = impact.brick();
-
             boolean destroyed = bricksSvc.handleBrickHit(brick);
             if (destroyed) processDestroyedBrick(state, brick);
         }
     }
 
-    // endregion
-
-
     // ======================================================================
     // region 3. COLLISION HANDLERS
     // ======================================================================
 
+    /**
+     * Handles collision between a ball and the paddle, including bouncing
+     * and playing sound effects.
+     *
+     * @param ball Ball object.
+     * @param state Current game state.
+     */
     private void handlePaddleCollision(Ball ball, GameState state) {
         if (ballSvc.checkCollision(ball, state.paddle)) {
             GameEventBus.getInstance().publish(new PaddleHitSoundEvent());
@@ -215,6 +256,13 @@ public final class GameService {
         }
     }
 
+    /**
+     * Handles collision between a ball and bricks. Updates score, spawns power-ups,
+     * triggers sound effects, and checks level completion.
+     *
+     * @param ball Ball object.
+     * @param state Current game state.
+     */
     private void handleBrickCollisions(Ball ball, GameState state) {
         for (Brick brick : state.bricks) {
             if (brick.isDestroyed()) continue;
@@ -239,22 +287,19 @@ public final class GameService {
         }
     }
 
-    // endregion
-
-
     // ======================================================================
     // region 4. GAME PROGRESSION (Lives, Scoring, Level Clear)
     // ======================================================================
 
     /**
-     * Handles ball loss (life decrement, reset, game over check).
+     * Handles ball falling below the paddle. Decrements lives,
+     * resets the ball, and triggers game over events if lives reach zero.
+     *
+     * @param state Current game state.
      */
     private void handleBallFall(GameState state) {
-        if (state.balls.size() > 0) {
-            return;
-        }
+        if (state.balls.size() > 0) return;
 
-        // No extra balls → lose life
         state.decrementLives();
         state.resetForLife();
 
@@ -262,15 +307,18 @@ public final class GameService {
             state.running = false;
             GameEventBus.getInstance().publish(new ExplodePaddleEvent());
             GameEventBus.getInstance().publish(new GameOverEvent());
-        }
-        else {
+        } else {
             state.balls.add(state.ball);
             ballSvc.resetOnPaddle(state.ball, state.paddle);
         }
     }
+
     /**
-     * Called whenever a brick is destroyed.
-     * Updates score, spawns power-up, and re-checks for level completion.
+     * Processes a destroyed brick by updating score, spawning a power-up if applicable,
+     * and checking if the level has been cleared.
+     *
+     * @param state Current game state.
+     * @param brick Destroyed brick object.
      */
     private void processDestroyedBrick(GameState state, Brick brick) {
         state.score++;
@@ -283,7 +331,10 @@ public final class GameService {
     }
 
     /**
-     * Checks if all bricks are cleared, marks transition, and fires event.
+     * Checks whether all bricks have been cleared, marks the level
+     * transition, stops the game, and fires the LevelClearedEvent.
+     *
+     * @param state Current game state.
      */
     private void checkLevelCleared(GameState state) {
         if (state.levelTransitionPending) return;
@@ -296,6 +347,12 @@ public final class GameService {
         }
     }
 
+    /**
+     * Counts the number of bricks that are not destroyed.
+     *
+     * @param state Current game state.
+     * @return Number of alive bricks.
+     */
     private int countAliveBricks(GameState state) {
         int alive = 0;
         for (Brick brick : state.bricks) {
@@ -304,15 +361,14 @@ public final class GameService {
         return alive;
     }
 
-    // endregion
-
-
     // ======================================================================
     // region 5. LEVEL MANAGEMENT
     // ======================================================================
 
     /**
-     * Restarts the current level (same layout, reset state).
+     * Restarts the current level by reloading layout and resetting game state.
+     *
+     * @param state Current game state.
      */
     public void restartLevel(GameState state) {
         roundSvc.loadLevel(state, state.level);
@@ -324,14 +380,18 @@ public final class GameService {
     }
 
     /**
-     * Loads the next level, keeping state transitions consistent.
+     * Loads the next level while maintaining game state transitions.
+     *
+     * @param state Current game state.
      */
     public void loadNextLevel(GameState state) {
         roundSvc.loadNextLevel(state);
     }
 
     /**
-     * Starts the level after intro countdown.
+     * Starts the next level after any intro countdown.
+     *
+     * @param state Current game state.
      */
     public void startNextLevel(GameState state) {
         state.paused = false;
@@ -340,21 +400,25 @@ public final class GameService {
     }
 
     /**
-     * Loads a specific level index.
+     * Loads a specific level by index.
+     *
+     * @param state Current game state.
+     * @param levelIndex Index of the level to load.
      */
     public void loadLevel(GameState state, int levelIndex) {
         roundSvc.loadLevel(state, levelIndex);
     }
 
-    // endregion
-
-
     // ======================================================================
     // region 6. MISC / SETUP
     // ======================================================================
 
+    /**
+     * Binds the GameService to a specific GameState instance.
+     *
+     * @param state GameState instance to bind.
+     */
     public void bindState(GameState state) {
         this.boundState = state;
     }
-    // endregion
 }

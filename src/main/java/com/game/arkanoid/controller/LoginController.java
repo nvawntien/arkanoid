@@ -13,10 +13,19 @@ import java.util.Objects;
  * <p>
  * Handles user login logic, input validation, password visibility toggle,
  * and navigation to other scenes (e.g., signup or menu).
+ * <p>
+ * Responsibilities:
+ * <ul>
+ *     <li>Bind UI fields and buttons from FXML.</li>
+ *     <li>Validate user input before attempting login.</li>
+ *     <li>Authenticate user asynchronously via {@link com.game.arkanoid.services.DatabaseService}.</li>
+ *     <li>Provide feedback messages for success or error states.</li>
+ *     <li>Navigate to main menu or signup scene on successful login or user request.</li>
+ * </ul>
  */
 public final class LoginController {
 
-    /** Scene navigation controller */
+    /** Scene navigation controller used for switching between views */
     private final SceneController navigator;
 
     // --- FXML UI elements ---
@@ -39,6 +48,7 @@ public final class LoginController {
 
     /**
      * Initializes the controller after the FXML has been loaded.
+     * <p>
      * Sets up button handlers, field bindings, and password visibility logic.
      */
     @FXML
@@ -70,10 +80,10 @@ public final class LoginController {
     /**
      * Handles the login process:
      * <ul>
-     *   <li>Validates user input</li>
-     *   <li>Authenticates via {@link com.game.arkanoid.services.DatabaseService}</li>
-     *   <li>Shows success or error messages</li>
-     *   <li>Redirects to the main menu on success</li>
+     *   <li>Validates user input.</li>
+     *   <li>Authenticates via {@link com.game.arkanoid.services.DatabaseService}.</li>
+     *   <li>Shows success or error messages.</li>
+     *   <li>Redirects to the main menu on success.</li>
      * </ul>
      */
     private void onLogin() {
@@ -142,7 +152,7 @@ public final class LoginController {
     }
 
     /**
-     * Displays a message to the user.
+     * Displays a message to the user in the {@link #messageLabel}.
      *
      * @param text the message text
      */

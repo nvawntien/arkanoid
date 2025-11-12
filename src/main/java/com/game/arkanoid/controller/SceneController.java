@@ -14,16 +14,27 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Central scene navigation helper that also plays animated transitions.
+ * Central controller responsible for navigating between scenes and
+ * playing visual transitions in the Arkanoid game.
  */
 public final class SceneController {
 
     // --- Core fields ---
+    /** The primary stage of the application. */
     private final Stage stage;
+
+    /** Manages animated transitions between scenes. */
     private final TransitionManager transitionManager = new TransitionManager();
+
+    /** The currently active game controller instance, if any. */
     private GameController activeGameController;
 
     // --- Constructor ---
+    /**
+     * Creates a new SceneController bound to the given stage.
+     *
+     * @param stage the main application stage (must not be null)
+     */
     public SceneController(Stage stage) {
         this.stage = Objects.requireNonNull(stage, "stage");
     }
@@ -32,12 +43,21 @@ public final class SceneController {
     //  TRANSITION & NAVIGATION HELPERS
     // ===============================================================
 
-    /** Expose transition manager so controllers can request custom strategies. */
+    /**
+     * Returns the TransitionManager used by this controller.
+     *
+     * @return the transition manager
+     */
     public TransitionManager transitions() {
         return transitionManager;
     }
 
-    /** Navigate to a scene with a custom transition strategy. */
+    /**
+     * Navigates to a specific scene using the given transition strategy.
+     *
+     * @param sceneId     the target scene identifier
+     * @param transition  the transition strategy to apply
+     */
     public void navigateTo(SceneId sceneId, TransitionStrategy transition) {
         switch (sceneId) {
             case LOGIN -> showLogin(transition);
@@ -52,14 +72,23 @@ public final class SceneController {
         }
     }
 
-    /** Set the current scene with a given transition. */
+    /**
+     * Sets the current scene and applies a transition animation.
+     *
+     * @param sceneId     the logical identifier of the scene
+     * @param root        the root node of the FXML layout
+     * @param transition  the transition strategy to apply
+     */
     private void setScene(SceneId sceneId, Parent root, TransitionStrategy transition) {
         Scene scene = new Scene(root, Constants.GAME_WIDTH, Constants.GAME_HEIGHT);
         stage.setScene(scene);
         Platform.runLater(() -> transitionManager.play(scene.getRoot(), transition, null));
     }
 
-    /** Stop any currently active game before changing scenes. */
+    /**
+     * Stops the currently active game if one exists.
+     * Ensures no background updates continue when changing scenes.
+     */
     private void stopActiveGame() {
         if (activeGameController != null) {
             activeGameController.stop();
@@ -71,11 +100,12 @@ public final class SceneController {
     //  MENU / SETTINGS / RANKINGS / LOGIN / SIGNUP SCENES
     // ===============================================================
 
-    /** Show the main menu with default transition. */
+    /** Displays the main menu using the default transition. */
     public void showMenu() {
         showMenu(transitionManager.menuTransition());
     }
 
+    /** Displays the main menu with a specific transition. */
     private void showMenu(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/MenuView.fxml", loader -> {
@@ -89,11 +119,12 @@ public final class SceneController {
         setScene(SceneId.MENU, root, transition);
     }
 
-    /** Show the settings scene with default transition. */
+    /** Displays the settings scene using the default transition. */
     public void showSettings() {
         showSettings(transitionManager.settingsTransition());
     }
 
+    /** Displays the settings scene with a specific transition. */
     private void showSettings(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/SettingsView.fxml", loader -> {
@@ -107,11 +138,12 @@ public final class SceneController {
         setScene(SceneId.SETTINGS, root, transition);
     }
 
-    /** Show the rankings scene with default transition. */
+    /** Displays the rankings scene using the default transition. */
     public void showRankings() {
         showRankings(transitionManager.menuTransition());
     }
 
+    /** Displays the rankings scene with a specific transition. */
     private void showRankings(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/RankingsView.fxml", loader -> {
@@ -123,11 +155,12 @@ public final class SceneController {
         setScene(SceneId.RANKINGS, root, transition);
     }
 
-    /** Show the login screen. */
+    /** Displays the login screen using the default transition. */
     public void showLogin() {
         showLogin(transitionManager.menuTransition());
     }
 
+    /** Displays the login screen with a specific transition. */
     private void showLogin(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/LoginView.fxml", loader -> {
@@ -139,11 +172,12 @@ public final class SceneController {
         setScene(SceneId.LOGIN, root, transition);
     }
 
-    /** Show the signup screen. */
+    /** Displays the signup screen using the default transition. */
     public void showSignup() {
         showSignup(transitionManager.menuTransition());
     }
 
+    /** Displays the signup screen with a specific transition. */
     private void showSignup(TransitionStrategy transition) {
         stopActiveGame();
         Parent root = load("/com/game/arkanoid/fxml/SignupView.fxml", loader -> {
@@ -159,14 +193,13 @@ public final class SceneController {
     //  GAMEPLAY SCENES (NORMAL, ROUND, SNAPSHOT, GAME OVER)
     // ===============================================================
 
-    /** Show the gameplay scene with default transition. */
+    /** Displays the default gameplay scene (starting from round 1). */
     public void showGame() {
-        // Start from Round 1 using the new per-round FXMLs
         showGameRound(1);
     }
 
+    /** Displays the gameplay scene with a specific transition. */
     private void showGame(TransitionStrategy transition) {
-        // Keep compatibility if explicitly called, but prefer showGameRound
         stopActiveGame();
         Container container = Container.getInstance();
         Parent root = load("/com/game/arkanoid/fxml/Round1View.fxml", loader -> {
@@ -180,8 +213,12 @@ public final class SceneController {
         setScene(SceneId.GAME, root, transition);
     }
 
-    /** Show the given game round (Round1View.fxml, Round2View.fxml, etc.). */
-    public void  showGameRound(int round) {
+    /**
+     * Displays the specified game round (e.g., Round1View.fxml, Round2View.fxml).
+     *
+     * @param round the round number to display
+     */
+    public void showGameRound(int round) {
         stopActiveGame();
         Container container = Container.getInstance();
         String path = String.format("/com/game/arkanoid/fxml/Round%dView.fxml", round);
@@ -198,20 +235,21 @@ public final class SceneController {
         setScene(SceneId.GAME, root, transitionManager.levelBannerTransition());
     }
 
-    /** Show the game over scene with default transition. */
+    /** Displays the Game Over screen using the default transition. */
     public void showGameOver() {
         showGameOver(transitionManager.gameOverTransition());
     }
 
+    /** Displays the Game Over screen with a specific transition. */
     private void showGameOver(TransitionStrategy transition) {
-        final int finalScore; 
+        final int finalScore;
 
         if (activeGameController != null) {
             finalScore = activeGameController.getScore();
             activeGameController.stop();
             activeGameController = null;
         } else {
-            finalScore = 0; 
+            finalScore = 0;
         }
 
         Parent root = load("/com/game/arkanoid/fxml/GameOverView.fxml", loader -> {
@@ -226,11 +264,12 @@ public final class SceneController {
         setScene(SceneId.GAME_OVER, root, transition);
     }
 
-    /** Show the win scene with default transition. */
+    /** Displays the victory (Win) screen using the default transition. */
     public void showWin() {
         showWin(transitionManager.winTransition());
     }
 
+    /** Displays the victory (Win) screen with a specific transition. */
     private void showWin(TransitionStrategy transition) {
         final int finalScore;
         if (activeGameController != null) {
@@ -253,12 +292,16 @@ public final class SceneController {
         setScene(SceneId.WIN, root, transition);
     }
 
-    /** Continue from paused state (placeholder). */
+    /** Resumes the current game (if paused). Placeholder for future use. */
     public void continueGame() {
         // Implementation can resume an active game session later
     }
 
-    /** Load the requested level and then apply snapshot + resume countdown. */
+    /**
+     * Loads a saved snapshot and resumes gameplay from that state.
+     *
+     * @param snapshot the saved game state snapshot
+     */
     public void startGameFromSnapshot(com.game.arkanoid.models.GameStateSnapshot snapshot) {
         int round = Math.max(1, snapshot.currentLevel);
         stopActiveGame();
@@ -276,7 +319,6 @@ public final class SceneController {
 
         setScene(SceneId.GAME, root, transitionManager.gameTransition());
         if (activeGameController != null) {
-            // apply snapshot then run resume countdown
             activeGameController.applySnapshot(snapshot);
             activeGameController.resumeWithCountdown();
         }
@@ -286,7 +328,7 @@ public final class SceneController {
     //  SAVE / EXIT LOGIC
     // ===============================================================
 
-    /** Best-effort save of in-progress game when app closes. */
+    /** Attempts to save the current in-progress game before exiting. */
     public void saveInProgressIfAny() {
         if (activeGameController == null) return;
         if (!activeGameController.isResumable()) return;
@@ -303,7 +345,7 @@ public final class SceneController {
         }
     }
 
-    /** Exit the application. */
+    /** Closes the application window. */
     public void exit() {
         stage.close();
     }
@@ -312,7 +354,13 @@ public final class SceneController {
     //  FXML LOADING UTILITIES
     // ===============================================================
 
-    /** Generic FXML loader with controller binding. */
+    /**
+     * Loads an FXML file and configures its controller factory.
+     *
+     * @param resource   the FXML resource path
+     * @param configurer consumer to configure the FXMLLoader
+     * @return the loaded root node
+     */
     private Parent load(String resource, Consumer<FXMLLoader> configurer) {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
         configurer.accept(loader);
@@ -328,7 +376,12 @@ public final class SceneController {
         }
     }
 
-    /** Throw helpful error when unknown controller type requested. */
+    /**
+     * Builds a descriptive exception when an unexpected controller type is requested.
+     *
+     * @param cls the unknown controller class
+     * @return a runtime exception describing the issue
+     */
     private RuntimeException buildUnknownController(Class<?> cls) {
         return new IllegalArgumentException("Unsupported controller request: " + cls.getName());
     }

@@ -40,6 +40,9 @@ public final class MenuController {
         this.navigator = navigator;
     }
 
+    /**
+     * FXML initialize method.
+     */
     @FXML
     private void initialize() {
         eventBus.publish(new MenuBGMSoundEvent());
@@ -55,13 +58,13 @@ public final class MenuController {
         allButtons.forEach(b -> b.setFocusTraversable(false));
 
         Platform.runLater(() -> {
-            // Sắp xếp thật theo vị trí X trong scene
+           // sort buttons following their layout X position
             List<Button> ordered = new ArrayList<>(allButtons);
             ordered.sort(Comparator.comparingDouble(b -> b.localToScene(b.getLayoutX(), 0).getX()));
 
             animator = new MenuAnimator(ordered);
 
-            // Đặt "Start" làm nút trung tâm
+            // set startButton to center
             int tries = 0;
             while (animator.getCenterButton() != startButton && tries < ordered.size()) {
                 animator.moveRight();
@@ -77,7 +80,9 @@ public final class MenuController {
         });
     }
 
-    /** Xử lý phím mũi tên và Enter */
+    /**
+     * Setup key handler for menu navigation.
+     */
     private void setupKeyHandler(Scene scene) {
         scene.setOnKeyPressed(event -> {
             if (animator == null) return;
@@ -95,21 +100,37 @@ public final class MenuController {
         });
     }
 
+    /**
+     * Handle "Start Game" button action.
+     * @param e
+     */
     @FXML private void onStartGame(ActionEvent e) {
         eventBus.publish(new StopBGMSoundEvent());
         Container.reset();
         navigator.showGame();
     }
 
+    /**
+     * Handle "Settings" button action.
+     * @param e
+     */
     @FXML private void onOpenSettings(ActionEvent e) {
         navigator.showSettings();
     }
 
+    /**
+     * Handle "Exit" button action.
+     * @param e
+     */
     @FXML private void onExit(ActionEvent e) {
         
         navigator.exit();
     }
 
+    /**
+     * Handle "Continue Game" button action.
+     * @param e
+     */
     @FXML private void onContinueGame(ActionEvent e) {
         User current = AppContext.getInstance().getCurrentUser();
         if (current == null) return;
@@ -128,6 +149,9 @@ public final class MenuController {
         });
     }
 
+    /**
+     * Update the availability of the "Continue" button based on saved game state.
+     */
     private void updateContinueAvailability() {
         if (continueButton == null) return;
         continueButton.setDisable(true);
@@ -138,5 +162,9 @@ public final class MenuController {
         });
     }
 
+    /**
+     * Handle "Ranking" button action.
+     * @param e
+     */
     @FXML private void onShowRanking(ActionEvent e) { navigator.showRankings(); }
 }

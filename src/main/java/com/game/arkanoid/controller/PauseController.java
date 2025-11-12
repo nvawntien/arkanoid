@@ -19,16 +19,25 @@ public final class PauseController {
         this.exitHandler = Objects.requireNonNull(exitHandler, "exitHandler");
     }
 
+    /**
+     * Handle "Resume" button action.
+     */
     @FXML
     private void onResume() {
         resumeHandler.run();
     }
 
+    /**
+     * Handle "Restart" button action.
+     */
     @FXML
     private void onRestart() {
         restartHandler.run();
     }
 
+    /**
+     * Handle "Exit to Menu" button action.
+     */
     @FXML
     private void onExitToMenu() {
         exitHandler.run();

@@ -2,7 +2,6 @@ package com.game.arkanoid.services;
 
 import com.game.arkanoid.config.GameSettings;
 import com.game.arkanoid.events.GameEventBus;
-import com.game.arkanoid.events.sound.PaddleHitSoundEvent;
 import com.game.arkanoid.events.sound.WallHitSoundEvent;
 import com.game.arkanoid.models.Ball;
 import com.game.arkanoid.models.GameObject;
@@ -10,10 +9,17 @@ import com.game.arkanoid.models.Paddle;
 import com.game.arkanoid.utils.Constants;
 
 /**
- * Service class for handling ball-related logic in the game.
+ * Service class responsible for handling all ball-related logic in the game.
+ * Includes launching, stepping, bouncing, collision detection, and interactions with paddle and world boundaries.
  */
 public class BallService {
 
+    /**
+     * Launches a stationary ball with initial velocity at a predefined angle.
+     * If the ball is already moving, this method does nothing.
+     *
+     * @param ball the ball to be launched
+     */
     public void launch(Ball ball) {
         if (ball.isMoving()) {
             return;
@@ -26,10 +32,25 @@ public class BallService {
         ball.setStuckOffsetX(0.0);
     }
 
+    /**
+     * Updates the ball's position based on its current velocity and the elapsed time.
+     *
+     * @param ball the ball to update
+     * @param dt   the delta time in milliseconds
+     */
     public void step(Ball ball, double dt) {
         ball.update(dt);
     }
 
+    /**
+     * Handles bouncing off the world boundaries (walls, ceiling).
+     * Adjusts ball's position and velocity according to restitution.
+     * Publishes a WallHitSoundEvent if the ball hits any wall.
+     *
+     * @param ball   the ball to check for boundary collisions
+     * @param worldW the width of the game world
+     * @param worldH the height of the game world
+     */
     public void bounceWorld(Ball ball, double worldW, double worldH) {
         double r = ball.getRadius();
         boolean check = false;
@@ -50,10 +71,24 @@ public class BallService {
         if (check) GameEventBus.getInstance().publish(new WallHitSoundEvent());
     }
 
+    /**
+     * Checks if the ball has fallen below the bottom of the world.
+     *
+     * @param ball   the ball to check
+     * @param worldH the height of the game world
+     * @return true if the ball fell below the bottom boundary
+     */
     public boolean fellBelow(Ball ball, double worldH) {
         return ball.getCenterY() - ball.getRadius() > worldH;
     }
 
+    /**
+     * Resets the ball on top of the paddle.
+     * Stops its movement and sets the ball's position relative to the paddle.
+     *
+     * @param ball   the ball to reset
+     * @param paddle the paddle on which to place the ball
+     */
     public void resetOnPaddle(Ball ball, Paddle paddle) {
         ball.setMoving(false);
         ball.setStuck(false);
@@ -66,8 +101,11 @@ public class BallService {
     }
 
     /**
-     * Handles bounce behavior when the ball collides with another object.
-     * Includes paddle motion influence for realistic deflection.
+     * Handles collision response when the ball hits another GameObject.
+     * Calculates penetration, updates velocity and position, and applies paddle motion influence if colliding with a paddle.
+     *
+     * @param ball  the ball involved in the collision
+     * @param other the other game object collided with
      */
     public void bounceOff(Ball ball, GameObject other) {
         double oL = other.getX();
@@ -98,12 +136,9 @@ public class BallService {
             if (other instanceof Paddle) {
                 Paddle paddle = (Paddle) other;
                 if (ball.isStuck()) {
-                    // Nếu bóng đã được "catch" bởi power-up: gắn bóng vào vị trí va chạm trên paddle
                     double paddleX = paddle.getX();
                     double paddleW = paddle.getWidth();
-                    // Giữ bóng nằm trong biên paddle (theo trục X)
                     double collisionX = Math.max(paddleX + ball.getRadius(), Math.min(ball.getCenterX(), paddleX + paddleW - ball.getRadius()));
-                    // Đặt bóng lên trên paddle, dừng chuyển động và ghi offset để theo paddle
                     ball.setCenter(collisionX, oT - ball.getRadius() - Constants.BALL_NUDGE);
                     ball.setVelocity(0.0, 0.0);
                     ball.setMoving(false);
@@ -112,51 +147,40 @@ public class BallService {
                     return;
                 }
 
-                // Đưa bóng ra khỏi paddle một chút
                 ball.setCenter(ball.getX(), oT - ball.getRadius() - Constants.BALL_NUDGE);
 
                 double paddleX = paddle.getX();
                 double paddleW = paddle.getWidth();
                 double paddleH = paddle.getHeight();
-
                 double ballX = ball.getCenterX();
 
-                // --- 1. Tính vị trí va chạm tương đối ---
-                double relX = (ballX - paddleX) / paddleW; // 0..1
-                double offset = (relX - 0.5) * 2.0;        // -1 (trái) .. +1 (phải)
+                double relX = (ballX - paddleX) / paddleW;
+                double offset = (relX - 0.5) * 2.0;
 
-                // --- 2. Phát hiện va chạm ở góc cong ---
-                double cornerRadius = paddleH / 2.0; // bán kính giả định góc cong
+                double cornerRadius = paddleH / 2.0;
                 boolean hitLeftCorner = (ballX < paddleX + cornerRadius);
                 boolean hitRightCorner = (ballX > paddleX + paddleW - cornerRadius);
 
-                // --- 3. Tính góc nảy theo vật lý ---
-                double minAngle = Math.toRadians(Constants.MIN_BALL_ANGLE); // vd: 35°
-                double maxAngle = Math.toRadians(Constants.MAX_BALL_ANGLE); // vd: 75°
+                double minAngle = Math.toRadians(Constants.MIN_BALL_ANGLE);
+                double maxAngle = Math.toRadians(Constants.MAX_BALL_ANGLE);
                 double angle;
 
                 if (hitLeftCorner) {
-                    // góc trái cong → nảy về trái, góc lớn hơn
                     angle = maxAngle - Math.abs(offset) * (maxAngle - minAngle);
                     angle = Math.min(maxAngle, angle);
                 } else if (hitRightCorner) {
-                    // góc phải cong → nảy về phải
                     angle = maxAngle - Math.abs(offset) * (maxAngle - minAngle);
                     angle = Math.min(maxAngle, angle);
                 } else {
-                    // giữa paddle → góc gần vuông lên trên
                     angle = minAngle + (maxAngle - minAngle) * Math.abs(offset);
                 }
 
-                // --- 4. Ảnh hưởng vận tốc paddle ---
                 double paddleDx = paddle.getDx();
-                double influence = 0.25; // hệ số ảnh hưởng paddle
-                angle += paddleDx * influence * 0.01; // tăng/giảm nhẹ theo hướng paddle
+                double influence = 0.25;
+                angle += paddleDx * influence * 0.01;
 
-                // Giới hạn lại góc
                 angle = Math.max(minAngle, Math.min(maxAngle, angle));
 
-                // --- 5. Tính vận tốc mới ---
                 double speed = baseSpeed();
                 vx = speed * Math.sin(angle) * Math.signum(offset);
                 vy = -speed * Math.cos(angle);
@@ -173,6 +197,13 @@ public class BallService {
         ensureMinimumSpeed(ball);
     }
 
+    /**
+     * Checks if the ball is currently colliding with a given GameObject.
+     *
+     * @param ball  the ball to check
+     * @param other the other object to test collision against
+     * @return true if the ball collides with the other object
+     */
     public boolean checkCollision(Ball ball, GameObject other) {
         double oL = other.getX();
         double oT = other.getY();
@@ -187,6 +218,12 @@ public class BallService {
         return ddx * ddx + ddy * ddy <= ball.getRadius() * ball.getRadius();
     }
 
+    /**
+     * Ensures the ball maintains a minimum speed.
+     * If the speed is too small, reinitializes the velocity to the base speed and launch angle.
+     *
+     * @param ball the ball to adjust
+     */
     private void ensureMinimumSpeed(Ball ball) {
         double speed = Math.hypot(ball.getDx(), ball.getDy());
         if (speed < 1e-3) {
@@ -196,6 +233,11 @@ public class BallService {
         }
     }
 
+    /**
+     * Returns the base speed of the ball, modified by game settings.
+     *
+     * @return base speed for the ball
+     */
     private double baseSpeed() {
         return Constants.BALL_SPEED * GameSettings.getBallSpeedMultiplier();
     }

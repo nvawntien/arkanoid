@@ -8,14 +8,12 @@ import com.game.arkanoid.events.game.DoorOpenedEvent;
 import com.game.arkanoid.events.game.LevelClearedEvent;
 import com.game.arkanoid.events.game.OpenDoorTopLeftEvent;
 import com.game.arkanoid.events.game.OpenDoorTopRightEvent;
-import com.game.arkanoid.events.paddle.ExplodePaddleEvent;
 import com.game.arkanoid.events.paddle.ExplodePaddleFinishedEvent;
 import com.game.arkanoid.events.paddle.IntroPaddleEvent;
 import com.game.arkanoid.models.GameState;
 import com.game.arkanoid.models.GameStateSnapshot;
 import com.game.arkanoid.models.InputState;
 import com.game.arkanoid.models.User;
-import com.game.arkanoid.models.DoorType;
 import com.game.arkanoid.services.GameService;
 import com.game.arkanoid.view.renderer.BallsRenderer;
 import com.game.arkanoid.view.renderer.BulletRenderer;
@@ -94,9 +92,13 @@ public final class GameController {
     private Parent pauseOverlay;
     private int lastLevelObserved = Integer.MIN_VALUE;
     private Timeline spawnTimer;
-    private DoorType doorType;
 
-    // Constructor ------------------------------------------------------------
+   /**
+    * Constructor.
+    * @param gameState
+    * @param gameService
+    * @param navigator
+    */
     public GameController(GameState gameState, GameService gameService, SceneController navigator) {
         this.gameState = gameState;
         this.gameService = gameService;
@@ -118,10 +120,9 @@ public final class GameController {
         startLevelIntro();
     }
 
-    // ======================================================================
-    // region 1. GAME LOOP (Core runtime logic)
-    // ======================================================================
-
+    /**
+     * Start the main game loop.
+     */
     private void startGameLoop() {
         loop = new AnimationTimer() {
             private long last = -1;
@@ -177,6 +178,9 @@ public final class GameController {
         loop.start();
     }
 
+    /**
+     * Start enemy spawn timer.
+     */
     private void startEnemySpawnTimer() {
         spawnTimer = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
             if (gameState.paused || gameState.levelTransitionPending) return;
@@ -188,6 +192,10 @@ public final class GameController {
         spawnTimer.play();
     }
 
+    /**
+     * Read current input state.
+     * @return
+     */
     private InputState readInput() {
         InputState in = new InputState();
         if (gameState.paused) return in;
@@ -198,24 +206,27 @@ public final class GameController {
         return in;
     }
 
-    // endregion
-
-
-    // ======================================================================
-    // region 2. INPUT HANDLING
-    // ======================================================================
-
+    /**
+     * Setup input handlers for key events.
+     */
     private void setupInputHandlers() {
         rootStack.addEventFilter(KeyEvent.KEY_PRESSED, this::handleGlobalKeyPressed);
         gamePane.setOnKeyPressed(this::handleGameKeyPressed);
         gamePane.setOnKeyReleased(event -> activeKeys.remove(event.getCode()));
     }
 
+    /**
+     * Handle pause button click.
+     */
     @FXML
     private void handlePauseButton() {
         togglePause();
     }
     
+    /**
+     * Handle global key pressed events.
+     * @param event
+     */
     private void handleGlobalKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.ESCAPE) {
             togglePause();
@@ -223,6 +234,10 @@ public final class GameController {
         }
     }
 
+    /**
+     * Handle game key pressed events.
+     * @param event
+     */
     private void handleGameKeyPressed(KeyEvent event) {
         KeyCode code = event.getCode();
         if (code == KeyCode.P) {
@@ -237,20 +252,12 @@ public final class GameController {
         activeKeys.add(code);
     }
 
-    // endregion
-
-
-    // ======================================================================
-    // region 3. LEVEL TRANSITION + EVENT HANDLING
-    // ======================================================================
-
-   // ...existing code...
+    /**
+     * Register event listeners.
+     */
     private void registerEventListeners() {
         subscriptions.add(GameEventBus.getInstance().subscribe(LevelClearedEvent.class, this::onLevelCleared));
-
-        // chạy trên FX thread, log để debug nếu handler nhận event hay không
         subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpActivatedEvent.class, paddleRenderer::onPowerUpActivated));
-
         subscriptions.add(GameEventBus.getInstance().subscribe(PowerUpExpiredEvent.class, paddleRenderer::onPowerUpExpired));
         subscriptions.add(GameEventBus.getInstance().subscribe(DoorOpenedEvent.class, ev -> {
             if (ev.left()) {    
@@ -271,8 +278,11 @@ public final class GameController {
         }));
     }
 
-    // ...existing code...
-
+    
+    /**
+     * Handle level cleared event.
+     * @param event
+     */
     private void onLevelCleared(LevelClearedEvent event) {
         Platform.runLater(() -> {
             if (loop != null) loop.stop();
@@ -313,14 +323,17 @@ public final class GameController {
                     return;
                 }
 
-                // 🔹 Chuyển qua Round mới bằng SceneController
+                // Restart loop and intro for next level
                 navigator.showGameRound(nextLevel);
             });
             pause.play();
         });
     }
 
-    private void trackLevelTransition() {
+    /**
+     * Track level transitions and start intro if level changed.
+     */
+    private void trackLevelTransition() {   
         int currentLevel = gameState.level;
         if (currentLevel != lastLevelObserved) {
             lastLevelObserved = currentLevel;
@@ -328,6 +341,9 @@ public final class GameController {
         }
     }
 
+    /**
+     * Start level intro sequence.
+     */
     private void startLevelIntro() {
         if (levelIntroSequence != null) {
             levelIntroSequence.stop();
@@ -354,7 +370,12 @@ public final class GameController {
         levelIntroSequence.playFromStart();
     }
 
-
+    /**
+     * Create banner step.
+     * @param text
+     * @param seconds
+     * @return
+     */
     private PauseTransition createBannerStep(String text, double seconds) {
         PauseTransition pt = new PauseTransition(Duration.seconds(seconds));
         pt.statusProperty().addListener((obs, oldStatus, newStatus) -> {
@@ -391,22 +412,25 @@ public final class GameController {
         return pt;
     }
 
-    // endregion
-
-
-    // ======================================================================
-    // region 4. PAUSE MENU & NAVIGATION
-    // ======================================================================
-
+    /**
+     * Toggle pause state.
+     */
     private void togglePause() {
         if (isPauseVisible()) resumeGame();
         else showPauseMenu();
     }
 
+    /**
+     * Check if pause menu is visible.
+     * @return
+     */
     private boolean isPauseVisible() {
         return overlayLayer.isVisible();
     }
 
+    /**
+     * Show pause menu.
+     */
     private void showPauseMenu() {
         if (pauseOverlay == null || isPauseVisible()) return;
         gameState.paused = true;
@@ -421,15 +445,12 @@ public final class GameController {
         ft.setFromValue(0.0);
         ft.setToValue(1.0);
         ft.play();
-
-        // region SOUND - Pause feedback
-       // soundService.playSfx("pause_on");
-        //soundService.fade("level_bgm", soundService.effectiveMusicVolume() * 0.35, Duration.millis(250));
-        // endregion
-
         pauseOverlay.requestFocus();
     }
 
+    /**
+     * Hide pause menu.
+     */
     private void hidePauseMenu() {
         if (!isPauseVisible()) return;
 
@@ -443,6 +464,9 @@ public final class GameController {
         ft.play();
     }
 
+    /**
+     * Resume game from pause.
+     */
     private void resumeGame() {
         hidePauseMenu();
         // show 3-2-1 countdown before resuming
@@ -462,16 +486,21 @@ public final class GameController {
         seq.playFromStart();
     }
 
+    /**
+     * Restart current level.
+     */
     private void restartLevel() {
         hidePauseMenu();
         gameService.restartLevel(gameState);
         lastLevelObserved = gameState.level;
         lifeRenderer.reset();
         startLevelIntro();
-        //playsound
         Platform.runLater(gamePane::requestFocus);
     }
 
+    /**
+     * Exit to main menu.
+     */
     private void exitToMenu() {
         hidePauseMenu();
         // Save in-progress game state for current user
@@ -487,13 +516,9 @@ public final class GameController {
         navigator.navigateTo(SceneId.MENU, navigator.transitions().menuTransition());
     }
 
-    // endregion
-
-
-    // ======================================================================
-    // region 5. RENDERING & HUD
-    // ======================================================================
-
+    /**
+     * Setup renderers for game entities.
+     */
     private void setupRenderers() {
         paddleRenderer = new PaddleRenderer(gamePane);
         ballsRenderer = new BallsRenderer(gamePane);
@@ -509,7 +534,9 @@ public final class GameController {
         GameEventBus.getInstance().publish(new IntroPaddleEvent());
     }
 
-
+    /**
+     * Update HUD elements.
+     */
     private void updateHud() {
         User currentUser = AppContext.getInstance().getCurrentUser();
         String username = (currentUser != null) ? currentUser.getName() : "PLAYER";
@@ -529,10 +556,17 @@ public final class GameController {
         }
     }
 
+    /**
+     * Get current score.
+     * @return
+     */
     public int getScore() {
         return gameState.score;
     }
 
+    /**
+     * Load and display high score from database.
+     */
     private void loadAndDisplayHighScore() {
         // Query top 1 ranking once; from then on, update locally when surpassed
         AppContext.getInstance().db().getRankings(1).whenComplete((list, err) -> {
@@ -549,6 +583,9 @@ public final class GameController {
         });
     }
 
+    /**
+     * Setup pause overlay UI.
+     */
     private void setupPauseOverlay() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/game/arkanoid/fxml/PauseView.fxml"));
@@ -567,32 +604,30 @@ public final class GameController {
         }
     }
 
-    // endregion
-
-
-    // ======================================================================
-    // region 6. STOP / CLEANUP
-    // ======================================================================
-
+    /**
+     * Stop game loop and navigate to target scene.
+     * @param target
+     * @param transition
+     */
     private void stopLoopAndNavigate(SceneId target, TransitionStrategy transition) {
         stop();
         navigator.navigateTo(target, transition);
     }
 
+    /**
+     * Stop the game controller and clean up resources.
+     */
     public void stop() {
         if (loop != null) loop.stop();
         if (levelIntroSequence != null) levelIntroSequence.stop();
-        //soundService.stopBgm("level_bgm");
         subscriptions.forEach(GameEventBus.Subscription::close);
         subscriptions.clear();
     }
 
-    // endregion
-
-    // ============================================================
-    // region 7. CONTINUE SUPPORT (apply snapshot + countdown)
-    // ============================================================
-
+    /**
+     * Apply a game state snapshot to restore gameplay.
+     * @param snapshot
+     */
     public void applySnapshot(GameStateSnapshot snapshot) {
         // Cancel any intro sequence that may have been scheduled in initialize()
         if (levelIntroSequence != null) {
@@ -617,6 +652,9 @@ public final class GameController {
         }
     }
 
+    /**
+     * Resume game with 3-2-1 countdown.
+     */
     public void resumeWithCountdown() {
         bannerLayer.setVisible(true);
         bannerLayer.setManaged(true);
@@ -641,5 +679,4 @@ public final class GameController {
     public GameStateSnapshot captureSnapshot() {
         return GameStateSnapshot.from(gameState);
     }
-    // endregion
 }

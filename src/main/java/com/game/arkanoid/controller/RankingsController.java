@@ -27,6 +27,9 @@ public final class RankingsController {
         this.navigator = navigator;
     }
 
+    /**
+     * FXML initialize method.
+     */
     @FXML
     private void initialize() {
         colRank.setCellValueFactory(new PropertyValueFactory<>("rank"));
@@ -47,6 +50,11 @@ public final class RankingsController {
         });
     }
 
+    /**
+     * Convert ranking entries to table rows.
+     * @param entries
+     * @return
+     */
     private ObservableList<RankingRow> toRows(List<RankingEntry> entries) {
         ObservableList<RankingRow> rows = FXCollections.observableArrayList();
         int rank = 1;
@@ -56,6 +64,9 @@ public final class RankingsController {
         return rows;
     }
 
+    /**
+     * Row representation for the rankings table.
+     */
     public static final class RankingRow {
         private final int rank;
         private final String name;

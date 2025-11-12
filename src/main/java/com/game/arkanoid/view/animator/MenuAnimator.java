@@ -10,8 +10,11 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Animator tổng quát cho 5 nút.
- * Ẩn 2 nút ngoài cùng, chỉ hiển thị 3 nút giữa.
+ * General animator for a horizontal menu of buttons.
+ * <p>
+ * Designed for 5 buttons: hides the outer 2 buttons and only shows the middle 3.
+ * Allows smooth left/right rotation of buttons with animation.
+ * </p>
  */
 public final class MenuAnimator {
 
@@ -19,6 +22,12 @@ public final class MenuAnimator {
     private final List<Double> originalX = new ArrayList<>();
     private final List<Double> originalY = new ArrayList<>();
 
+    /**
+     * Constructs a MenuAnimator with an ordered list of buttons.
+     *
+     * @param orderedButtons the buttons in initial order (at least 3 required)
+     * @throws IllegalArgumentException if less than 3 buttons are provided
+     */
     public MenuAnimator(List<Button> orderedButtons) {
         if (orderedButtons == null || orderedButtons.size() < 3)
             throw new IllegalArgumentException("MenuAnimator requires at least 3 buttons");
@@ -34,7 +43,7 @@ public final class MenuAnimator {
         updateVisibility();
     }
 
-    /** Xoay sang trái (menu dịch sang phải) */
+    /** Rotate the menu to the left (buttons appear to move right). */
     public void moveLeft() {
         List<Button> oldOrder = new ArrayList<>(buttons);
         Button first = buttons.remove(0);
@@ -42,7 +51,7 @@ public final class MenuAnimator {
         animateAll(oldOrder);
     }
 
-    /** Xoay sang phải (menu dịch sang trái) */
+    /** Rotate the menu to the right (buttons appear to move left). */
     public void moveRight() {
         List<Button> oldOrder = new ArrayList<>(buttons);
         Button last = buttons.remove(buttons.size() - 1);
@@ -50,7 +59,11 @@ public final class MenuAnimator {
         animateAll(oldOrder);
     }
 
-    /** Animation di chuyển tất cả các nút */
+    /**
+     * Animate all buttons to their new positions after a rotation.
+     *
+     * @param oldOrder the previous order of buttons before rotation
+     */
     private void animateAll(List<Button> oldOrder) {
         int n = buttons.size();
 
@@ -64,7 +77,14 @@ public final class MenuAnimator {
         }
     }
 
-    /** Animation di chuyển 1 nút đến vị trí mới */
+    /**
+     * Animate a single button to a new layout position.
+     *
+     * @param btn        the button to move
+     * @param newX       target X position
+     * @param newY       target Y position
+     * @param onFinished optional callback after animation completes
+     */
     private void animateMove(Button btn, double newX, double newY, Runnable onFinished) {
         double deltaX = newX - btn.getLayoutX();
         double deltaY = newY - btn.getLayoutY();
@@ -82,13 +102,13 @@ public final class MenuAnimator {
         tt.play();
     }
 
-    /** Cập nhật sau khi xoay */
+    /** Update state after menu rotation (highlight and visibility). */
     private void postMoveUpdate() {
         updateHighlight();
         updateVisibility();
     }
 
-    /** Cập nhật highlight cho nút trung tâm (nút có x lớn thứ 3) */
+    /** Update the "selected" style for the center button. */
     private void updateHighlight() {
         for (Button b : buttons) b.getStyleClass().remove("selected");
         Button center = getCenterButton();
@@ -97,11 +117,10 @@ public final class MenuAnimator {
         }
     }
 
-    /** Ẩn 2 nút ngoài cùng, chỉ hiển thị 3 nút giữa */
+    /** Update visibility: hide outer buttons, show only the 3 middle ones. */
     private void updateVisibility() {
         if (buttons.size() < 3) return;
 
-        // Sắp xếp tạm theo layoutX (trái → phải)
         List<Button> sorted = new ArrayList<>(buttons);
         sorted.sort(Comparator.comparingDouble(Button::getLayoutX));
 
@@ -109,11 +128,15 @@ public final class MenuAnimator {
         for (int i = 0; i < sorted.size(); i++) {
             Button b = sorted.get(i);
             int distance = Math.abs(i - centerIndex);
-            b.setVisible(distance < 2); // chỉ hiển thị 3 nút giữa
+            b.setVisible(distance < 2); // only show 3 center buttons
         }
     }
 
-    /** Lấy nút trung tâm (nút có layoutX lớn thứ 3) */
+    /**
+     * Get the center button of the menu (middle X position).
+     *
+     * @return the center button, or null if not enough buttons
+     */
     public Button getCenterButton() {
         if (buttons.size() < 3) return null;
 

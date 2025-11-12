@@ -12,6 +12,9 @@ public final class Container {
     private final GameState state;
     private final GameService game;
 
+    /**
+     * Private constructor initializes game state and services.
+     */
     private Container() { 
         double paddleWidth = Constants.PADDLE_WIDTH * GameSettings.getPaddleWidthMultiplier();
         Paddle paddle = new Paddle(
@@ -49,13 +52,18 @@ public final class Container {
         this.game.bindState(this.state);
     }
 
-    // 🔹 Public accessor
+    /**
+     * Get the singleton instance.
+     * @return
+     */
     public static synchronized Container getInstance() {
         if (instance == null) instance = new Container();
         return instance;
     }
 
-    // 🔹 Optional reset (for restart from menu)
+    /**
+     * Reset the container singleton (for new game).
+     */
     public static synchronized void reset() {
         instance = new Container();
     }
