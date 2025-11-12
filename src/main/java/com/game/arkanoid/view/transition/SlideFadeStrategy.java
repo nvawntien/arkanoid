@@ -14,15 +14,27 @@ public class SlideFadeStrategy implements TransitionStrategy {
     private final Duration duration;
     private final double translateY;
 
+    /**
+     * Default constructor.
+     */
     public SlideFadeStrategy() {
         this(Duration.millis(280), 40.0);
     }
 
+    /**
+     * Parameterized constructor.
+     * @param duration
+     * @param translateY
+     */
     public SlideFadeStrategy(Duration duration, double translateY) {
         this.duration = duration;
         this.translateY = translateY;
     }
 
+    /**
+     * Play the slide fade transition.
+     * @param root
+     */
     @Override
     public void play(Node root, Runnable onFinished) {
         if (root == null) {

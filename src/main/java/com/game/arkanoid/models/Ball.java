@@ -3,33 +3,11 @@ package com.game.arkanoid.models;
 public class Ball extends MovableObject {
     private double radius;
     private boolean isMoving;
-    private boolean isStuck;  // Bóng dính vào paddle
-    private double stuckOffsetX; // horizontal offset from paddle.x when ball is stuck
+    private boolean isStuck; 
+    private double stuckOffsetX;
     
-    public boolean isStuck() {
-        return isStuck;
-    }
-
-    public void setStuck(boolean isStuck) {
-        this.isStuck = isStuck;
-    }
-
-    public double getStuckOffsetX() {
-        return stuckOffsetX;
-    }
-
-    public void setStuckOffsetX(double stuckOffsetX) {
-        this.stuckOffsetX = stuckOffsetX;
-    }
-
-    /**
-     * Ball constructor 1.
-     * @param centerX center x axis
-     * @param y center y axis
-     * @param radius ball radius
-     */
     public Ball(double centerX, double centerY, double radius) {
-        super(centerX, centerY, radius * 2, radius * 2);            // MovableObject width = height = 2r
+        super(centerX, centerY, radius * 2, radius * 2);
         if (radius <= 0) throw new IllegalArgumentException("radius must be > 0");
         this.radius = radius;
         this.isMoving = false;
@@ -68,28 +46,43 @@ public class Ball extends MovableObject {
         isMoving = moving;
     }
 
+    public boolean isStuck() {
+        return isStuck;
+    }
+
+    public void setStuck(boolean isStuck) {
+        this.isStuck = isStuck;
+    }
+
+    public double getStuckOffsetX() {
+        return stuckOffsetX;
+    }
+
+    public void setStuckOffsetX(double stuckOffsetX) {
+        this.stuckOffsetX = stuckOffsetX;
+    }
+
+    /**
+     * Updates the ball's position based on its velocity and the time delta.
+     */
     @Override
     public void update(double dt) {
         if (isMoving) move(dt);
     }
 
-
-    //Collision handling
-
-    // --- Hình hộp bao (AABB) để kiểm va chạm đơn giản ---
-
-    public double left()   {
+    public double left() {
         return x - radius;
     }
-    public double right()  {
+
+    public double right() {
         return x + radius;
     }
-    public double top()    {
+
+    public double top() {
         return y - radius;
     }
+
     public double bottom() {
         return y + radius;
     }
-
-
 }

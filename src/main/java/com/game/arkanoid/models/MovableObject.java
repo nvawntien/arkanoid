@@ -26,7 +26,9 @@ public abstract class MovableObject extends GameObject {
     public double getDx() {
         return dx;
     }
+
     public double getDy() {return dy;}
+    
     public void setVelocity(double dx, double dy) {
         this.dx = dx;
         this.dy = dy;

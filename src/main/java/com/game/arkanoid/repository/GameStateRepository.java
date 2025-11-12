@@ -6,8 +6,17 @@ import com.game.arkanoid.models.GameStateSnapshot;
 import java.sql.*;
 import java.util.Optional;
 
+/**
+ * Repository for saving and loading game state snapshots.
+ */
 public final class GameStateRepository {
 
+    /**
+     * Upsert (insert or update) the in-progress game state for the given user.
+     * @param userId
+     * @param snap
+     * @throws SQLException
+     */
     public void upsertInProgress(int userId, GameStateSnapshot snap) throws SQLException {
         try (Connection c = DatabaseConfig.getConnection()) {
             // Try update-by-user first (single-row-per-user policy)
@@ -20,8 +29,8 @@ public final class GameStateRepository {
                 ps.setString(idx++, Json.encodePowerUps(snap));
                 ps.setString(idx++, Json.encodeEnemies(snap));
                 ps.setString(idx++, Json.encodeBalls(snap));
-                ps.setString(idx++, Json.encodeEffects(snap)); // ✅ FIX: add idx++
-                ps.setInt(idx, userId);                        // ✅ now has its own index
+                ps.setString(idx++, Json.encodeEffects(snap));
+                ps.setInt(idx, userId);
                 int updated = ps.executeUpdate();
                 if (updated > 0) return;
             }
@@ -30,6 +39,12 @@ public final class GameStateRepository {
         }
     }
 
+    /**
+     * Find the latest in-progress game state for the given user.
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     public Optional<GameStateSnapshot> findLatestInProgress(int userId) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load(
             "/com/game/arkanoid/sql/game_state/select_latest_state.sql"
@@ -56,14 +71,14 @@ public final class GameStateRepository {
                     s.timeScale = rs.getDouble("time_scale");
                     s.laserCooldown = rs.getDouble("laser_cooldown");
 
-                    // ✅ Read all JSON columns
+                    // Read all JSON columns
                     String bricksJson = rs.getString("bricks");
                     String powerupsJson = rs.getString("powerups");
                     String enemiesJson = rs.getString("enemies");
                     String ballsJson = rs.getString("balls");
                     String effectsJson = rs.getString("effects");
 
-                    // ✅ Decode JSON data
+                    // Decode JSON data
                     Json.decodeBricks(bricksJson, s);
                     Json.decodePowerUps(powerupsJson, s);
                     Json.decodeEnemies(enemiesJson, s);
@@ -72,11 +87,17 @@ public final class GameStateRepository {
 
                     return Optional.of(s);
                 }
+
                 return Optional.empty();
             }
         }
     }
 
+    /**
+     * Clear in-progress state for the given user.
+     * @param userId
+     * @throws SQLException
+     */
      public void clearInProgressForUser(int userId) throws SQLException {
         String sql = "UPDATE game_states SET in_progress = FALSE WHERE user_id = ?";
         try (Connection c = DatabaseConfig.getConnection();
@@ -86,6 +107,13 @@ public final class GameStateRepository {
         }
     }
 
+    /**
+     * Insert new game state.
+     * @param c
+     * @param userId
+     * @param s
+     * @throws SQLException
+     */
     private void insert(Connection c, int userId, GameStateSnapshot s) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load(
             "/com/game/arkanoid/sql/game_state/insert_state.sql"
@@ -96,6 +124,13 @@ public final class GameStateRepository {
         }
     }
 
+    /**
+     * Update existing game state.
+     * @param c
+     * @param id
+     * @param s
+     * @throws SQLException
+     */
     private void update(Connection c, int id, GameStateSnapshot s) throws SQLException {
         String sql = com.game.arkanoid.utils.SqlLoader.load(
             "/com/game/arkanoid/sql/game_state/update_state.sql"
@@ -106,12 +141,19 @@ public final class GameStateRepository {
             ps.setString(idx++, Json.encodePowerUps(s));
             ps.setString(idx++, Json.encodeEnemies(s));
             ps.setString(idx++, Json.encodeBalls(s));
-            ps.setString(idx++, Json.encodeEffects(s)); // ✅ FIX: add idx++
-            ps.setInt(idx, id);                         // ✅ correct index now
+            ps.setString(idx++, Json.encodeEffects(s)); // add idx++
+            ps.setInt(idx, id);                         // correct index now
             ps.executeUpdate();
         }
     }
 
+    /**
+     * Bind snapshot fields to prepared statement.
+     * @param ps
+     * @param userId
+     * @param s
+     * @throws SQLException
+     */
     private void bind(PreparedStatement ps, int userId, GameStateSnapshot s) throws SQLException {
         ps.setInt(1, userId);
         int idx = bindCore(ps, s, 2);
@@ -119,13 +161,28 @@ public final class GameStateRepository {
         ps.setString(idx++, Json.encodePowerUps(s));
         ps.setString(idx++, Json.encodeEnemies(s));
         ps.setString(idx++, Json.encodeBalls(s));
-        ps.setString(idx++, Json.encodeEffects(s)); // ✅ FIX: add idx++
+        ps.setString(idx++, Json.encodeEffects(s)); // add idx++
     }
 
+    /**
+     * Bind core snapshot fields to prepared statement.
+     * @param ps
+     * @param s
+     * @return
+     * @throws SQLException
+     */
     private int bindCore(PreparedStatement ps, GameStateSnapshot s) throws SQLException {
         return bindCore(ps, s, 1);
     }
 
+    /**
+     * Bind core snapshot fields to prepared statement starting at given index.
+     * @param ps
+     * @param s
+     * @param startIdx
+     * @return
+     * @throws SQLException
+     */
     private int bindCore(PreparedStatement ps, GameStateSnapshot s, int startIdx) throws SQLException {
         int i = startIdx;
         ps.setInt(i++, s.currentLevel);
@@ -141,9 +198,11 @@ public final class GameStateRepository {
     /** Minimal JSON encoder/decoder for our snapshot (avoid external deps). */
     private static final class Json {
 
-        // ----------------------------
-        // 🔹 BRICKS
-        // ----------------------------
+        /**
+         * Encode bricks to JSON.
+         * @param s
+         * @return
+         */
         static String encodeBricks(GameStateSnapshot s) {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
@@ -160,6 +219,11 @@ public final class GameStateRepository {
             return sb.toString();
         }
 
+        /**
+         * Decode bricks from JSON.
+         * @param json
+         * @param out
+         */
         static void decodeBricks(String json, GameStateSnapshot out) {
             if (json == null || json.isBlank()) return;
             String s = json.trim();
@@ -175,10 +239,12 @@ public final class GameStateRepository {
                 out.bricks.add(new GameStateSnapshot.BrickState(x, y, health));
             }
         }
-
-        // ----------------------------
-        // 🔹 POWERUPS
-        // ----------------------------
+        
+        /**
+         * Encode power-ups to JSON.
+         * @param s
+         * @return
+         */
         static String encodePowerUps(GameStateSnapshot s) {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
@@ -196,6 +262,11 @@ public final class GameStateRepository {
             return sb.toString();
         }
 
+        /**
+         * Decode power-ups from JSON.
+         * @param json
+         * @param out
+         */
         static void decodePowerUps(String json, GameStateSnapshot out) {
             if (json == null || json.isBlank()) return;
             String s = json.trim();
@@ -212,10 +283,12 @@ public final class GameStateRepository {
                 out.fallingPowerUps.add(new GameStateSnapshot.PowerUpState(type, x, y, collected));
             }
         }
-
-        // ----------------------------
-        // 🔹 ENEMIES (new separate column)
-        // ----------------------------
+        
+        /**
+         * Encode enemies to JSON.
+         * @param s
+         * @return
+         */
         static String encodeEnemies(GameStateSnapshot s) {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
@@ -234,6 +307,11 @@ public final class GameStateRepository {
             return sb.toString();
         }
 
+        /**
+         * Decode enemies from JSON.
+         * @param json
+         * @param out
+         */
         static void decodeEnemies(String json, GameStateSnapshot out) {
             if (json == null || json.isBlank()) return;
             String s = json.trim();
@@ -251,10 +329,12 @@ public final class GameStateRepository {
                 out.enemies.add(new GameStateSnapshot.EnemyState(type, x, y, dx, dy));
             }
         }
-
-        // ----------------------------
-        // 🔹 BALLS
-        // ----------------------------
+        
+        /**
+         * Encode balls to JSON.
+         * @param s
+         * @return
+         */
         static String encodeBalls(GameStateSnapshot s) {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
@@ -274,6 +354,11 @@ public final class GameStateRepository {
             return sb.toString();
         }
 
+        /**
+         * Decode balls from JSON.
+         * @param json
+         * @param out
+         */
         static void decodeBalls(String json, GameStateSnapshot out) {
             if (json == null || json.isBlank()) return;
             String s = json.trim();
@@ -293,9 +378,11 @@ public final class GameStateRepository {
             }
         }
 
-        // ----------------------------
-        // 🔹 EFFECTS
-        // ----------------------------
+        /**
+         * Encode active effects to JSON.
+         * @param s
+         * @return
+         */
         static String encodeEffects(GameStateSnapshot s) {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
@@ -311,6 +398,12 @@ public final class GameStateRepository {
             return sb.toString();
         }
 
+
+        /**
+         * Decode active effects from JSON.
+         * @param json
+         * @param out
+         */
         static void decodeEffects(String json, GameStateSnapshot out) {
             if (json == null || json.isBlank()) return;
             String s = json.trim();
@@ -326,16 +419,31 @@ public final class GameStateRepository {
             }
         }
 
-        // ----------------------------
-        // 🔹 Utility helpers
-        // ----------------------------
+        /**
+         * Escape string for JSON.
+         * @param s
+         * @return
+         */
         private static String escape(String s) {
             return s == null ? "" : s.replace("\\", "\\\\").replace("\"", "\\\"");
         }
+
+        /**
+         * Trim double to string (remove .0 if integer).
+         * @param d
+         * @return
+         */
         private static String trim(double d) {
             String s = Double.toString(d);
             return s.endsWith(".0") ? s.substring(0, s.length() - 2) : s;
         }
+
+        /**
+         * Read double value from JSON-like string.
+         * @param src
+         * @param key
+         * @return
+         */
         private static double readDouble(String src, String key) {
             int i = src.indexOf(key);
             if (i < 0) return 0;
@@ -345,6 +453,13 @@ public final class GameStateRepository {
             String sub = src.substring(i + 1, j).replace(":", "").trim();
             try { return Double.parseDouble(sub); } catch (Exception e) { return 0; }
         }
+
+        /**
+         * Read string value from JSON-like string.
+         * @param src
+         * @param key
+         * @return
+         */
         private static String readString(String src, String key) {
             int i = src.indexOf(key);
             if (i < 0) return "";
@@ -353,6 +468,13 @@ public final class GameStateRepository {
             if (i < 0 || j < 0) return "";
             return src.substring(i + 1, j);
         }
+
+        /**
+         * Read boolean value from JSON-like string.
+         * @param src
+         * @param key
+         * @return
+         */
         private static boolean readBoolean(String src, String key) {
             int i = src.indexOf(key);
             if (i < 0) return false;

@@ -1,8 +1,7 @@
 package com.game.arkanoid.models;
+
 /**
- * Input state xới.
- *
- * @author bmngxn
+ * Represents the current input state.
  */
 public final class InputState {
     public boolean left;

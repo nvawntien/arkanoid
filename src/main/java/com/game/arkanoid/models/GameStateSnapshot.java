@@ -34,11 +34,15 @@ public final class GameStateSnapshot {
         public ActiveEffect() {}
         public ActiveEffect(String type, double remaining) { this.type = type; this.remaining = remaining; }
     }
+
     public final List<BrickState> bricks = new ArrayList<>();
     public final List<PowerUpState> fallingPowerUps = new ArrayList<>();
     public final List<BallsState> balls = new ArrayList<>();
     public final List<EnemyState> enemies = new ArrayList<>();
 
+    /**
+     * Brick state for snapshot.
+     */
     public static final class BrickState {
         public double x;
         public double y;
@@ -50,6 +54,9 @@ public final class GameStateSnapshot {
         }
     }
 
+    /**
+     * Power-up state for snapshot.
+     */
     public static final class PowerUpState {
         public String type;
         public double x;
@@ -62,6 +69,9 @@ public final class GameStateSnapshot {
         }
     }
 
+    /**
+     * Ball state for snapshot.
+     */
     public static final class BallsState {
         public double x;
         public double y;
@@ -76,6 +86,9 @@ public final class GameStateSnapshot {
         }
     }
 
+    /**
+     * Enemy state for snapshot.
+     */
     public static final class EnemyState {
         public String type; // EnemyType name
         public double x;
@@ -89,7 +102,11 @@ public final class GameStateSnapshot {
         }
     }
 
-    /** Build a snapshot from the current in-memory GameState. */
+    /**
+     * Create snapshot from GameState.
+     * @param s
+     * @return
+     */
     public static GameStateSnapshot from(GameState s) {
         GameStateSnapshot snap = new GameStateSnapshot();
         snap.currentLevel = s.level;
@@ -133,7 +150,10 @@ public final class GameStateSnapshot {
         return snap;
     }
 
-    /** Apply snapshot onto a GameState. Level must be preloaded. */
+    /**
+     * Apply snapshot to GameState.
+     * @param s
+     */
     public void applyTo(GameState s) {
         s.score = this.score;
         s.lives = this.lives;

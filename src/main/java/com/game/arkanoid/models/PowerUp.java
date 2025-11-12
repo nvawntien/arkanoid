@@ -8,6 +8,15 @@ public final class PowerUp extends MovableObject {
     private final PowerUpType type;
     private boolean collected;
 
+    /**
+     * Power-up constructor.
+     * @param type
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param fallSpeed
+     */
     public PowerUp(PowerUpType type, double x, double y, double width, double height, double fallSpeed) {
         super(x, y, width, height);
         this.type = type;

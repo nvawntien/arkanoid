@@ -13,16 +13,29 @@ public class FadeTransitionStrategy implements TransitionStrategy {
     private final double fromValue;
     private final double toValue;
 
+    /**
+     * Default constructor.
+     */
     public FadeTransitionStrategy() {
         this(Duration.millis(260), 0.0, 1.0);
     }
 
+    /**
+     * Parameterized constructor.
+     * @param duration
+     * @param fromValue
+     * @param toValue
+     */
     public FadeTransitionStrategy(Duration duration, double fromValue, double toValue) {
         this.duration = duration;
         this.fromValue = fromValue;
         this.toValue = toValue;
     }
 
+    /**
+     * Play the fade transition.
+     * @param root
+     */
     @Override
     public void play(Node root, Runnable onFinished) {
         if (root == null) {
