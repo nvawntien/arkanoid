@@ -1,26 +1,26 @@
-# 🎮 Arkanoid Game  
+# Arkanoid Game  
 *A modern Object-Oriented remake of the classic brick-breaker arcade.*
 
 ---
 
-## 🧩 Overview
+## Overview
 **Arkanoid Game** is a fully object-oriented JavaFX project built to demonstrate advanced programming principles, modular architecture, and engaging gameplay mechanics.  
 Players control a paddle to bounce a ball, destroy bricks, and progress through increasingly challenging levels with power-ups, enemies, and smooth scene transitions.
 
 ---
 
-## ⚙️ Key Features
-- 🧱 **Multiple Levels** with dynamic layouts and increasing difficulty  
-- 💥 **Power-ups & Enemies** that modify gameplay and add strategy  
-- 🎵 **Integrated Sound System** for background music and effects  
-- 🎬 **Scene Transitions & Animations** for immersive flow  
-- 💾 **Database-backed save system** (PostgreSQL / Supabase)  
-- 🧠 **Pause, Resume, and Snapshot** features to restore gameplay seamlessly  
-- 🧪 **TestFX UI Tests** and **JUnit backend tests** for reliability  
+## Key Features
+- **Multiple Levels** with dynamic layouts and increasing difficulty  
+- **Power-ups & Enemies** that modify gameplay and add strategy  
+- **Integrated Sound System** for background music and effects  
+- **Scene Transitions & Animations** for immersive flow  
+- **Database-backed save system** (PostgreSQL / Supabase)  
+- **Pause, Resume, and Snapshot** features to restore gameplay seamlessly  
+- **TestFX UI Tests** and **JUnit backend tests** for reliability  
 
 ---
 
-## 🧱 Project Architecture (MVC)
+## Project Architecture (MVC)
 
 ```text
 src/
@@ -47,14 +47,14 @@ src/
 ```
 
 
-## 🧭 The project follows the **MVC pattern**:
+## The project follows the **MVC pattern**:
 - **Model:** Game state and entities  
 - **View:** JavaFX visuals, renderers, and sound  
 - **Controller:** Input handlers and scene management  
 
 ---
 
-## 🧠 Object-Oriented Design Principles
+## Object-Oriented Design Principles
 | Principle         | Implementation                                                                           |
 |-------------------|------------------------------------------------------------------------------------------|
 | **Encapsulation** | Each entity (Ball, Paddle, Brick) maintains private state with controlled public access. |
@@ -64,29 +64,29 @@ src/
 
 ---
 
-## 🧰 Technologies Used
-- ☕ **Java 25**  
-- 🎨 **JavaFX 21** for GUI and animation  
-- 🕹️ **FXGL Engine** for physics and game loops  
-- 🧩 **PostgreSQL / Supabase** for persistent storage  
-- ⚙️ **Dotenv** for environment configuration  
-- 🧪 **JUnit 5 + TestFX** for automated testing  
-- 🧱 **Maven** for dependency management and builds  
+## Technologies Used
+- **Java 25**  
+- **JavaFX 21** for GUI and animation  
+- **FXGL Engine** for physics and game loops  
+- **PostgreSQL / Supabase** for persistent storage  
+- **Dotenv** for environment configuration  
+- **JUnit 5 + TestFX** for automated testing  
+- **Maven** for dependency management and builds  
 
 ---
 
-## 💾 Database Integration
+## Database Integration
 The project integrates **PostgreSQL** using `DatabaseService`, handling:
 - User login and signup  
 - Scoreboard and ranking retrieval  
 - Auto-saving game snapshots  
 - Restoring “continue” state on startup  
 
-🔐 Credentials are loaded via `.env` configuration.
+Credentials are loaded via `.env` configuration.
 
 ---
 
-## 🧪 Testing Strategy
+## Testing Strategy
 - **Unit Tests:** Validate core logic (services, models, repositories)  
 - **UI Tests:** `TestFX` automates FXML scene rendering and event testing  
 
@@ -95,7 +95,7 @@ Run all tests:
 mvn clean test
 ```
 
-## 🚀 How to Run
+## How to Run
 
 Make sure you have Java 24+ and Maven installed.
 ```bash
@@ -113,7 +113,7 @@ Or directly:
 mvn exec:java -Dexec.mainClass="com.game.arkanoid.app.Main"
 ```
 
-## 🎮 Controls
+## Controls
 
 | Key       | Action                      |
 |-----------|-----------------------------|
@@ -122,7 +122,7 @@ mvn exec:java -Dexec.mainClass="com.game.arkanoid.app.Main"
 | SPACE     | Launch ball / Shoot laser   |
 | ESC       | Pause game                  |
 
-## 🕹️ How to Play
+## How to Play
 
 1) Login / Signup account.
 2) Press Start to start a new game.
@@ -133,25 +133,25 @@ mvn exec:java -Dexec.mainClass="com.game.arkanoid.app.Main"
 6) Avoid losing the ball: Keep the ball from falling below the paddle.
 7) Complete the level: Destroy all destructible bricks to advance.
 
-## 🔋 Power-ups
+## Power-ups
 
-| Icon | Name          | Effect                                                     |
+| Image | Name          | Effect                                                     |
 |------|---------------|------------------------------------------------------------|
-| 🟦   | Expand Paddle | Temporarily increases paddle width                         |
-| 🔫   | Laser Paddle  | Enables twin laser bullets from the paddle (SPACE to fire) |
-| 🎯   | Multi Ball    | Spawns 2 additional balls from the moving ball             |
-| ❤️   | Extra Life    | Grants +1 life                                             |
-| 🧲   | Catch Ball    | Balls stick to the paddle; press SPACE to re-launch        |
-| 🐌   | Slow Ball     | Slows down overall gameplay time scale                     |
+| <img src="src/main/resources/com/game/arkanoid/images/powerup_expand_1.png" width="32">| Expand Paddle | Temporarily increases paddle width                         |
+|<img src="src/main/resources/com/game/arkanoid/images/powerup_laser_1.png" width="32">   | Laser Paddle  | Enables twin laser bullets from the paddle (SPACE to fire) |
+|<img src="src/main/resources/com/game/arkanoid/images/powerup_duplicate_1.png" width="32">   | Multi Ball    | Spawns 2 additional balls from the moving ball             |
+| <img src="src/main/resources/com/game/arkanoid/images/powerup_life_1.png" width="32">   | Extra Life    | Grants +1 life                                             |
+|<img src="src/main/resources/com/game/arkanoid/images/powerup_catch_1.png" width="32">   | Catch Ball    | Balls stick to the paddle; press SPACE to re-launch        |
+| <img src="src/main/resources/com/game/arkanoid/images/powerup_slow_1.png" width="32">   | Slow Ball     | Slows down overall gameplay time scale                     |
 
 
-## 🧠 UML & Architecture
+## UML & Architecture
 
 Visual representation of the core architecture and class relationships:
 
 ![Project Architecture](docs/architecture.svg)
 
-## 🧩 Design Patterns Implementation
+##  Design Patterns Implementation
 
 - Observer / Publish–Subscribe (Event Bus)
   - Decouples producers and consumers of game and sound events.
@@ -186,7 +186,7 @@ Visual representation of the core architecture and class relationships:
   - App services context (DB + session): `container/AppContext.java`
   - Game container (state + services wiring): `container/Container.java`
 
-## 💡 Additional Design Choices
+## Additional Design Choices
 
 - Rendering: pluggable renderer interface per model type.
   - Interface: `view/renderer/Renderer.java`
@@ -196,7 +196,7 @@ Visual representation of the core architecture and class relationships:
   - Abstracts SQL and maps rows to domain models/DTOs.
   - `repository/UserRepository.java`, `repository/ScoreRepository.java`, `repository/GameStateRepository.java`
 
-## 🗄️ Database Schema
+## Database Schema
 
 The game persists user profiles and in‑progress game snapshots:
 
@@ -212,9 +212,9 @@ Rankings are derived directly from `users` (best score/round), while the latest 
 
 ![Database Schema](docs/database-schema.png)
 
-## 📺 Gameplay Demo
+## Gameplay Demo
 
-🎥 Watch the gameplay demo on YouTube:
+Watch the gameplay demo on YouTube:
 👉 https://youtu.be/-pdxJ3mrEVg?si=cibv7gh3pPN2UHON
 
 ## Authors
@@ -225,7 +225,7 @@ Rankings are derived directly from `users` (best score/round), while the latest 
 | **Nguyễn Bảo Minh  - 24021569**  | Database / System Architect / Scene Management   |
 | **Lê Đình Anh Tuấn - 24021657**  | JavaFX - FXML / UI Intergration                  | 
 
-## 🪪 License
+## License
 
 This project was developed for academic and demonstration purposes.  
 It is **not covered by an open-source license**. Redistribution or commercial use requires prior permission from the authors.
@@ -233,7 +233,7 @@ It is **not covered by an open-source license**. Redistribution or commercial us
 
 ---
 
-## 💭 Motivation & Inspiration
+## Motivation & Inspiration
 This project was inspired by the timeless classic **Arkanoid**, reimagined with modern Java technologies.  
 Some visual assets and design ideas were adapted from open-source community projects.  
 We would like to express our gratitude to the developers who shared their work publicly, which helped shape and inspire this project.
